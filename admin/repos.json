@@ -15,7 +15,6 @@
     /* ============================================================
        AUTOMATION & TOOLS
        ============================================================ */
-    { "org": "LostMinions", "name": "Darkfall_Programs", "enabled": true, "description": "Legacy C# tools related to Darkfall" },
     { "org": "LostMinions", "name": "MinionBot", "enabled": true, "description": "IRC / Discord automation bot (archived codebase)" },
 
     /* ============================================================
@@ -40,6 +39,7 @@
     { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-PMap2", "enabled": false, "description": "Darkfall: Unholy Wars Political Map project" },
     { "org": "LostMinions", "name": "Darkfall-ClientMod", "enabled": false, "description": "Darkfall Java client modification" },
+    { "org": "LostMinions", "name": "Darkfall_Programs", "enabled": false, "description": "Legacy C# tools related to Darkfall" },
     { "org": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" },
   ]
 }
