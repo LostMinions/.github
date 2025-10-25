@@ -24,9 +24,9 @@ Every Lost Minions repository — from websites and bots to design libraries —
 | Project | Description |
 |----------|-------------|
 | **[LostMinions.org](https://github.com/LostMinions/LostMinions.org)** | Main website & network hub. |
-| **[LostMinions.org-Forum](https://github.com/LostMinions/LostMinions.org-Forum)** | Community forums powered by phpBB3. |
-| **[LostMinions.org-DnD](https://github.com/LostMinions/LostMinions.org-DnD)** | D&D campaign tools and resources. |
 | **[LostMinions.org-3DPrint](https://github.com/LostMinions/LostMinions.org-3DPrint)** | 3D print designs and model sources. |
+| **[LostMinions.org-DnD](https://github.com/LostMinions/LostMinions.org-DnD)** | D&D campaign tools and resources. |
+| **[LostMinions.org-Forum](https://github.com/LostMinions/LostMinions.org-Forum)** | Community forums powered by phpBB3. |
 | **[LostMinions_Libraries](https://github.com/LostMinions/LostMinions_Libraries)** | Shared C# utilities and automation frameworks. |
 | **[DarkfallInfo.com](https://github.com/LostMinions/DarkfallInfo.com)** | Legacy MMO utilities and data site. |
 
