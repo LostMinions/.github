@@ -3,7 +3,7 @@
     /* ============================================================
        CORE ADMIN & ACTIVE PROJECTS
        ============================================================ */
-    //{ "org": "LostMinions", "name": ".github", "enabled": true, "description": "Admin repo for templates, actions, and automation" },
+    { "org": "LostMinions", "name": ".github", "enabled": false, "description": "Admin repo for templates, actions, and automation" },
     { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
     { "org": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub" },
     { "org": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": false, "description": "3D print designs and model sources" },
@@ -40,6 +40,6 @@
     { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-PMap2", "enabled": false, "description": "Darkfall: Unholy Wars Political Map project" },
     { "org": "LostMinions", "name": "Darkfall-ClientMod", "enabled": false, "description": "Darkfall Java client modification" },
-    { "org": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" }
+    { "org": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" },
   ]
 }
