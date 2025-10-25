@@ -21,20 +21,6 @@ fi
 echo "# The Portal Realm GitHub Sync"
 echo ""
 
-# --- Sync labels for the source repo itself ----------------------------------
-if [ -n "${GITHUB_REPOSITORY:-}" ]; then
-  echo "## Repository: $GITHUB_REPOSITORY (self)"
-  echo ""
-  echo "### Labels (Self-Sync)"
-  bash "$SCRIPT_DIR/sync-labels.sh" "$GITHUB_REPOSITORY" || {
-    echo "sync-labels.sh failed for $GITHUB_REPOSITORY"
-    exit 1
-  }
-  echo ""
-  echo "---"
-  echo ""
-fi
-
 # --- Read enabled repos -------------------------------------------------------
 # Clean the JSON file (strip comments, fix trailing commas, handle CRLF)
 strip_comments() {
@@ -52,6 +38,53 @@ strip_comments "$REPOS_FILE" > "$CLEAN_REPOS"
 # Now parse with jq
 repos=$(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
 
+# --- Pre-check for archived repositories --------------------------------------
+echo "### Checking for archived repositories..."
+echo ""
+
+ARCHIVED_LIST=()
+
+while IFS= read -r repo; do
+  ORG=$(echo "$repo" | jq -r '.org')
+  NAME=$(echo "$repo" | jq -r '.name')
+  FULL="$ORG/$NAME"
+
+  # Query GitHub to see if the repo is archived
+  IS_ARCHIVED=$(gh repo view "$FULL" --json isArchived -q '.isArchived' 2>/dev/null || echo "false")
+
+  if [[ "$IS_ARCHIVED" == "true" ]]; then
+    ARCHIVED_LIST+=("$FULL")
+  fi
+done <<< "$repos"
+
+if (( ${#ARCHIVED_LIST[@]} > 0 )); then
+  echo "The following repositories are archived but marked as enabled:"
+  for r in "${ARCHIVED_LIST[@]}"; do
+    echo "- $r"
+  done
+  echo ""
+  echo "Please set \"enabled\": false for these in repos.json before running the sync."
+  exit 1
+else
+  echo "No archived repositories detected — proceeding with sync."
+  echo ""
+fi
+
+# --- Sync labels for the source repo itself ----------------------------------
+if [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  echo "## Repository: $GITHUB_REPOSITORY (self)"
+  echo ""
+  echo "### Labels (Self-Sync)"
+  bash "$SCRIPT_DIR/sync-labels.sh" "$GITHUB_REPOSITORY" || {
+    echo "sync-labels.sh failed for $GITHUB_REPOSITORY"
+    exit 1
+  }
+  echo ""
+  echo "---"
+  echo ""
+fi
+
+# --- Main sync loop -----------------------------------------------------------
 while IFS= read -r repo; do
   ORG=$(echo "$repo" | jq -r '.org')
   NAME=$(echo "$repo" | jq -r '.name')
