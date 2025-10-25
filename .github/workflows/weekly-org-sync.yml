@@ -1,0 +1,112 @@
+name: 🔄 Weekly GitHub Org Sync
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"   # Sundays 03:00 UTC
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      # --- Workflow files
+      - ".github/workflows/weekly-org-sync.yml"
+
+      # --- Source sync files
+      - "admin/*.sh"
+      - "admin/*.json"
+
+      # --- Template folders to watch
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+
+      # --- Governance documents
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
+      - "CODE_OF_CONDUCT.md"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔑 Validate GH_TOKEN
+        shell: pwsh
+        run: |
+          try {
+            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
+            if (-not $r.login) { throw "Invalid" }
+            Write-Host "✅ Token OK: $($r.login)"
+          } catch {
+            Write-Host "❌ Bad or expired GH_TOKEN"
+            exit 1
+          }
+
+      - name: ⚙️ Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: ⚙️ Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git gh jq perl
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+          gh auth status -t
+
+      - name: 🔮 Run Org Sync
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          cd admin
+          # Convert Windows (CRLF) endings to Unix (LF) to avoid $'\r' errors
+          find . -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
+          chmod +x *.sh
+          bash sync-core.sh | tee ../sync-output.txt
+
+      - name: 🧾 Commit Sync Log (only if changed)
+        shell: bash
+        run: |
+          cd "${GITHUB_WORKSPACE}"
+
+          git config core.autocrlf false
+          git config core.eol lf
+
+          # Compute new hash
+          NEW_HASH=$(sha256sum sync-output.txt | awk '{print $1}')
+          OLD_HASH=$(grep -m1 "## HASH:" sync-log.md | awk '{print $3}' | tr -d '\r\n' || echo "")
+
+          echo "🔍 OLD_HASH: '$OLD_HASH'"
+          echo "🔍 NEW_HASH: '$NEW_HASH'"
+
+          if [[ "$NEW_HASH" == "$OLD_HASH" ]]; then
+            echo "✅ No changes detected — skipping commit."
+            exit 0
+          else
+            echo "⚠️  Hash mismatch — committing new log."
+          fi
+
+          # Rebuild log
+          NOW=$(date -u +"%Y-%m-%d %H:%M UTC")
+          {
+            echo "## Weekly GitHub Org Sync Log ($NOW)"
+            echo "## HASH: $NEW_HASH"
+            echo '```text'
+            cat sync-output.txt
+            echo '```'
+          } > sync-log.md
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sync-log.md
+          git diff --cached --quiet && echo "✅ No file changes, skipping commit." && exit 0
+          git commit -m "Auto-sync log ($NOW)"
+          git push origin HEAD
