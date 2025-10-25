@@ -1,0 +1,23 @@
+[
+  /* ============================================================
+     LOST MINIONS — CUSTOM LABELS
+     ============================================================ */
+  { "name": "website", "color": "0366D6", "description": "Front-end or content update for a LostMinions.org site." },
+  { "name": "automation", "color": "0E8A16", "description": "Automation, scripts, or workflow updates." },
+  { "name": "3d-print", "color": "6F42C1", "description": "3D print designs or asset changes." },
+  { "name": "game-tool", "color": "2E8B57", "description": "Game or mod tool development." },
+  { "name": "task", "color": "EAC54F", "description": "General maintenance or work item." },
+
+  /* ============================================================
+     DEFAULT GITHUB LABELS (STANDARDIZED)
+     ============================================================ */
+  { "name": "bug", "color": "D73A4A", "description": "Something isn't working." },
+  { "name": "documentation", "color": "0366D6", "description": "Improvements or additions to documentation." },
+  { "name": "duplicate", "color": "D4C5F9", "description": "This issue or pull request already exists." },
+  { "name": "enhancement", "color": "A2EEEF", "description": "New feature or request." },
+  { "name": "good first issue", "color": "7057FF", "description": "Good for newcomers." },
+  { "name": "help wanted", "color": "008672", "description": "Extra attention is needed." },
+  { "name": "invalid", "color": "E4E669", "description": "This doesn't seem right." },
+  { "name": "question", "color": "D876E3", "description": "Further information is requested." },
+  { "name": "wontfix", "color": "FFFFFF", "description": "This will not be worked on." }
+]
