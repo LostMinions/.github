@@ -36,7 +36,21 @@ if [ -n "${GITHUB_REPOSITORY:-}" ]; then
 fi
 
 # --- Read enabled repos -------------------------------------------------------
-repos=$(jq -c '.repos[] | select(.enabled == true)' "$REPOS_FILE")
+# Clean the JSON file (strip comments, fix trailing commas, handle CRLF)
+strip_comments() {
+  perl -0777 -pe '
+    s{/\*.*?\*/}{}gs;          # remove /* ... */ blocks
+    s{//[^\r\n]*}{}g;          # remove // comments (CRLF or LF)
+    s/,\s*([}\]])/\1/g;        # remove trailing commas
+  ' "$1"
+}
+
+# Create a temp copy of the cleaned file
+CLEAN_REPOS=$(mktemp)
+strip_comments "$REPOS_FILE" > "$CLEAN_REPOS"
+
+# Now parse with jq
+repos=$(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
 
 while IFS= read -r repo; do
   ORG=$(echo "$repo" | jq -r '.org')
