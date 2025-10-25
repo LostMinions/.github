@@ -88,4 +88,4 @@ a circle of creators, programmers, and makers who believe in open collaboration 
 Maintainers can find admin scripts, label/issue-type sync tools, and automation documentation inside  
 [`/admin/`](./admin) — not needed for public use but preserved for consistency.
 
-[![Community Standards](https://img.shields.io/badge/GitHub-Community%20Ready-6F42C1?style=for-the-badge&logo=github)](https://github.com/LostMinions/.github)
+[![Community Standards](https://img.shields.io/badge/GitHub-Community%20Ready-2E8B57?style=for-the-badge&logo=github)](https://github.com/LostMinions/.github)
