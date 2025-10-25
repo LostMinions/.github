@@ -15,7 +15,7 @@
     /* ============================================================
        AUTOMATION & TOOLS
        ============================================================ */
-    { "org": "LostMinions", "name": "MinionBot", "enabled": true, "description": "IRC / Discord automation bot (archived codebase)" },
+    { "org": "LostMinions", "name": "MinionBot", "enabled": false, "description": "IRC / Discord automation bot (archived codebase)" },
 
     /* ============================================================
        ARCHIVED MINISITES / WEB PROJECTS
