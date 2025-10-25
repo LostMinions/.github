@@ -20,6 +20,7 @@ on:
 
       # --- Governance documents
       - "CONTRIBUTING.md"
+#      - "LICENSE"
       - "SECURITY.md"
       - "CODE_OF_CONDUCT.md"
 
