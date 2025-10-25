@@ -4,41 +4,41 @@
        CORE ADMIN & ACTIVE PROJECTS
        ============================================================ */
     //{ "org": "LostMinions", "name": ".github", "enabled": true, "description": "Admin repo for templates, actions, and automation" },
-    { "org": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub" },
     { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
+    { "org": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub" },
+    { "org": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": false, "description": "3D print designs and model sources" },
     { "org": "LostMinions", "name": "LostMinions.org-DnD", "enabled": true, "description": "D&D campaign and resources" },
+    { "org": "LostMinions", "name": "LostMinions.org-DnD-Resources", "enabled": false, "description": "Images and reference resources for D&D" },
+    { "org": "LostMinions", "name": "LostMinions.org-Forum", "enabled": false, "description": "Community forums (phpBB3)" },
     { "org": "LostMinions", "name": "LostMinions_Libraries", "enabled": true, "description": "C# shared libraries & automation" },
-    { "org": "LostMinions", "name": "LostMinions.org-Forum", "enabled": true, "description": "Community forums (phpBB3)" },
-    { "org": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": true, "description": "3D print designs and model sources" },
-    { "org": "LostMinions", "name": "LostMinions.org-DnD-Resources", "enabled": true, "description": "Images and reference resources for D&D" },
 
     /* ============================================================
        AUTOMATION & TOOLS
        ============================================================ */
-    { "org": "LostMinions", "name": "MinionBot", "enabled": true, "description": "IRC / Discord automation bot (archived codebase)" },
     { "org": "LostMinions", "name": "Darkfall_Programs", "enabled": true, "description": "Legacy C# tools related to Darkfall" },
+    { "org": "LostMinions", "name": "MinionBot", "enabled": true, "description": "IRC / Discord automation bot (archived codebase)" },
 
     /* ============================================================
        ARCHIVED MINISITES / WEB PROJECTS
        ============================================================ */
-    { "org": "LostMinions", "name": "LostMinions.org-Collections", "enabled": false, "description": "Archived minisite for item collections" },
-    { "org": "LostMinions", "name": "LostMinions.org-II", "enabled": false, "description": "Wrapper for Improved Initiative host" },
-    { "org": "LostMinions", "name": "LostMinions.org-LilUrl", "enabled": false, "description": "Legacy URL shortener service" },
-    { "org": "LostMinions", "name": "LostMinions.org-DnD-Moloch", "enabled": false, "description": "Archived journal site for Moloch the Warlock" },
-    { "org": "LostMinions", "name": "LostMinions.org-Krush", "enabled": false, "description": "Early HTML prototype site (Krush project)" },
-    { "org": "LostMinions", "name": "LostMinions.org-DigiPen", "enabled": false, "description": "Archived student project from DigiPen" },
-    { "org": "LostMinions", "name": "LostMinions.org-Minisite", "enabled": false, "description": "Legacy minisite framework" },
-    { "org": "LostMinions", "name": "LostMinions.org-IRC", "enabled": false, "description": "Old IRC web tools" },
-    { "org": "LostMinions", "name": "LostMinions.org-Graphics", "enabled": false, "description": "Archived graphics and HTML experiments" },
     { "org": "LostMinions", "name": "LostMinions.org-ArthasBot", "enabled": false, "description": "World of Warcraft bot project (archived)" },
+    { "org": "LostMinions", "name": "LostMinions.org-Collections", "enabled": false, "description": "Archived minisite for item collections" },
+    { "org": "LostMinions", "name": "LostMinions.org-DigiPen", "enabled": false, "description": "Archived student project from DigiPen" },
+    { "org": "LostMinions", "name": "LostMinions.org-DnD-Moloch", "enabled": false, "description": "Archived journal site for Moloch the Warlock" },
+    { "org": "LostMinions", "name": "LostMinions.org-Graphics", "enabled": false, "description": "Archived graphics and HTML experiments" },
+    { "org": "LostMinions", "name": "LostMinions.org-II", "enabled": false, "description": "Wrapper for Improved Initiative host" },
+    { "org": "LostMinions", "name": "LostMinions.org-IRC", "enabled": false, "description": "Old IRC web tools" },
+    { "org": "LostMinions", "name": "LostMinions.org-Krush", "enabled": false, "description": "Early HTML prototype site (Krush project)" },
+    { "org": "LostMinions", "name": "LostMinions.org-LilUrl", "enabled": false, "description": "Legacy URL shortener service" },
+    { "org": "LostMinions", "name": "LostMinions.org-Minisite", "enabled": false, "description": "Legacy minisite framework" },
 
     /* ============================================================
        DARKFALL LEGACY BRANCHES
        ============================================================ */
-    { "org": "LostMinions", "name": "DarkfallInfo.com-PMap2", "enabled": false, "description": "Darkfall map project (second version)" },
-    { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Original Darkfall map project" },
-    { "org": "LostMinions", "name": "DarkfallInfo.com-Crafting", "enabled": false, "description": "Darkfall crafting data site" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-Calendar", "enabled": false, "description": "Darkfall calendar project" },
+    { "org": "LostMinions", "name": "DarkfallInfo.com-Crafting", "enabled": false, "description": "Darkfall crafting data site" },
+    { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project" },
+    { "org": "LostMinions", "name": "DarkfallInfo.com-PMap2", "enabled": false, "description": "Darkfall: Unholy Wars Political Map project" },
     { "org": "LostMinions", "name": "Darkfall-ClientMod", "enabled": false, "description": "Darkfall Java client modification" },
     { "org": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" }
   ]
