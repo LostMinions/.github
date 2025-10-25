@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "updated": "2025-10-25",
+  "organization": "Lost Minions",
+  "description": "Core brand palette for Lost Minions — bright monster energy meets dark workshop grit.",
+
+  "colors": {
+    "primary": {
+      "name": "Slime Green",
+      "hex": "#8BFF4A",
+      "rgb": "139,255,74",
+      "usage": "Main accent — slime glow, highlights, icons, playful emphasis"
+    },
+    "secondary": {
+      "name": "Toxic Purple",
+      "hex": "#A24AFF",
+      "rgb": "162,74,255",
+      "usage": "Complementary accent — lighting edges, shadows, banners"
+    },
+    "accent": {
+      "name": "Minion Yellow",
+      "hex": "#FFE44A",
+      "rgb": "255,228,74",
+      "usage": "Warm punch — character eyes, teeth, motion trails, brand callouts"
+    },
+    "dark": {
+      "name": "Lab Black",
+      "hex": "#111216",
+      "rgb": "17,18,22",
+      "usage": "Main background — site themes, merch shadows, outlines"
+    },
+    "light": {
+      "name": "Bone White",
+      "hex": "#F4F4F6",
+      "rgb": "244,244,246",
+      "usage": "Contrast on dark backgrounds, paper textures, type"
+    },
+    "neutral": {
+      "name": "Workshop Grey",
+      "hex": "#2A2C34",
+      "rgb": "42,44,52",
+      "usage": "Panels, UI containers, shadowed materials"
+    },
+    "support": {
+      "name": "Rust Orange",
+      "hex": "#D06E2E",
+      "rgb": "208,110,46",
+      "usage": "Metal accent, logo outlines, mechanical grime tone"
+    },
+    "error": {
+      "name": "Gore Red",
+      "hex": "#E13B3B",
+      "rgb": "225,59,59",
+      "usage": "Warnings, hot-metal glow, danger signs"
+    },
+    "success": {
+      "name": "Bio Mint",
+      "hex": "#7CFABF",
+      "rgb": "124,250,191",
+      "usage": "Positive actions, vitality, healed effects"
+    }
+  }
+}
