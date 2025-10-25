@@ -1,0 +1,13 @@
+[
+  { "name": "Design", "color": "6F42C1", "description": "3D print, logo, or graphic design work." },
+  { "name": "Website", "color": "0366D6", "description": "Updates to LostMinions.org or related sites." },
+  { "name": "Game Tool", "color": "2E8B57", "description": "Game utilities, bots, or tools." },
+  { "name": "Documentation", "color": "1F6FEB", "description": "Improvements or additions to documentation." }
+
+  /* ============================================================
+     DEFAULT GITHUB ISSUE TYPES (STANDARDIZED)
+     ============================================================ */
+  { "name": "Bug", "color": "D73A4A", "description": "An unexpected defect or issue." },
+  { "name": "Task", "color": "EAC54F", "description": "General technical or creative task." },
+  { "name": "Feature", "color": "0E8A16", "description": "New system, module, or gameplay mechanic." },
+]
