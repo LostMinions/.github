@@ -20,6 +20,7 @@
     /* ============================================================
        ARCHIVED MINISITES / WEB PROJECTS
        ============================================================ */
+    { "org": "LostMinions", "name": "ActiveSocialSports.com", "enabled": false, "description": "Kickball league website" },
     { "org": "LostMinions", "name": "LostMinions.org-ArthasBot", "enabled": false, "description": "World of Warcraft bot project (archived)" },
     { "org": "LostMinions", "name": "LostMinions.org-Collections", "enabled": false, "description": "Archived minisite for item collections" },
     { "org": "LostMinions", "name": "LostMinions.org-DigiPen", "enabled": false, "description": "Archived student project from DigiPen" },
