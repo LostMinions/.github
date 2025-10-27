@@ -1,3 +1,5 @@
+[![Community Standards](https://img.shields.io/badge/GitHub-Community%20Ready-2E8B57?style=for-the-badge&logo=github)](https://github.com/LostMinions/.github)
+
 # Lost Minions — Organization Hub
 
 Welcome to **Lost Minions**, a collective of makers, gamers, and coders turning imagination into code, prints, and pixels.  
@@ -87,5 +89,3 @@ a circle of creators, programmers, and makers who believe in open collaboration 
 
 Maintainers can find admin scripts, label/issue-type sync tools, and automation documentation inside  
 [`/admin/`](./admin) — not needed for public use but preserved for consistency.
-
-[![Community Standards](https://img.shields.io/badge/GitHub-Community%20Ready-2E8B57?style=for-the-badge&logo=github)](https://github.com/LostMinions/.github)
