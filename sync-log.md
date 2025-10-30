@@ -1,5 +1,5 @@
-## Weekly GitHub Org Sync Log (2025-10-25 07:31 UTC)
-## HASH: da42ea9d78ef67f699ee7ab5fef43da766a8a4b0180d7f83871efc908bee2ae9
+## Weekly GitHub Org Sync Log (2025-10-30 23:58 UTC)
+## HASH: 85b5d6de122e8198402f89e57b160743a557802cf6f75cb16c18e70b0decaa2d
 ```text
 # The Portal Realm GitHub Sync
 
@@ -270,6 +270,132 @@ Finished syncing labels for LostMinions/LostMinions_Libraries
 ---
 
 Done: LostMinions/LostMinions_Libraries
+
+## Repository: LostMinions/LostMinions.Core
+
+### [0/3] Secrets
+Syncing secrets for LostMinions/LostMinions.Core
+
+- Setting GH_TOKEN for LostMinions/LostMinions.Core
+- Verified: GH_TOKEN successfully written
+
+Finished syncing secrets for LostMinions/LostMinions.Core
+
+---
+
+### [1/3] Templates and Policies
+Syncing .github templates and policies for LostMinions/LostMinions.Core
+
+  Checking .github/ISSUE_TEMPLATE ...
+- Committing changes
+- Pushing changes
+- Updated LostMinions/LostMinions.Core
+
+Finished syncing .github templates and policies for LostMinions/LostMinions.Core
+
+---
+
+### [2/3] Issue Types
+Syncing 7 issue types for LostMinions/LostMinions.Core
+
+- Updating: Design (PURPLE)
+- Updating: Website (BLUE)
+- Updating: Game Tool (GREEN)
+- Updating: Documentation (BLUE)
+- Updating: Bug (RED)
+- Updating: Task (YELLOW)
+- Updating: Feature (GREEN)
+
+Finished syncing issue types for LostMinions/LostMinions.Core
+
+---
+
+### [3/3] Labels
+Syncing 14 labels for LostMinions/LostMinions.Core
+
+- Creating: website
+- Creating: automation
+- Creating: 3d-print
+- Creating: game-tool
+- Creating: task
+- Updating: bug
+- Updating: documentation
+- Updating: duplicate
+- Updating: enhancement
+- Updating: good first issue
+- Updating: help wanted
+- Updating: invalid
+- Updating: question
+- Updating: wontfix
+
+Finished syncing labels for LostMinions/LostMinions.Core
+
+---
+
+Done: LostMinions/LostMinions.Core
+
+## Repository: LostMinions/LostMinions.GoogleSheets
+
+### [0/3] Secrets
+Syncing secrets for LostMinions/LostMinions.GoogleSheets
+
+- Setting GH_TOKEN for LostMinions/LostMinions.GoogleSheets
+- Verified: GH_TOKEN successfully written
+
+Finished syncing secrets for LostMinions/LostMinions.GoogleSheets
+
+---
+
+### [1/3] Templates and Policies
+Syncing .github templates and policies for LostMinions/LostMinions.GoogleSheets
+
+  Checking .github/ISSUE_TEMPLATE ...
+- Committing changes
+- Pushing changes
+- Updated LostMinions/LostMinions.GoogleSheets
+
+Finished syncing .github templates and policies for LostMinions/LostMinions.GoogleSheets
+
+---
+
+### [2/3] Issue Types
+Syncing 7 issue types for LostMinions/LostMinions.GoogleSheets
+
+- Updating: Design (PURPLE)
+- Updating: Website (BLUE)
+- Updating: Game Tool (GREEN)
+- Updating: Documentation (BLUE)
+- Updating: Bug (RED)
+- Updating: Task (YELLOW)
+- Updating: Feature (GREEN)
+
+Finished syncing issue types for LostMinions/LostMinions.GoogleSheets
+
+---
+
+### [3/3] Labels
+Syncing 14 labels for LostMinions/LostMinions.GoogleSheets
+
+- Creating: website
+- Creating: automation
+- Creating: 3d-print
+- Creating: game-tool
+- Creating: task
+- Updating: bug
+- Updating: documentation
+- Updating: duplicate
+- Updating: enhancement
+- Updating: good first issue
+- Updating: help wanted
+- Updating: invalid
+- Updating: question
+- Updating: wontfix
+
+Finished syncing labels for LostMinions/LostMinions.GoogleSheets
+
+---
+
+Done: LostMinions/LostMinions.GoogleSheets
 
 All enabled repositories processed successfully.
 ```
