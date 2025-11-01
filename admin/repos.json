@@ -37,7 +37,7 @@
     /* ============================================================
        DARKFALL LEGACY BRANCHES
        ============================================================ */
-    { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
+    { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": false, "description": "Legacy MMO utilities & data site" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-Calendar", "enabled": false, "description": "Darkfall calendar project" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-Crafting", "enabled": false, "description": "Darkfall crafting data site" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project" },
@@ -49,7 +49,7 @@
     /* ============================================================
        H1Z1 LEGACY BRANCHES
        ============================================================ */
-    { "org": "LostMinions", "name": "H1Z1Info.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
+    { "org": "LostMinions", "name": "H1Z1Info.com", "enabled": false, "description": "Legacy MMO utilities & data site" },
     { "org": "LostMinions", "name": "H1Z1Info.com-Map", "enabled": false, "description": "Legacy MMO map site" },
   ]
 }
