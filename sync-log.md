@@ -1,5 +1,5 @@
-## Weekly GitHub Org Sync Log (2025-10-31 06:25 UTC)
-## HASH: c9c1c5ee8f2ab9315bf1f371eb174c79f64a16fff03d3f6e2f551aeeb026222d
+## Weekly GitHub Org Sync Log (2025-11-01 09:29 UTC)
+## HASH: 27afe57f6e28532a41a5a07ac4bfe5b2cde230e8328d809eb77f3df04d89f10e
 ```text
 # The Portal Realm GitHub Sync
 
@@ -30,66 +30,6 @@ Syncing 14 labels for LostMinions/.github
 Finished syncing labels for LostMinions/.github
 
 ---
-
-## Repository: LostMinions/DarkfallInfo.com
-
-### [0/3] Secrets
-Syncing secrets for LostMinions/DarkfallInfo.com
-
-- Setting GH_TOKEN for LostMinions/DarkfallInfo.com
-- Verified: GH_TOKEN successfully written
-
-Finished syncing secrets for LostMinions/DarkfallInfo.com
-
----
-
-### [1/3] Templates and Policies
-Syncing .github templates and policies for LostMinions/DarkfallInfo.com
-
-  Checking .github/ISSUE_TEMPLATE ...
-
-Finished syncing .github templates and policies for LostMinions/DarkfallInfo.com
-
----
-
-### [2/3] Issue Types
-Syncing 7 issue types for LostMinions/DarkfallInfo.com
-
-- Updating: Design (PURPLE)
-- Updating: Website (BLUE)
-- Updating: Game Tool (GREEN)
-- Updating: Documentation (BLUE)
-- Updating: Bug (RED)
-- Updating: Task (YELLOW)
-- Updating: Feature (GREEN)
-
-Finished syncing issue types for LostMinions/DarkfallInfo.com
-
----
-
-### [3/3] Labels
-Syncing 14 labels for LostMinions/DarkfallInfo.com
-
-- Updating: website
-- Updating: automation
-- Updating: 3d-print
-- Updating: game-tool
-- Updating: task
-- Updating: bug
-- Updating: documentation
-- Updating: duplicate
-- Updating: enhancement
-- Updating: good first issue
-- Updating: help wanted
-- Updating: invalid
-- Updating: question
-- Updating: wontfix
-
-Finished syncing labels for LostMinions/DarkfallInfo.com
-
----
-
-Done: LostMinions/DarkfallInfo.com
 
 ## Repository: LostMinions/LostMinions.org
 
@@ -210,66 +150,6 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ---
 
 Done: LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions_Libraries
-
-### [0/3] Secrets
-Syncing secrets for LostMinions/LostMinions_Libraries
-
-- Setting GH_TOKEN for LostMinions/LostMinions_Libraries
-- Verified: GH_TOKEN successfully written
-
-Finished syncing secrets for LostMinions/LostMinions_Libraries
-
----
-
-### [1/3] Templates and Policies
-Syncing .github templates and policies for LostMinions/LostMinions_Libraries
-
-  Checking .github/ISSUE_TEMPLATE ...
-
-Finished syncing .github templates and policies for LostMinions/LostMinions_Libraries
-
----
-
-### [2/3] Issue Types
-Syncing 7 issue types for LostMinions/LostMinions_Libraries
-
-- Updating: Design (PURPLE)
-- Updating: Website (BLUE)
-- Updating: Game Tool (GREEN)
-- Updating: Documentation (BLUE)
-- Updating: Bug (RED)
-- Updating: Task (YELLOW)
-- Updating: Feature (GREEN)
-
-Finished syncing issue types for LostMinions/LostMinions_Libraries
-
----
-
-### [3/3] Labels
-Syncing 14 labels for LostMinions/LostMinions_Libraries
-
-- Updating: website
-- Updating: automation
-- Updating: 3d-print
-- Updating: game-tool
-- Updating: task
-- Updating: bug
-- Updating: documentation
-- Updating: duplicate
-- Updating: enhancement
-- Updating: good first issue
-- Updating: help wanted
-- Updating: invalid
-- Updating: question
-- Updating: wontfix
-
-Finished syncing labels for LostMinions/LostMinions_Libraries
-
----
-
-Done: LostMinions/LostMinions_Libraries
 
 ## Repository: LostMinions/LostMinions.Core
 
@@ -407,9 +287,6 @@ Finished syncing secrets for LostMinions/LostMinions.Discord
 Syncing .github templates and policies for LostMinions/LostMinions.Discord
 
   Checking .github/ISSUE_TEMPLATE ...
-- Committing changes
-- Pushing changes
-- Updated LostMinions/LostMinions.Discord
 
 Finished syncing .github templates and policies for LostMinions/LostMinions.Discord
 
@@ -433,11 +310,11 @@ Finished syncing issue types for LostMinions/LostMinions.Discord
 ### [3/3] Labels
 Syncing 14 labels for LostMinions/LostMinions.Discord
 
-- Creating: website
-- Creating: automation
-- Creating: 3d-print
-- Creating: game-tool
-- Creating: task
+- Updating: website
+- Updating: automation
+- Updating: 3d-print
+- Updating: game-tool
+- Updating: task
 - Updating: bug
 - Updating: documentation
 - Updating: duplicate
@@ -453,6 +330,129 @@ Finished syncing labels for LostMinions/LostMinions.Discord
 ---
 
 Done: LostMinions/LostMinions.Discord
+
+## Repository: LostMinions/DarkfallInfo.com
+
+### [0/3] Secrets
+Syncing secrets for LostMinions/DarkfallInfo.com
+
+- Setting GH_TOKEN for LostMinions/DarkfallInfo.com
+- Verified: GH_TOKEN successfully written
+
+Finished syncing secrets for LostMinions/DarkfallInfo.com
+
+---
+
+### [1/3] Templates and Policies
+Syncing .github templates and policies for LostMinions/DarkfallInfo.com
+
+  Checking .github/ISSUE_TEMPLATE ...
+
+Finished syncing .github templates and policies for LostMinions/DarkfallInfo.com
+
+---
+
+### [2/3] Issue Types
+Syncing 7 issue types for LostMinions/DarkfallInfo.com
+
+- Updating: Design (PURPLE)
+- Updating: Website (BLUE)
+- Updating: Game Tool (GREEN)
+- Updating: Documentation (BLUE)
+- Updating: Bug (RED)
+- Updating: Task (YELLOW)
+- Updating: Feature (GREEN)
+
+Finished syncing issue types for LostMinions/DarkfallInfo.com
+
+---
+
+### [3/3] Labels
+Syncing 14 labels for LostMinions/DarkfallInfo.com
+
+- Updating: website
+- Updating: automation
+- Updating: 3d-print
+- Updating: game-tool
+- Updating: task
+- Updating: bug
+- Updating: documentation
+- Updating: duplicate
+- Updating: enhancement
+- Updating: good first issue
+- Updating: help wanted
+- Updating: invalid
+- Updating: question
+- Updating: wontfix
+
+Finished syncing labels for LostMinions/DarkfallInfo.com
+
+---
+
+Done: LostMinions/DarkfallInfo.com
+
+## Repository: LostMinions/H1Z1Info.com
+
+### [0/3] Secrets
+Syncing secrets for LostMinions/H1Z1Info.com
+
+- Setting GH_TOKEN for LostMinions/H1Z1Info.com
+- Verified: GH_TOKEN successfully written
+
+Finished syncing secrets for LostMinions/H1Z1Info.com
+
+---
+
+### [1/3] Templates and Policies
+Syncing .github templates and policies for LostMinions/H1Z1Info.com
+
+  Checking .github/ISSUE_TEMPLATE ...
+- Committing changes
+- Pushing changes
+- Updated LostMinions/H1Z1Info.com
+
+Finished syncing .github templates and policies for LostMinions/H1Z1Info.com
+
+---
+
+### [2/3] Issue Types
+Syncing 7 issue types for LostMinions/H1Z1Info.com
+
+- Updating: Design (PURPLE)
+- Updating: Website (BLUE)
+- Updating: Game Tool (GREEN)
+- Updating: Documentation (BLUE)
+- Updating: Bug (RED)
+- Updating: Task (YELLOW)
+- Updating: Feature (GREEN)
+
+Finished syncing issue types for LostMinions/H1Z1Info.com
+
+---
+
+### [3/3] Labels
+Syncing 14 labels for LostMinions/H1Z1Info.com
+
+- Creating: website
+- Creating: automation
+- Creating: 3d-print
+- Creating: game-tool
+- Creating: task
+- Updating: bug
+- Creating: documentation
+- Updating: duplicate
+- Updating: enhancement
+- Creating: good first issue
+- Updating: help wanted
+- Updating: invalid
+- Updating: question
+- Updating: wontfix
+
+Finished syncing labels for LostMinions/H1Z1Info.com
+
+---
+
+Done: LostMinions/H1Z1Info.com
 
 All enabled repositories processed successfully.
 ```
