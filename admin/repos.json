@@ -9,18 +9,16 @@
     { "org": "LostMinions", "name": "LostMinions.org-DnD", "enabled": true, "description": "D&D campaign and resources" },
     { "org": "LostMinions", "name": "LostMinions.org-DnD-Resources", "enabled": false, "description": "Images and reference resources for D&D" },
     { "org": "LostMinions", "name": "LostMinions.org-Forum", "enabled": false, "description": "Community forums (phpBB3)" },
-    { "org": "LostMinions", "name": "LostMinions_Libraries", "enabled": false, "description": "C# shared libraries & automation" },
-    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, logging, string helpers)" },
-    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)" },
-    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup, logging)" },
 
     /* ============================================================
        AUTOMATION & TOOLS
        ============================================================ */
-    { "org": "LostMinions", "name": "MinionBot", "enabled": false, "description": "IRC / Discord automation bot (archived codebase)" },
+    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, logging, string helpers)" },
+    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup, logging)" },
+    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)" },
 
     /* ============================================================
-       ARCHIVED MINISITES / WEB PROJECTS
+       ARCHIVED PROJECTS
        ============================================================ */
     { "org": "LostMinions", "name": "ActiveSocialSports.com", "enabled": false, "description": "Kickball league website" },
     { "org": "LostMinions", "name": "LostMinions.org-ArthasBot", "enabled": false, "description": "World of Warcraft bot project (archived)" },
@@ -33,6 +31,8 @@
     { "org": "LostMinions", "name": "LostMinions.org-Krush", "enabled": false, "description": "Early HTML prototype site (Krush project)" },
     { "org": "LostMinions", "name": "LostMinions.org-LilUrl", "enabled": false, "description": "Legacy URL shortener service" },
     { "org": "LostMinions", "name": "LostMinions.org-Minisite", "enabled": false, "description": "Legacy minisite framework" },
+    { "org": "LostMinions", "name": "LostMinions_Libraries", "enabled": false, "description": "C# shared libraries & automation" },
+    { "org": "LostMinions", "name": "MinionBot", "enabled": false, "description": "IRC / Discord automation bot (archived codebase)" },
 
     /* ============================================================
        DARKFALL LEGACY BRANCHES
