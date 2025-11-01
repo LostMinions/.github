@@ -4,7 +4,6 @@
        CORE ADMIN & ACTIVE PROJECTS
        ============================================================ */
     { "org": "LostMinions", "name": ".github", "enabled": false, "description": "Admin repo for templates, actions, and automation" },
-    { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
     { "org": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub" },
     { "org": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": false, "description": "3D print designs and model sources" },
     { "org": "LostMinions", "name": "LostMinions.org-DnD", "enabled": true, "description": "D&D campaign and resources" },
@@ -38,6 +37,7 @@
     /* ============================================================
        DARKFALL LEGACY BRANCHES
        ============================================================ */
+    { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-Calendar", "enabled": false, "description": "Darkfall calendar project" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-Crafting", "enabled": false, "description": "Darkfall crafting data site" },
     { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project" },
@@ -45,5 +45,11 @@
     { "org": "LostMinions", "name": "Darkfall-ClientMod", "enabled": false, "description": "Darkfall Java client modification" },
     { "org": "LostMinions", "name": "Darkfall_Programs", "enabled": false, "description": "Legacy C# tools related to Darkfall" },
     { "org": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" },
+
+    /* ============================================================
+       H1Z1 LEGACY BRANCHES
+       ============================================================ */
+    { "org": "LostMinions", "name": "H1Z1Info.com", "enabled": true, "description": "Legacy MMO utilities & data site" },
+    { "org": "LostMinions", "name": "H1Z1Info.com-Map", "enabled": false, "description": "Legacy MMO map site" },
   ]
 }
