@@ -9,11 +9,10 @@ on:
     paths:
       - ".github/workflows/update-submodules-weekly.yml"
 
-# 🚫 Never run inside any .github template repo
-if: ${{ !endsWith(github.repository, '/.github') }}
-
 jobs:
   trigger-update:
+    if: ${{ !endsWith(github.repository, '/.github') }}
+
     name: Trigger Submodule Update
     runs-on: ubuntu-latest
     steps:
