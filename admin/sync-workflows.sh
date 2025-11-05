@@ -58,8 +58,15 @@ if [ "$(echo "$REPO_CONFIG" | jq -r '.enabled')" != "true" ]; then
   exit 0
 fi
 
+# --- Deprecated workflow list ---
+DEPRECATED_WORKFLOWS=(
+  "weekly-submodule-update.yml"
+)
+
 # --- Build workflow list ---
-WORKFLOWS=("update-submodules.yml")
+WORKFLOWS=(
+  "update-submodules.yml"
+)
 
 EXTRA_WORKFLOWS=$(echo "$REPO_CONFIG" | jq -r '.workflows[]?' 2>/dev/null || true)
 if [ -n "$EXTRA_WORKFLOWS" ]; then
@@ -81,6 +88,14 @@ fi
 cd "$TMPDIR"
 
 mkdir -p .github/workflows
+
+# --- Remove deprecated workflows (clean up old names) ---
+for old in "${DEPRECATED_WORKFLOWS[@]}"; do
+  if [ -f "$TMPDIR/.github/workflows/$old" ]; then
+    echo "  - Removing deprecated $old"
+    rm -f "$TMPDIR/.github/workflows/$old"
+  fi
+done
 
 for wf in "${WORKFLOWS[@]}"; do
   SRC="$SOURCE_DIR/$wf"

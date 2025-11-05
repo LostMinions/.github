@@ -1,0 +1,27 @@
+name: 🔁 Update Submodules - Weekly
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"   # Sundays 03:00 UTC
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/update-submodules-weekly.yml"
+
+# 🚫 Never run inside any .github template repo
+if: ${{ !endsWith(github.repository, '/.github') }}
+
+jobs:
+  trigger-update:
+    name: Trigger Submodule Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📨 Dispatch update-submodules.yml
+        run: |
+          echo "🔁 Triggering update-submodules.yml..."
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/update-submodules.yml/dispatches \
+            -d '{"ref": "${{ github.ref_name }}"}'
