@@ -1,5 +1,5 @@
-# Weekly GitHub Org Sync Log (2025-11-05 03:18 UTC)
-## HASH: 42b17a9432122958df8d3e67b4711ad65c5104503b5ce341036fe7dd4271d9e7
+# Weekly GitHub Org Sync Log (2025-11-05 04:18 UTC)
+## HASH: e8ad919823ea762df1b2d34a2c84a7c2950e5e232b11d9989d25adf2a1675d04
 ---
 # The Portal Realm GitHub Sync
 
@@ -150,6 +150,69 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ---
 
 Done: LostMinions/LostMinions.org-DnD
+
+## Repository: LostMinions/LostMinions.CSharpTemplate
+
+### [0/3] Secrets
+Syncing secrets for LostMinions/LostMinions.CSharpTemplate
+
+- Setting GH_TOKEN for LostMinions/LostMinions.CSharpTemplate
+- Verified: GH_TOKEN successfully written
+
+Finished syncing secrets for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+### [1/3] Templates and Policies
+Syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
+
+  Checking .github/ISSUE_TEMPLATE ...
+- Committing changes
+- Pushing changes
+- Updated LostMinions/LostMinions.CSharpTemplate
+
+Finished syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+### [2/3] Issue Types
+Syncing 7 issue types for LostMinions/LostMinions.CSharpTemplate
+
+- Updating: Design (PURPLE)
+- Updating: Website (BLUE)
+- Updating: Game Tool (GREEN)
+- Updating: Documentation (BLUE)
+- Updating: Bug (RED)
+- Updating: Task (YELLOW)
+- Updating: Feature (GREEN)
+
+Finished syncing issue types for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+### [3/3] Labels
+Syncing 14 labels for LostMinions/LostMinions.CSharpTemplate
+
+- Creating: website
+- Creating: automation
+- Creating: 3d-print
+- Creating: game-tool
+- Creating: task
+- Updating: bug
+- Updating: documentation
+- Updating: duplicate
+- Updating: enhancement
+- Updating: good first issue
+- Updating: help wanted
+- Updating: invalid
+- Updating: question
+- Updating: wontfix
+
+Finished syncing labels for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+Done: LostMinions/LostMinions.CSharpTemplate
 
 ## Repository: LostMinions/LostMinions.Core
 
@@ -347,9 +410,6 @@ Finished syncing secrets for LostMinions/LostMinions.Logging
 Syncing .github templates and policies for LostMinions/LostMinions.Logging
 
   Checking .github/ISSUE_TEMPLATE ...
-- Committing changes
-- Pushing changes
-- Updated LostMinions/LostMinions.Logging
 
 Finished syncing .github templates and policies for LostMinions/LostMinions.Logging
 
@@ -373,11 +433,11 @@ Finished syncing issue types for LostMinions/LostMinions.Logging
 ### [3/3] Labels
 Syncing 14 labels for LostMinions/LostMinions.Logging
 
-- Creating: website
-- Creating: automation
-- Creating: 3d-print
-- Creating: game-tool
-- Creating: task
+- Updating: website
+- Updating: automation
+- Updating: 3d-print
+- Updating: game-tool
+- Updating: task
 - Updating: bug
 - Updating: documentation
 - Updating: duplicate
@@ -547,6 +607,69 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 
 Done: LostMinions/LostMinions.org-DnD
 
+## Repository: LostMinions/LostMinions.CSharpTemplate
+
+### [0/3] Secrets
+Syncing secrets for LostMinions/LostMinions.CSharpTemplate
+
+- Setting GH_TOKEN for LostMinions/LostMinions.CSharpTemplate
+- Verified: GH_TOKEN successfully written
+
+Finished syncing secrets for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+### [1/3] Templates and Policies
+Syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
+
+  Checking .github/ISSUE_TEMPLATE ...
+- Committing changes
+- Pushing changes
+- Updated LostMinions/LostMinions.CSharpTemplate
+
+Finished syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+### [2/3] Issue Types
+Syncing 7 issue types for LostMinions/LostMinions.CSharpTemplate
+
+- Updating: Design (PURPLE)
+- Updating: Website (BLUE)
+- Updating: Game Tool (GREEN)
+- Updating: Documentation (BLUE)
+- Updating: Bug (RED)
+- Updating: Task (YELLOW)
+- Updating: Feature (GREEN)
+
+Finished syncing issue types for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+### [3/3] Labels
+Syncing 14 labels for LostMinions/LostMinions.CSharpTemplate
+
+- Creating: website
+- Creating: automation
+- Creating: 3d-print
+- Creating: game-tool
+- Creating: task
+- Updating: bug
+- Updating: documentation
+- Updating: duplicate
+- Updating: enhancement
+- Updating: good first issue
+- Updating: help wanted
+- Updating: invalid
+- Updating: question
+- Updating: wontfix
+
+Finished syncing labels for LostMinions/LostMinions.CSharpTemplate
+
+---
+
+Done: LostMinions/LostMinions.CSharpTemplate
+
 ## Repository: LostMinions/LostMinions.Core
 
 ### [0/3] Secrets
@@ -743,9 +866,6 @@ Finished syncing secrets for LostMinions/LostMinions.Logging
 Syncing .github templates and policies for LostMinions/LostMinions.Logging
 
   Checking .github/ISSUE_TEMPLATE ...
-- Committing changes
-- Pushing changes
-- Updated LostMinions/LostMinions.Logging
 
 Finished syncing .github templates and policies for LostMinions/LostMinions.Logging
 
@@ -769,11 +889,11 @@ Finished syncing issue types for LostMinions/LostMinions.Logging
 ### [3/3] Labels
 Syncing 14 labels for LostMinions/LostMinions.Logging
 
-- Creating: website
-- Creating: automation
-- Creating: 3d-print
-- Creating: game-tool
-- Creating: task
+- Updating: website
+- Updating: automation
+- Updating: 3d-print
+- Updating: game-tool
+- Updating: task
 - Updating: bug
 - Updating: documentation
 - Updating: duplicate
