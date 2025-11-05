@@ -60,15 +60,13 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      # 🧱 Setup .NET SDK
-      - name: Setup .NET 8
+      - name: 🧱 Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
-      # 🔍 Detect the project file dynamically
-      - name: Detect project
+      - name: 🔍 Detect project
         id: detect
         shell: bash
         run: |
@@ -135,7 +133,6 @@ jobs:
             -p:PackageVersion=${{ steps.version.outputs.version }} \
             -p:ContinuousIntegrationBuild=true
 
-      # 🚀 Publish to GitHub Packages
       - name: 🚀 Publish to GitHub Packages
         run: |
           dotnet nuget push "bin/Release/*.nupkg" \
@@ -143,8 +140,7 @@ jobs:
             --api-key ${{ secrets.GH_TOKEN }} \
             --skip-duplicate
 
-      # 🏷️ Create Git Tag
-      - name: Create Git Tag
+      - name: 🏷️ Create Git Tag
         id: tag
         run: |
           TAG="v${{ steps.version.outputs.version }}"
