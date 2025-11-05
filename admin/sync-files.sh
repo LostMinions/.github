@@ -88,6 +88,21 @@ for d in "${TEMPLATE_DIRS[@]}"; do
   fi
 done
 
+# --- Remove stale root community files ---------------------------------------
+STALE_ROOT_FILES=(
+  "LICENSE"
+  "NOTICE_PRIVATE.md"
+  "CONTRIBUTING.md"
+  "SECURITY.md"
+  "CODE_OF_CONDUCT.md"
+)
+
+for f in "${STALE_ROOT_FILES[@]}"; do
+  if [ -f "$f" ]; then
+    rm -f "$f"
+  fi
+done
+
 # Copy community files into repo root
 for f in "${ROOT_FILES[@]}"; do
   if [ -f "$f" ]; then
