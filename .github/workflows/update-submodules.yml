@@ -9,6 +9,7 @@ on:
 
 jobs:
   submodule-update:
+    if: github.repository != 'LostMinions/.github'
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -18,6 +18,7 @@ permissions:
 
 jobs:
   publish:
+    if: github.repository != 'LostMinions/.github'
     runs-on: ubuntu-latest
     env:
       NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}

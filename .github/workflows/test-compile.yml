@@ -12,6 +12,7 @@ on:
 
 jobs:
   compile-test:
+    if: github.repository != 'LostMinions/.github'
     runs-on: windows-latest
 
     steps:
