@@ -88,9 +88,9 @@ LICENSE_TYPE=$(jq -r --arg repo "$FULL_REPO" '
 ' "$CLEAN_JSON")
 
 if [[ "$LICENSE_TYPE" == "mit" ]]; then
-  ROOT_FILES+=("$SOURCE_DIR/.github/LICENSE")
+  ROOT_FILES+=("$SOURCE_DIR/LICENSE")
 else
-  ROOT_FILES+=("$SOURCE_DIR/.github/NOTICE_PRIVATE.md")
+  ROOT_FILES+=("$SOURCE_DIR/NOTICE_PRIVATE.md")
 fi
 
 # Copy template directories into .github
