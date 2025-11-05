@@ -73,6 +73,7 @@ jobs:
           MAX_JOBS: ${{ github.event.inputs.max_jobs || 4 }}
         run: |
           cd admin
+          set -o pipefail
           find . -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
           chmod +x *.sh
           start=$(date +%s)
@@ -98,7 +99,7 @@ jobs:
           shopt -s nullglob
           for log in admin/logs/*.log; do
             repo=$(basename "$log" .log)
-            if grep -q "failed" "$log"; then
+            if grep -iq "failed" "$log"; then
               echo "| $repo | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $repo | ✅ Success |" >> $GITHUB_STEP_SUMMARY

@@ -187,6 +187,7 @@ done
 
 # --- re-enable -e after concurrency block ---
 set -e
+exit $exit_status
 
 echo ""
 echo "============================================================"
