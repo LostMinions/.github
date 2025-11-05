@@ -7,17 +7,15 @@
     { "org": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub" },
     { "org": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": false, "description": "3D print designs and model sources" },
     { "org": "LostMinions", "name": "LostMinions.org-DnD", "enabled": true, "description": "D&D campaign and resources" },
-    { "org": "LostMinions", "name": "LostMinions.org-DnD-Resources", "enabled": false, "description": "Images and reference resources for D&D" },
-    { "org": "LostMinions", "name": "LostMinions.org-Forum", "enabled": false, "description": "Community forums (phpBB3)" },
 
     /* ============================================================
        AUTOMATION & TOOLS
        ============================================================ */
-    { "org": "LostMinions", "name": "LostMinions.CSharpTemplate", "enabled": true, "description": "Standardized .NET 8 template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation." },
-    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, logging, string helpers)" },
-    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup, logging)" },
-    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)" },
-    { "org": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)" },
+    { "org": "LostMinions", "name": "LostMinions.CSharpTemplate", "enabled": true, "description": "Standardized .NET 8 template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation.", "workflows": ["publish.yml", "test-compile.yml"] },
+    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, logging, string helpers)", "workflows": ["publish.yml", "test-compile.yml"] },
+    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup, logging)", "workflows": ["publish.yml", "test-compile.yml"] },
+    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)", "workflows": ["publish.yml", "test-compile.yml"] },
+    { "org": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)", "workflows": ["publish.yml", "test-compile.yml"] },
 
     /* ============================================================
        ARCHIVED PROJECTS

@@ -94,9 +94,9 @@ while IFS= read -r repo; do
   echo ""
 
   # ------------------------------------------------------------
-  # [0/3] Secrets
+  # [0/4] Secrets
   # ------------------------------------------------------------
-  echo "### [0/3] Secrets"
+  echo "### [0/4] Secrets"
   bash "$SCRIPT_DIR/sync-secrets.sh" "$FULL" || {
     echo "sync-secrets.sh failed for $FULL"
     exit 1
@@ -106,9 +106,9 @@ while IFS= read -r repo; do
   echo ""
 
   # ------------------------------------------------------------
-  # [1/3] Templates and Policies
+  # [1/4] Templates and Policies
   # ------------------------------------------------------------
-  echo "### [1/3] Templates and Policies"
+  echo "### [1/4] Templates and Policies"
   bash "$SCRIPT_DIR/sync-files.sh" "$FULL" || {
     echo "sync-files.sh failed for $FULL"
     exit 1
@@ -118,9 +118,9 @@ while IFS= read -r repo; do
   echo ""
 
   # ------------------------------------------------------------
-  # [2/3] Issue Types
+  # [2/4] Issue Types
   # ------------------------------------------------------------
-  echo "### [2/3] Issue Types"
+  echo "### [2/4] Issue Types"
   bash "$SCRIPT_DIR/sync-issue-types.sh" "$FULL" || {
     echo "sync-issue-types.sh failed for $FULL"
     exit 1
@@ -130,9 +130,9 @@ while IFS= read -r repo; do
   echo ""
 
   # ------------------------------------------------------------
-  # [3/3] Labels
+  # [3/4] Labels
   # ------------------------------------------------------------
-  echo "### [3/3] Labels"
+  echo "### [3/4] Labels"
   bash "$SCRIPT_DIR/sync-labels.sh" "$FULL" || {
     echo "sync-labels.sh failed for $FULL"
     exit 1
@@ -140,6 +140,17 @@ while IFS= read -r repo; do
   echo ""
   echo "---"
   echo ""
+
+  # ------------------------------------------------------------
+  # [4/4] Workflows
+  # ------------------------------------------------------------
+  echo "### [4/4] Workflows"
+  bash "$SCRIPT_DIR/sync-workflows.sh" || {
+    echo "sync-workflows.sh failed"
+    exit 1
+  }
+  echo ""
+  echo "---"
 
   echo "Done: $FULL"
   echo ""
