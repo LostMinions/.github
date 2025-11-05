@@ -1,5 +1,5 @@
-# Weekly GitHub Org Sync Log (2025-11-05 17:18 UTC)
-## HASH: 3501524fac9f25833af95b4ccda689494d9ff24194dfdea6846ef1d01b0c2114
+# Weekly GitHub Org Sync Log (2025-11-05 17:24 UTC)
+## HASH: b2446685f1609bd1a324570394c60890de59a2c5547cc4ea6b1f66eeaf22688d
 ---
 # The Portal Realm GitHub Sync
 
@@ -47,22 +47,21 @@ Max parallel jobs: 4
 - Starting sync for LostMinions/LostMinions.org-DnD (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.org-DnD.log)
 - Starting sync for LostMinions/LostMinions.CSharpTemplate (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.CSharpTemplate.log)
 - Starting sync for LostMinions/LostMinions.Core (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.Core.log)
-⚙️  Throttling... waiting for one job to finish
+ Throttling... waiting for one job to finish
 - Starting sync for LostMinions/LostMinions.Discord (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.Discord.log)
-⚙️  Throttling... waiting for one job to finish
+ Throttling... waiting for one job to finish
 - Starting sync for LostMinions/LostMinions.GoogleSheets (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.GoogleSheets.log)
-⚙️  Throttling... waiting for one job to finish
+ Throttling... waiting for one job to finish
 - Starting sync for LostMinions/LostMinions.Logging (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.Logging.log)
-⚙️  Throttling... waiting for one job to finish
-⌛ Waiting for remaining jobs to finish...
-✅ LostMinions/LostMinions.org completed successfully
-✅ LostMinions/LostMinions.org-DnD completed successfully
-✅ LostMinions/LostMinions.CSharpTemplate completed successfully
-✅ LostMinions/LostMinions.Core completed successfully
-✅ LostMinions/LostMinions.Discord completed successfully
-✅ LostMinions/LostMinions.GoogleSheets completed successfully
-✅ LostMinions/LostMinions.Logging completed successfully
-
+ Throttling... waiting for one job to finish
+Waiting for remaining jobs to finish...
+LostMinions/LostMinions.org completed successfully
+LostMinions/LostMinions.org-DnD completed successfully
+LostMinions/LostMinions.CSharpTemplate completed successfully
+LostMinions/LostMinions.Core completed successfully
+LostMinions/LostMinions.Discord completed successfully
+LostMinions/LostMinions.GoogleSheets completed successfully
+LostMinions/LostMinions.Logging completed successfully
 All enabled repositories processed.
 Combined log written to: /home/runner/work/.github/.github/admin/sync-log.md
 ---
@@ -113,22 +112,21 @@ Max parallel jobs: 4
 - Starting sync for LostMinions/LostMinions.org-DnD (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.org-DnD.log)
 - Starting sync for LostMinions/LostMinions.CSharpTemplate (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.CSharpTemplate.log)
 - Starting sync for LostMinions/LostMinions.Core (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.Core.log)
-⚙️  Throttling... waiting for one job to finish
+ Throttling... waiting for one job to finish
 - Starting sync for LostMinions/LostMinions.Discord (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.Discord.log)
-⚙️  Throttling... waiting for one job to finish
+ Throttling... waiting for one job to finish
 - Starting sync for LostMinions/LostMinions.GoogleSheets (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.GoogleSheets.log)
-⚙️  Throttling... waiting for one job to finish
+ Throttling... waiting for one job to finish
 - Starting sync for LostMinions/LostMinions.Logging (logging to /home/runner/work/.github/.github/admin/logs/LostMinions-LostMinions.Logging.log)
-⚙️  Throttling... waiting for one job to finish
-⌛ Waiting for remaining jobs to finish...
-✅ LostMinions/LostMinions.org completed successfully
-✅ LostMinions/LostMinions.org-DnD completed successfully
-✅ LostMinions/LostMinions.CSharpTemplate completed successfully
-✅ LostMinions/LostMinions.Core completed successfully
-✅ LostMinions/LostMinions.Discord completed successfully
-✅ LostMinions/LostMinions.GoogleSheets completed successfully
-✅ LostMinions/LostMinions.Logging completed successfully
-
+ Throttling... waiting for one job to finish
+Waiting for remaining jobs to finish...
+LostMinions/LostMinions.org completed successfully
+LostMinions/LostMinions.org-DnD completed successfully
+LostMinions/LostMinions.CSharpTemplate completed successfully
+LostMinions/LostMinions.Core completed successfully
+LostMinions/LostMinions.Discord completed successfully
+LostMinions/LostMinions.GoogleSheets completed successfully
+LostMinions/LostMinions.Logging completed successfully
 All enabled repositories processed.
 Combined log written to: /home/runner/work/.github/.github/admin/sync-log.md
 ```
