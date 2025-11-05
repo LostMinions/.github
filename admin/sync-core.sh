@@ -21,7 +21,9 @@ if [ ! -f "$REPOS_FILE" ]; then
 fi
 
 ORG_NAME="${GITHUB_REPOSITORY%%/*}"
-echo "== $ORG_NAME GitHub Sync =="
+echo "============================================================"
+echo "$ORG_NAME GitHub Sync Started"
+echo "============================================================"
 echo ""
 
 # --- Read enabled repos -------------------------------------------------------
@@ -58,7 +60,7 @@ for repo in "${REPOS[@]}"; do
 done
 
 if (( ${#ARCHIVED_LIST[@]} > 0 )); then
-  echo "The following repositories are archived but marked as enabled:"
+  echo "Archived repositories detected (must disable in repos.json):"
   for r in "${ARCHIVED_LIST[@]}"; do
     echo "- $r"
   done
@@ -66,15 +68,14 @@ if (( ${#ARCHIVED_LIST[@]} > 0 )); then
   echo "Please set \"enabled\": false for these in repos.json before running the sync."
   exit 1
 else
-  echo "No archived repositories detected — proceeding with sync."
+  echo "No archived repositories detected. Proceeding with sync..."
   echo ""
 fi
 
 # --- Self-label sync (runs immediately) ---------------------------------------
 if [ -n "${GITHUB_REPOSITORY:-}" ]; then
-  echo "Repository: $GITHUB_REPOSITORY (self)"
-  echo ""
-  echo "Labels (Self-Sync)"
+  echo "Self repository: $GITHUB_REPOSITORY"
+  echo "Running label sync..."
   bash "$SCRIPT_DIR/sync-labels.sh" "$GITHUB_REPOSITORY" || {
     echo "sync-labels.sh failed for $GITHUB_REPOSITORY"
     exit 1
@@ -94,8 +95,10 @@ run_sync_for_repo() {
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
 
   {
-    echo "Repository: $FULL"
     echo ""
+    echo "------------------------------------------------------------"
+    echo "Repository: $FULL"
+    echo "------------------------------------------------------------"
 
     declare -A steps=(
       ["0"]="sync-secrets.sh|Secrets"
@@ -107,18 +110,18 @@ run_sync_for_repo() {
 
     for i in {0..4}; do
       IFS='|' read -r script title <<< "${steps[$i]}"
-      echo "[$i/4] $title"
+      echo "Step $((i+1))/5: $title"
       if bash "$SCRIPT_DIR/$script" "$FULL"; then
-        echo "  $script succeeded"
+        echo "  Success: $script"
       else
-        echo "  $script failed for $FULL"
+        echo "  Failed:  $script"
       fi
       echo ""
       echo "---"
       echo ""
     done
 
-    echo "Done: $FULL"
+    echo "Completed repository: $FULL"
     echo ""
   } > "$LOG_PATH" 2>&1
 }
@@ -147,7 +150,7 @@ for repo_json in "${REPOS[@]}"; do
   FULL="$ORG/$NAME"
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
 
-  echo "- Starting sync for $FULL (logging to $LOG_PATH)"
+  echo "Starting sync for $FULL (log: $LOG_PATH)"
   (
     set +e
     run_sync_for_repo "$repo_json"
@@ -161,14 +164,15 @@ for repo_json in "${REPOS[@]}"; do
   ((running_jobs++))
 
   if (( running_jobs >= MAX_JOBS )); then
-    echo " Throttling... waiting for one job to finish"
+    echo "Waiting for available job slot..."
     wait -n || true
     ((running_jobs--))
   fi
 done
 
 # --- Wait for remaining jobs to finish ---
-echo "Waiting for remaining jobs to finish..."
+echo ""
+echo "Waiting for remaining sync jobs to finish..."
 exit_status=0
 for i in "${!pids[@]}"; do
   pid=${pids[$i]}
@@ -184,6 +188,9 @@ done
 # --- re-enable -e after concurrency block ---
 set -e
 
+echo ""
+echo "============================================================"
 echo "All enabled repositories processed."
+echo "============================================================"
 
 cd "$START_DIR"
