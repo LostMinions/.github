@@ -123,8 +123,12 @@ export SCRIPT_DIR LOG_DIR
 
 echo "### Launching parallel syncs..."
 echo ""
+echo "Repos detected: ${#REPOS[@]}"
+echo "Max parallel jobs: ${MAX_JOBS:-4}"
+printf '  - %s\n' "${REPOS[@]}"
+echo ""
 
-MAX_JOBS=4  # adjust for concurrency
+MAX_JOBS=4  # concurrency limit
 running_jobs=0
 pids=()
 repo_names=()
@@ -137,7 +141,7 @@ for repo_json in "${REPOS[@]}"; do
 
   echo "- Starting sync for $FULL (logging to $LOG_PATH)"
   (
-    set +e  # prevent subshell errors from killing parent
+    set +e
     run_sync_for_repo "$repo_json"
     exit_code=$?
     echo "- Finished $FULL with exit code $exit_code" >> "$LOG_PATH"
@@ -147,15 +151,16 @@ for repo_json in "${REPOS[@]}"; do
   repo_names+=("$FULL")
   ((running_jobs++))
 
-  # limit concurrent jobs
+  # --- throttle parallelism safely ---
   if (( running_jobs >= MAX_JOBS )); then
-    echo " Throttling... waiting for a job to finish"
+    echo " Throttling... waiting for one job to finish"
+    # Make wait non-fatal under set -e
     wait -n || true
     ((running_jobs--))
   fi
 done
 
-# --- Wait for all jobs to complete -------------------------------------------
+# --- wait for all remaining jobs (non-fatal) ---
 echo "Waiting for remaining jobs to finish..."
 exit_status=0
 for i in "${!pids[@]}"; do
@@ -164,7 +169,7 @@ for i in "${!pids[@]}"; do
   if wait "$pid"; then
     echo "$repo completed successfully"
   else
-    echo "$repo failed (check logs/${repo//\//-}.log)"
+    echo "$repo failed (see logs/${repo//\//-}.log)"
     exit_status=1
   fi
 done
