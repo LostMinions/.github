@@ -131,7 +131,7 @@ pids=()
 for repo_json in "${REPOS[@]}"; do
   # run in subshell, suppress errors bubbling to main
   (
-    run_sync_for_repo "$repo_json" || echo "⚠️ Sync failed for repo JSON: $repo_json"
+    run_sync_for_repo "$repo_json" || echo "Sync failed for repo JSON: $repo_json"
   ) &
   pids+=($!)
   ((running_jobs++))
