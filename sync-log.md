@@ -1,5 +1,5 @@
-# Weekly GitHub Org Sync Log (2025-11-05 16:34 UTC)
-## HASH: 77e168a839aa796e4b0f262ea51992727e34070e66d336965786f17d55e7c550
+# Weekly GitHub Org Sync Log (2025-11-05 16:47 UTC)
+## HASH: af94cc65ffb159334e722a7ed8666810b0542cf9e09e9d52d8a9e2705f3f357b
 ---
 # The Portal Realm GitHub Sync
 
@@ -92,7 +92,9 @@ Finished syncing labels for LostMinions/LostMinions.org
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org
 
+  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
+  - Copied update-submodules-weekly.yml
   - Updated LostMinions/LostMinions.org
 
 Finished syncing workflows for LostMinions/LostMinions.org
@@ -161,7 +163,9 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org-DnD
 
+  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
+  - Copied update-submodules-weekly.yml
   - Updated LostMinions/LostMinions.org-DnD
 
 Finished syncing workflows for LostMinions/LostMinions.org-DnD
@@ -233,7 +237,7 @@ Syncing workflows for LostMinions/LostMinions.CSharpTemplate
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.CSharpTemplate
+  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
 
 Finished syncing workflows for LostMinions/LostMinions.CSharpTemplate
 
@@ -304,7 +308,7 @@ Syncing workflows for LostMinions/LostMinions.Core
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.Core
+  - No workflow changes for LostMinions/LostMinions.Core
 
 Finished syncing workflows for LostMinions/LostMinions.Core
 
@@ -375,7 +379,7 @@ Syncing workflows for LostMinions/LostMinions.Discord
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.Discord
+  - No workflow changes for LostMinions/LostMinions.Discord
 
 Finished syncing workflows for LostMinions/LostMinions.Discord
 
@@ -446,7 +450,7 @@ Syncing workflows for LostMinions/LostMinions.GoogleSheets
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.GoogleSheets
+  - No workflow changes for LostMinions/LostMinions.GoogleSheets
 
 Finished syncing workflows for LostMinions/LostMinions.GoogleSheets
 
@@ -517,7 +521,7 @@ Syncing workflows for LostMinions/LostMinions.Logging
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.Logging
+  - No workflow changes for LostMinions/LostMinions.Logging
 
 Finished syncing workflows for LostMinions/LostMinions.Logging
 
@@ -618,7 +622,9 @@ Finished syncing labels for LostMinions/LostMinions.org
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org
 
+  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
+  - Copied update-submodules-weekly.yml
   - Updated LostMinions/LostMinions.org
 
 Finished syncing workflows for LostMinions/LostMinions.org
@@ -687,7 +693,9 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org-DnD
 
+  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
+  - Copied update-submodules-weekly.yml
   - Updated LostMinions/LostMinions.org-DnD
 
 Finished syncing workflows for LostMinions/LostMinions.org-DnD
@@ -759,7 +767,7 @@ Syncing workflows for LostMinions/LostMinions.CSharpTemplate
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.CSharpTemplate
+  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
 
 Finished syncing workflows for LostMinions/LostMinions.CSharpTemplate
 
@@ -830,7 +838,7 @@ Syncing workflows for LostMinions/LostMinions.Core
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.Core
+  - No workflow changes for LostMinions/LostMinions.Core
 
 Finished syncing workflows for LostMinions/LostMinions.Core
 
@@ -901,7 +909,7 @@ Syncing workflows for LostMinions/LostMinions.Discord
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.Discord
+  - No workflow changes for LostMinions/LostMinions.Discord
 
 Finished syncing workflows for LostMinions/LostMinions.Discord
 
@@ -972,7 +980,7 @@ Syncing workflows for LostMinions/LostMinions.GoogleSheets
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.GoogleSheets
+  - No workflow changes for LostMinions/LostMinions.GoogleSheets
 
 Finished syncing workflows for LostMinions/LostMinions.GoogleSheets
 
@@ -1043,7 +1051,7 @@ Syncing workflows for LostMinions/LostMinions.Logging
   - Copied update-submodules.yml
   - Copied publish.yml
   - Copied test-compile.yml
-  - Updated LostMinions/LostMinions.Logging
+  - No workflow changes for LostMinions/LostMinions.Logging
 
 Finished syncing workflows for LostMinions/LostMinions.Logging
 
