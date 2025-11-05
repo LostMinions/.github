@@ -134,8 +134,7 @@ jobs:
             -p:PackageVersion=${{ steps.version.outputs.version }} \
             -p:ContinuousIntegrationBuild=true \
             -p:IncludeSymbols=true \
-            -p:IncludeSource=true \
-            -o ../../artifacts
+            -p:IncludeSource=true
 
       - name: 🚀 Publish to GitHub Packages
         run: |
