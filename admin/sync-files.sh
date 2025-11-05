@@ -70,6 +70,17 @@ ROOT_FILES=(
   "$SOURCE_DIR/CODE_OF_CONDUCT.md"
 )
 
+# Determine which license to copy (default = private)
+LICENSE_TYPE=$(jq -r --arg repo "$FULL_REPO" '
+  .repos[] | select((.org + "/" + .name) == $repo) | .license // "private"
+' "$ROOT_DIR/repos.json")
+
+if [[ "$LICENSE_TYPE" == "mit" ]]; then
+  ROOT_FILES+=("$SOURCE_DIR/.github/LICENSE:LICENSE")
+else
+  ROOT_FILES+=("$SOURCE_DIR/.github/NOTICE_PRIVATE.md:NOTICE_PRIVATE.md")
+fi
+
 # Copy template directories into .github
 for d in "${TEMPLATE_DIRS[@]}"; do
   if [ -d "$d" ]; then
@@ -125,6 +136,13 @@ FILES_TO_COMMIT=(
   "SECURITY.md"
   "CODE_OF_CONDUCT.md"
 )
+
+# Add whichever license/notice was used above
+if [[ "$LICENSE_TYPE" == "mit" ]]; then
+  FILES_TO_COMMIT+=("LICENSE")
+else
+  FILES_TO_COMMIT+=("NOTICE_PRIVATE.md")
+fi
 
 # Filter only those that exist
 TO_STAGE=()
