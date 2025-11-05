@@ -35,7 +35,11 @@ strip_comments() {
 CLEAN_REPOS=$(mktemp)
 strip_comments "$REPOS_FILE" > "$CLEAN_REPOS"
 
-mapfile -t REPOS < <(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
+REPOS=()
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue  # skip empty lines
+  REPOS+=("$line")
+done < <(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
 
 # --- Pre-check for archived repositories --------------------------------------
 echo "### Checking for archived repositories..."
