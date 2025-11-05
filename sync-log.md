@@ -1,5 +1,5 @@
-# Weekly GitHub Org Sync Log (2025-11-05 04:18 UTC)
-## HASH: e8ad919823ea762df1b2d34a2c84a7c2950e5e232b11d9989d25adf2a1675d04
+# Weekly GitHub Org Sync Log (2025-11-05 07:22 UTC)
+## HASH: 0fe45d38139a6f4af612657d39b8b46dc12bcc966ff7a5428cfa2b8c085fbe02
 ---
 # The Portal Realm GitHub Sync
 
@@ -167,9 +167,6 @@ Finished syncing secrets for LostMinions/LostMinions.CSharpTemplate
 Syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
 
   Checking .github/ISSUE_TEMPLATE ...
-- Committing changes
-- Pushing changes
-- Updated LostMinions/LostMinions.CSharpTemplate
 
 Finished syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
 
@@ -193,11 +190,11 @@ Finished syncing issue types for LostMinions/LostMinions.CSharpTemplate
 ### [3/3] Labels
 Syncing 14 labels for LostMinions/LostMinions.CSharpTemplate
 
-- Creating: website
-- Creating: automation
-- Creating: 3d-print
-- Creating: game-tool
-- Creating: task
+- Updating: website
+- Updating: automation
+- Updating: 3d-print
+- Updating: game-tool
+- Updating: task
 - Updating: bug
 - Updating: documentation
 - Updating: duplicate
@@ -623,9 +620,6 @@ Finished syncing secrets for LostMinions/LostMinions.CSharpTemplate
 Syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
 
   Checking .github/ISSUE_TEMPLATE ...
-- Committing changes
-- Pushing changes
-- Updated LostMinions/LostMinions.CSharpTemplate
 
 Finished syncing .github templates and policies for LostMinions/LostMinions.CSharpTemplate
 
@@ -649,11 +643,11 @@ Finished syncing issue types for LostMinions/LostMinions.CSharpTemplate
 ### [3/3] Labels
 Syncing 14 labels for LostMinions/LostMinions.CSharpTemplate
 
-- Creating: website
-- Creating: automation
-- Creating: 3d-print
-- Creating: game-tool
-- Creating: task
+- Updating: website
+- Updating: automation
+- Updating: 3d-print
+- Updating: game-tool
+- Updating: task
 - Updating: bug
 - Updating: documentation
 - Updating: duplicate
