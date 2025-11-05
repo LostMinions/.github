@@ -160,22 +160,22 @@ for repo_json in "${REPOS[@]}"; do
   ((running_jobs++))
 
   if (( running_jobs >= MAX_JOBS )); then
-    echo "⚙️  Throttling... waiting for one job to finish"
+    echo " Throttling... waiting for one job to finish"
     wait -n || true
     ((running_jobs--))
   fi
 done
 
 # --- Wait for remaining jobs to finish ---
-echo "⌛ Waiting for remaining jobs to finish..."
+echo "Waiting for remaining jobs to finish..."
 exit_status=0
 for i in "${!pids[@]}"; do
   pid=${pids[$i]}
   repo=${repo_names[$i]}
   if wait "$pid"; then
-    echo "✅ $repo completed successfully"
+    echo "$repo completed successfully"
   else
-    echo "❌ $repo failed (see logs/${repo//\//-}.log)"
+    echo "$repo failed (see logs/${repo//\//-}.log)"
     exit_status=1
   fi
 done
@@ -186,25 +186,32 @@ set -e
 # --- Merge logs in order ------------------------------------------------------
 SYNC_LOG="$SCRIPT_DIR/sync-log.md"
 {
-  echo "# Sync Summary ($(date -u))"
+  echo "# Weekly GitHub Org Sync Log ($(date -u +"%Y-%m-%d %H:%M UTC"))"
+  echo "## HASH: $(sha256sum "$REPOS_FILE" | cut -d' ' -f1)"
+  echo "---"
   echo ""
+
   for repo_json in "${REPOS[@]}"; do
     ORG=$(echo "$repo_json" | jq -r '.org')
     NAME=$(echo "$repo_json" | jq -r '.name')
     FULL="$ORG/$NAME"
     LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
 
-    if [ -f "$LOG_PATH" ]; then
-      echo -e "\n## $FULL\n"
+    echo "## $FULL"
+    echo ""
+    if [ -s "$LOG_PATH" ]; then
+      # give the file a moment to flush if just closed
+      sleep 0.2
       cat "$LOG_PATH"
-      echo ""
     else
-      echo -e "\n## $FULL\nNo log found.\n"
+      echo "_No log found or job produced no output._"
     fi
+    echo ""
+    echo "---"
+    echo ""
   done
 } > "$SYNC_LOG"
 
-echo ""
 echo "All enabled repositories processed."
 echo "Combined log written to: $SYNC_LOG"
 
