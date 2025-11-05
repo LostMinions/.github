@@ -1,5 +1,5 @@
-# Weekly GitHub Org Sync Log (2025-11-05 16:21 UTC)
-## HASH: e339314307f3e44dfe74dfa651a0d978bf5b16d4b2fae0ae6adcdbd881ba9118
+# Weekly GitHub Org Sync Log (2025-11-05 16:34 UTC)
+## HASH: 77e168a839aa796e4b0f262ea51992727e34070e66d336965786f17d55e7c550
 ---
 # The Portal Realm GitHub Sync
 
@@ -90,47 +90,12 @@ Finished syncing labels for LostMinions/LostMinions.org
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.org
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Updated LostMinions/LostMinions.org
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.org
 
 ---
 Done: LostMinions/LostMinions.org
@@ -194,47 +159,12 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.org-DnD
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Updated LostMinions/LostMinions.org-DnD
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.org-DnD
 
 ---
 Done: LostMinions/LostMinions.org-DnD
@@ -298,47 +228,14 @@ Finished syncing labels for LostMinions/LostMinions.CSharpTemplate
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.CSharpTemplate
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.CSharpTemplate
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.CSharpTemplate
 
 ---
 Done: LostMinions/LostMinions.CSharpTemplate
@@ -402,47 +299,14 @@ Finished syncing labels for LostMinions/LostMinions.Core
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.Core
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.Core
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.Core
 
 ---
 Done: LostMinions/LostMinions.Core
@@ -506,47 +370,14 @@ Finished syncing labels for LostMinions/LostMinions.Discord
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.Discord
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.Discord
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.Discord
 
 ---
 Done: LostMinions/LostMinions.Discord
@@ -610,47 +441,14 @@ Finished syncing labels for LostMinions/LostMinions.GoogleSheets
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.GoogleSheets
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.GoogleSheets
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.GoogleSheets
 
 ---
 Done: LostMinions/LostMinions.GoogleSheets
@@ -714,47 +512,14 @@ Finished syncing labels for LostMinions/LostMinions.Logging
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.Logging
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.Logging
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.Logging
 
 ---
 Done: LostMinions/LostMinions.Logging
@@ -851,47 +616,12 @@ Finished syncing labels for LostMinions/LostMinions.org
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.org
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Updated LostMinions/LostMinions.org
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.org
 
 ---
 Done: LostMinions/LostMinions.org
@@ -955,47 +685,12 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.org-DnD
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Updated LostMinions/LostMinions.org-DnD
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.org-DnD
 
 ---
 Done: LostMinions/LostMinions.org-DnD
@@ -1059,47 +754,14 @@ Finished syncing labels for LostMinions/LostMinions.CSharpTemplate
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.CSharpTemplate
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.CSharpTemplate
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.CSharpTemplate
 
 ---
 Done: LostMinions/LostMinions.CSharpTemplate
@@ -1163,47 +825,14 @@ Finished syncing labels for LostMinions/LostMinions.Core
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.Core
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.Core
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.Core
 
 ---
 Done: LostMinions/LostMinions.Core
@@ -1267,47 +896,14 @@ Finished syncing labels for LostMinions/LostMinions.Discord
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.Discord
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.Discord
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.Discord
 
 ---
 Done: LostMinions/LostMinions.Discord
@@ -1371,47 +967,14 @@ Finished syncing labels for LostMinions/LostMinions.GoogleSheets
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.GoogleSheets
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.GoogleSheets
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.GoogleSheets
 
 ---
 Done: LostMinions/LostMinions.GoogleSheets
@@ -1475,47 +1038,14 @@ Finished syncing labels for LostMinions/LostMinions.Logging
 ---
 
 ### [4/4] Workflows
-# Syncing workflows to enabled repositories
+Syncing workflows for LostMinions/LostMinions.Logging
 
-## Repository: LostMinions/LostMinions.org
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org
+  - Copied update-submodules.yml
+  - Copied publish.yml
+  - Copied test-compile.yml
+  - Updated LostMinions/LostMinions.Logging
 
-## Repository: LostMinions/LostMinions.org-DnD
-  - Missing source file: update-submodules.yml
-  - No workflow changes for LostMinions/LostMinions.org-DnD
-
-## Repository: LostMinions/LostMinions.CSharpTemplate
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.CSharpTemplate
-
-## Repository: LostMinions/LostMinions.Core
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Core
-
-## Repository: LostMinions/LostMinions.Discord
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Discord
-
-## Repository: LostMinions/LostMinions.GoogleSheets
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.GoogleSheets
-
-## Repository: LostMinions/LostMinions.Logging
-  - Missing source file: update-submodules.yml
-  - Missing source file: publish.yml
-  - Missing source file: test-compile.yml
-  - No workflow changes for LostMinions/LostMinions.Logging
-
-Workflow sync complete.
+Finished syncing workflows for LostMinions/LostMinions.Logging
 
 ---
 Done: LostMinions/LostMinions.Logging
