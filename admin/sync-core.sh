@@ -145,8 +145,8 @@ while IFS= read -r repo; do
   # [4/4] Workflows
   # ------------------------------------------------------------
   echo "### [4/4] Workflows"
-  bash "$SCRIPT_DIR/sync-workflows.sh" || {
-    echo "sync-workflows.sh failed"
+  bash "$SCRIPT_DIR/sync-workflows.sh" "$FULL" || {
+    echo "sync-workflows.sh failed for $FULL"
     exit 1
   }
   echo ""
