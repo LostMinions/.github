@@ -126,12 +126,16 @@ jobs:
 
       - name: 📦 Pack project
         run: |
-          dotnet pack ${{ steps.detect.outputs.project }} \
+          cd $(dirname "${{ steps.detect.outputs.project }}")
+          dotnet pack $(basename "${{ steps.detect.outputs.project }}") \
             -c Release \
             --no-restore \
             --no-build \
             -p:PackageVersion=${{ steps.version.outputs.version }} \
-            -p:ContinuousIntegrationBuild=true
+            -p:ContinuousIntegrationBuild=true \
+            -p:IncludeSymbols=true \
+            -p:IncludeSource=true \
+            -o ../../artifacts
 
       - name: 🚀 Publish to GitHub Packages
         run: |
