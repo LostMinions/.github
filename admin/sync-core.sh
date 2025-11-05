@@ -20,7 +20,8 @@ if [ ! -f "$REPOS_FILE" ]; then
   exit 1
 fi
 
-echo "# The Portal Realm GitHub Sync"
+ORG_NAME="${GITHUB_REPOSITORY%%/*}"
+echo "== $ORG_NAME GitHub Sync =="
 echo ""
 
 # --- Read enabled repos -------------------------------------------------------
@@ -42,7 +43,7 @@ while IFS= read -r line; do
 done < <(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
 
 # --- Pre-check for archived repositories --------------------------------------
-echo "### Checking for archived repositories..."
+echo "Checking for archived repositories..."
 echo ""
 
 ARCHIVED_LIST=()
@@ -71,9 +72,9 @@ fi
 
 # --- Self-label sync (runs immediately) ---------------------------------------
 if [ -n "${GITHUB_REPOSITORY:-}" ]; then
-  echo "## Repository: $GITHUB_REPOSITORY (self)"
+  echo "Repository: $GITHUB_REPOSITORY (self)"
   echo ""
-  echo "### Labels (Self-Sync)"
+  echo "Labels (Self-Sync)"
   bash "$SCRIPT_DIR/sync-labels.sh" "$GITHUB_REPOSITORY" || {
     echo "sync-labels.sh failed for $GITHUB_REPOSITORY"
     exit 1
@@ -93,7 +94,7 @@ run_sync_for_repo() {
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
 
   {
-    echo "## Repository: $FULL"
+    echo "Repository: $FULL"
     echo ""
 
     declare -A steps=(
@@ -106,7 +107,7 @@ run_sync_for_repo() {
 
     for i in {0..4}; do
       IFS='|' read -r script title <<< "${steps[$i]}"
-      echo "### [$i/4] $title"
+      echo "[$i/4] $title"
       if bash "$SCRIPT_DIR/$script" "$FULL"; then
         echo "  $script succeeded"
       else
@@ -125,7 +126,7 @@ run_sync_for_repo() {
 export -f run_sync_for_repo
 export SCRIPT_DIR LOG_DIR
 
-echo "### Launching parallel syncs..."
+echo "Launching parallel syncs..."
 echo ""
 echo "Repos detected: ${#REPOS[@]}"
 echo "Max parallel jobs: ${MAX_JOBS:-4}"
