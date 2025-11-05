@@ -22,16 +22,21 @@ each project an experiment in curiosity and controlled chaos.
 ---
 
 ### 🛠️ Active Repositories
-| Repository | Description |
-|-------------|-------------|
-| 🧩 **`LostMinions.org`** | Core website & shared framework |
-| 🧠 **`LostMinions_Libraries`** | Shared C# utility libraries |
-| ⚙️ **`DarkfallInfo.com`** | Darkfall online info site |
-| 🎲 **`LostMinions.org-DnD`** | D&D campaign resources and tools |
-| 🏰 **`LostMinions.org-Forum`** | phpBB-based community forums |
-| 🧵 **`LostMinions.org-3DPrint`** | 3D print projects and model sources |
-| 🤖 **`MinionBot`** | IRC / Discord automation bot |
-| 🏛️ **`.github`** | Org-wide templates & GitHub Actions |
+
+| Repository                       | Description                                                                         |
+| -------------------------------- | ----------------------------------------------------------------------------------- |
+| **`.github`**                    | Org-wide templates, workflows, and admin tools                                      |
+| **`DarkfallInfo.com`**           | Darkfall Online info site                                                           |
+| **`KrushStock`**                 | Stock-analysis and automation bot (Discord + Google Sheets integration)             |
+| **`LostMinions.Core`**           | Shared .NET 8 core utilities and extensions (IO, logging, string helpers)           |
+| **`LostMinions.CSharpTemplate`** | Standardized .NET 8 template repo (build settings, workflows, submodule automation) |
+| **`LostMinions.Discord`**        | Discord.NET 3.x base classes, Lavalink integration, and lifecycle helpers           |
+| **`LostMinions.GoogleSheets`**   | Google Sheets API integration helpers (.NET 8 OAuth2 + SheetsService utilities)     |
+| **`LostMinions.Logging`**        | Centralized structured logging utilities (Serilog configuration, sinks, formatting) |
+| **`LostMinions.org-3DPrint`**    | 3D-print projects and model sources                                                 |
+| **`LostMinions.org-DnD`**        | D&D campaign resources and tools                                                    |
+| **`LostMinions.org-Forum`**      | phpBB-based community forums                                                        |
+| **`LostMinions.org`**            | Core website & shared framework                                                     |
 
 *(Older or archived repositories are preserved for historical reference.)*
 
