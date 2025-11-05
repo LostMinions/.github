@@ -124,29 +124,53 @@ export SCRIPT_DIR LOG_DIR
 echo "### Launching parallel syncs..."
 echo ""
 
-MAX_JOBS=4  # parallel limit
+MAX_JOBS=4  # adjust for concurrency
 running_jobs=0
 pids=()
+repo_names=()
 
 for repo_json in "${REPOS[@]}"; do
-  # run in subshell, suppress errors bubbling to main
+  ORG=$(echo "$repo_json" | jq -r '.org')
+  NAME=$(echo "$repo_json" | jq -r '.name')
+  FULL="$ORG/$NAME"
+  LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
+
+  echo "- Starting sync for $FULL (logging to $LOG_PATH)"
   (
-    run_sync_for_repo "$repo_json" || echo "Sync failed for repo JSON: $repo_json"
+    set +e  # prevent subshell errors from killing parent
+    run_sync_for_repo "$repo_json"
+    exit_code=$?
+    echo "- Finished $FULL with exit code $exit_code" >> "$LOG_PATH"
+    exit $exit_code
   ) &
   pids+=($!)
+  repo_names+=("$FULL")
   ((running_jobs++))
 
-  # throttle parallelism
+  # limit concurrent jobs
   if (( running_jobs >= MAX_JOBS )); then
+    echo " Throttling... waiting for a job to finish"
     wait -n || true
     ((running_jobs--))
   fi
 done
 
-# Wait for all jobs to finish safely
-for pid in "${pids[@]}"; do
-  wait "$pid" || true
+# --- Wait for all jobs to complete -------------------------------------------
+echo "Waiting for remaining jobs to finish..."
+exit_status=0
+for i in "${!pids[@]}"; do
+  pid=${pids[$i]}
+  repo=${repo_names[$i]}
+  if wait "$pid"; then
+    echo "$repo completed successfully"
+  else
+    echo "$repo failed (check logs/${repo//\//-}.log)"
+    exit_status=1
+  fi
 done
+
+# Don't abort entire script even if some fail — we'll handle later
+set +e
 
 # --- Merge logs in order ------------------------------------------------------
 SYNC_LOG="$SCRIPT_DIR/sync-log.md"
