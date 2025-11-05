@@ -132,7 +132,7 @@ echo "Max parallel jobs: ${MAX_JOBS:-4}"
 printf '  - %s\n' "${REPOS[@]}"
 echo ""
 
-MAX_JOBS=4
+MAX_JOBS=${MAX_JOBS:-4}
 running_jobs=0
 pids=()
 repo_names=()
@@ -183,36 +183,6 @@ done
 # --- re-enable -e after concurrency block ---
 set -e
 
-# --- Merge logs in order ------------------------------------------------------
-SYNC_LOG="$SCRIPT_DIR/sync-log.md"
-{
-  echo "# Weekly GitHub Org Sync Log ($(date -u +"%Y-%m-%d %H:%M UTC"))"
-  echo "## HASH: $(sha256sum "$REPOS_FILE" | cut -d' ' -f1)"
-  echo "---"
-  echo ""
-
-  for repo_json in "${REPOS[@]}"; do
-    ORG=$(echo "$repo_json" | jq -r '.org')
-    NAME=$(echo "$repo_json" | jq -r '.name')
-    FULL="$ORG/$NAME"
-    LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
-
-    echo "## $FULL"
-    echo ""
-    if [ -s "$LOG_PATH" ]; then
-      # give the file a moment to flush if just closed
-      sleep 0.2
-      cat "$LOG_PATH"
-    else
-      echo "_No log found or job produced no output._"
-    fi
-    echo ""
-    echo "---"
-    echo ""
-  done
-} > "$SYNC_LOG"
-
 echo "All enabled repositories processed."
-echo "Combined log written to: $SYNC_LOG"
 
 cd "$START_DIR"
