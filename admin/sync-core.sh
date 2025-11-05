@@ -121,24 +121,32 @@ run_sync_for_repo() {
 export -f run_sync_for_repo
 export SCRIPT_DIR LOG_DIR
 
-# --- Run all repos concurrently ----------------------------------------------
 echo "### Launching parallel syncs..."
 echo ""
 
-MAX_JOBS=4  # adjust for safety / GH token limits
-
+MAX_JOBS=4  # parallel limit
 running_jobs=0
+pids=()
+
 for repo_json in "${REPOS[@]}"; do
-  run_sync_for_repo "$repo_json" &
+  # run in subshell, suppress errors bubbling to main
+  (
+    run_sync_for_repo "$repo_json" || echo "⚠️ Sync failed for repo JSON: $repo_json"
+  ) &
+  pids+=($!)
   ((running_jobs++))
 
-  # simple job limiter
+  # throttle parallelism
   if (( running_jobs >= MAX_JOBS )); then
     wait -n || true
     ((running_jobs--))
   fi
 done
-wait
+
+# Wait for all jobs to finish safely
+for pid in "${pids[@]}"; do
+  wait "$pid" || true
+done
 
 # --- Merge logs in order ------------------------------------------------------
 SYNC_LOG="$SCRIPT_DIR/sync-log.md"
