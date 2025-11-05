@@ -29,6 +29,7 @@ $xml = @"
 <configuration>
   <packageSources>
     <add key="github" value="https://nuget.pkg.github.com/$Owner/index.json" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
   <packageSourceCredentials>
     <github>
