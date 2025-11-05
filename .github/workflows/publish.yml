@@ -1,0 +1,165 @@
+name: 📦 Publish Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type (major, minor, patch)'
+        required: false
+        default: 'patch'
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/publish.yml"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    steps:
+      - name: 🔑 Validate GH_TOKEN
+        shell: pwsh
+        run: |
+          try {
+            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
+            if (-not $r.login) { throw "Invalid" }
+            Write-Host "✅ Token OK: $($r.login)"
+          } catch {
+            Write-Host "❌ Bad or expired GH_TOKEN"
+            exit 1
+          }
+
+      - name: ⚙️ Configure Git
+        shell: pwsh
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+
+          $gitCreds = if ($IsWindows) {
+            Join-Path $env:USERPROFILE ".git-credentials"
+          } else {
+            Join-Path $env:HOME ".git-credentials"
+          }
+
+          "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" | Out-File -FilePath $gitCreds -Encoding ascii
+          Write-Host "✅ Git credentials stored at $gitCreds"
+
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      # 🧱 Setup .NET SDK
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+      # 🔍 Detect the project file dynamically
+      - name: Detect project
+        id: detect
+        shell: bash
+        run: |
+          PROJECT=$(find . -maxdepth 1 -name "*.csproj" | head -n 1)
+          if [ -z "$PROJECT" ]; then
+            echo "❌ No .csproj file found in repository root."
+            exit 1
+          fi
+          echo "📦 Detected project: $PROJECT"
+          echo "project=$PROJECT" >> $GITHUB_OUTPUT
+
+      - name: 🔢 Determine next version automatically
+        id: version
+        shell: bash
+        run: |
+          git fetch --tags --quiet
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "Latest tag: $LATEST_TAG"
+
+          if [ -z "$LATEST_TAG" ]; then
+            MAJOR=1; MINOR=0; PATCH=0
+          else
+            # Remove leading "v" and any 4th version segment
+            BASE_VERSION=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d'.' -f1-3)
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+          fi
+
+          BUMP_TYPE="${{ github.event.inputs.bump || 'patch' }}"
+          echo "Bump type: $BUMP_TYPE"
+
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+            *)
+              echo "❌ Unknown bump type: $BUMP_TYPE"; exit 1 ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "🔢 Using version: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: 🧱 Restore dependencies
+        run: dotnet restore ${{ steps.detect.outputs.project }}
+
+      - name: 🏗️ Build project
+        run: dotnet build ${{ steps.detect.outputs.project }} -c Release --no-restore
+
+      - name: 📦 Pack project
+        run: |
+          dotnet pack ${{ steps.detect.outputs.project }} \
+            -c Release \
+            --no-restore \
+            --no-build \
+            -p:PackageVersion=${{ steps.version.outputs.version }} \
+            -p:ContinuousIntegrationBuild=true
+
+      # 🚀 Publish to GitHub Packages
+      - name: 🚀 Publish to GitHub Packages
+        run: |
+          dotnet nuget push "bin/Release/*.nupkg" \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key ${{ secrets.GH_TOKEN }} \
+            --skip-duplicate
+
+      # 🏷️ Create Git Tag
+      - name: Create Git Tag
+        id: tag
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: 📰 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}"
+          name: "📦 ${{ github.event.repository.name }} ${{ steps.tag.outputs.tag }}"
+          body: |
+            **Package:** ${{ github.repository }}
+            **Version:** ${{ steps.version.outputs.version }}
+            **Published by:** ${{ github.actor }}
+          files: |
+            bin/Release/*.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

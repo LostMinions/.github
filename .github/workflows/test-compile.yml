@@ -1,0 +1,88 @@
+name: 🧪 C# Compilation Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/test-compile.yml"
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "*.sln"
+
+jobs:
+  compile-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: 🔑 Validate GH_TOKEN
+        shell: pwsh
+        run: |
+          try {
+            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
+            if (-not $r.login) { throw "Invalid" }
+            Write-Host "✅ Token OK: $($r.login)"
+          } catch {
+            Write-Host "❌ Bad or expired GH_TOKEN"
+            exit 1
+          }
+
+      - name: ⚙️ Configure Git
+        shell: pwsh
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+
+          $gitCreds = if ($IsWindows) {
+            Join-Path $env:USERPROFILE ".git-credentials"
+          } else {
+            Join-Path $env:HOME ".git-credentials"
+          }
+
+          "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" | Out-File -FilePath $gitCreds -Encoding ascii
+          Write-Host "✅ Git credentials stored at $gitCreds"
+
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧰 Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 🔐 Configure NuGet for GitHub Packages
+        shell: pwsh
+        run: |
+          Write-Host "Adding GitHub Packages source for LostMinions..."
+          dotnet nuget remove source github -v q -f | Out-Null
+          dotnet nuget add source "https://nuget.pkg.github.com/LostMinions/index.json" `
+            --name "github" `
+            --username "TheKrush" `
+            --password "${{ secrets.GH_TOKEN }}" `
+            --store-password-in-clear-text | Out-Null
+          Write-Host "✅ NuGet source added: https://nuget.pkg.github.com/LostMinions/"
+
+      - name: 🧱 Restore dependencies
+        shell: pwsh
+        run: |
+          $solution = (Get-ChildItem -Path . -Filter *.sln -Depth 1 | Select-Object -First 1).FullName
+          Write-Host "🔍 Found solution: $solution"
+          dotnet restore $solution
+
+      - name: 🏗️ Build solution
+        shell: pwsh
+        run: |
+          $solution = (Get-ChildItem -Path . -Filter *.sln -Depth 1 | Select-Object -First 1).FullName
+          Write-Host "⚙️  Building solution: $solution"
+          dotnet build $solution --configuration Release --no-restore
+
+      - name: ✅ Verify Build Success
+        shell: pwsh
+        run: |
+          $solution = (Get-ChildItem -Path . -Filter *.sln -Depth 1 | Select-Object -First 1).Name
+          Write-Host "✅ $solution compiled successfully on GitHub Actions."
