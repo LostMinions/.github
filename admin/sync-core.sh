@@ -132,10 +132,13 @@ echo "Max parallel jobs: ${MAX_JOBS:-4}"
 printf '  - %s\n' "${REPOS[@]}"
 echo ""
 
-MAX_JOBS=4  # concurrency limit
+MAX_JOBS=4
 running_jobs=0
 pids=()
 repo_names=()
+
+# --- disable -e so a child failure or wait error won't abort main ---
+set +e
 
 for repo_json in "${REPOS[@]}"; do
   ORG=$(echo "$repo_json" | jq -r '.org')
@@ -151,35 +154,34 @@ for repo_json in "${REPOS[@]}"; do
     echo "- Finished $FULL with exit code $exit_code" >> "$LOG_PATH"
     exit $exit_code
   ) &
+
   pids+=($!)
   repo_names+=("$FULL")
   ((running_jobs++))
 
-  # --- throttle parallelism safely ---
   if (( running_jobs >= MAX_JOBS )); then
-    echo " Throttling... waiting for one job to finish"
-    # Make wait non-fatal under set -e
+    echo "⚙️  Throttling... waiting for one job to finish"
     wait -n || true
     ((running_jobs--))
   fi
 done
 
-# --- wait for all remaining jobs (non-fatal) ---
-echo "Waiting for remaining jobs to finish..."
+# --- Wait for remaining jobs to finish ---
+echo "⌛ Waiting for remaining jobs to finish..."
 exit_status=0
 for i in "${!pids[@]}"; do
   pid=${pids[$i]}
   repo=${repo_names[$i]}
   if wait "$pid"; then
-    echo "$repo completed successfully"
+    echo "✅ $repo completed successfully"
   else
-    echo "$repo failed (see logs/${repo//\//-}.log)"
+    echo "❌ $repo failed (see logs/${repo//\//-}.log)"
     exit_status=1
   fi
 done
 
-# Don't abort entire script even if some fail — we'll handle later
-set +e
+# --- re-enable -e after concurrency block ---
+set -e
 
 # --- Merge logs in order ------------------------------------------------------
 SYNC_LOG="$SCRIPT_DIR/sync-log.md"
