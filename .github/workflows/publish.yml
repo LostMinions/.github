@@ -18,7 +18,8 @@ permissions:
 
 jobs:
   publish:
-    if: github.repository != 'LostMinions/.github'
+    if: ${{ !endsWith(github.repository, '/.github') }}
+
     runs-on: ubuntu-latest
     env:
       NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}

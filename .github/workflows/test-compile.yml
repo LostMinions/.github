@@ -12,7 +12,8 @@ on:
 
 jobs:
   compile-test:
-    if: github.repository != 'LostMinions/.github'
+    if: ${{ !endsWith(github.repository, '/.github') }}
+
     runs-on: windows-latest
 
     steps:
