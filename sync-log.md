@@ -1,5 +1,5 @@
-# Weekly GitHub Org Sync Log (2025-11-05 16:47 UTC)
-## HASH: af94cc65ffb159334e722a7ed8666810b0542cf9e09e9d52d8a9e2705f3f357b
+# Weekly GitHub Org Sync Log (2025-11-05 16:50 UTC)
+## HASH: 487b5d499b38d00e9ce02ff61cb9f4a1cc316ee8922e75f9fefa222405431dbb
 ---
 # The Portal Realm GitHub Sync
 
@@ -92,10 +92,9 @@ Finished syncing labels for LostMinions/LostMinions.org
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org
 
-  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
   - Copied update-submodules-weekly.yml
-  - Updated LostMinions/LostMinions.org
+  - No workflow changes for LostMinions/LostMinions.org
 
 Finished syncing workflows for LostMinions/LostMinions.org
 
@@ -163,7 +162,6 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org-DnD
 
-  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
   - Copied update-submodules-weekly.yml
   - Updated LostMinions/LostMinions.org-DnD
@@ -622,10 +620,9 @@ Finished syncing labels for LostMinions/LostMinions.org
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org
 
-  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
   - Copied update-submodules-weekly.yml
-  - Updated LostMinions/LostMinions.org
+  - No workflow changes for LostMinions/LostMinions.org
 
 Finished syncing workflows for LostMinions/LostMinions.org
 
@@ -693,7 +690,6 @@ Finished syncing labels for LostMinions/LostMinions.org-DnD
 ### [4/4] Workflows
 Syncing workflows for LostMinions/LostMinions.org-DnD
 
-  - Removing deprecated weekly-submodule-update.yml
   - Copied update-submodules.yml
   - Copied update-submodules-weekly.yml
   - Updated LostMinions/LostMinions.org-DnD
