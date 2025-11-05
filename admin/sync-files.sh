@@ -18,6 +18,7 @@ FULL_REPO="$1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SOURCE_DIR="$ROOT_DIR"
+REPOS_FILE="$SCRIPT_DIR/repos.json"
 
 TMPDIR=$(mktemp -d)
 cleanup() {
@@ -70,10 +71,21 @@ ROOT_FILES=(
   "$SOURCE_DIR/CODE_OF_CONDUCT.md"
 )
 
+strip_comments() {
+  perl -0777 -pe '
+    s{/\*.*?\*/}{}gs;
+    s{//[^\r\n]*}{}g;
+    s/,\s*([}\]])/\1/g;
+  ' "$1"
+}
+
+CLEAN_JSON=$(mktemp)
+strip_comments "$REPOS_FILE" > "$CLEAN_JSON"
+
 # Determine which license to copy (default = private)
 LICENSE_TYPE=$(jq -r --arg repo "$FULL_REPO" '
   .repos[] | select((.org + "/" + .name) == $repo) | .license // "private"
-' "$ROOT_DIR/repos.json")
+' "$CLEAN_JSON")
 
 if [[ "$LICENSE_TYPE" == "mit" ]]; then
   ROOT_FILES+=("$SOURCE_DIR/.github/LICENSE")
