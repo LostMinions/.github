@@ -2,6 +2,11 @@ name: 🔄 GitHub Org Sync
 
 on:
   workflow_dispatch:
+    inputs:
+      max_jobs:
+        description: "Maximum concurrent repos to sync"
+        required: false
+        default: "4"
   push:
     branches: [ main, master ]
     paths:
@@ -65,51 +70,38 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          MAX_JOBS: ${{ github.event.inputs.max_jobs || 4 }}
         run: |
           cd admin
-          # Convert Windows (CRLF) endings to Unix (LF) to avoid $'\r' errors
           find . -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
           chmod +x *.sh
+          start=$(date +%s)
           bash sync-core.sh | tee ../sync-output.txt
+          end=$(date +%s)
+          echo "⏱️ Sync duration: $(( (end - start) / 60 )) minutes"
 
-      - name: 🧾 Commit Sync Log (only if changed)
-        shell: bash
+      - name: 📦 Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sync-logs
+          path: admin/logs/
+          retention-days: 30
+
+      - name: 📄 Show Summary
+        if: always()
         run: |
-          cd "${GITHUB_WORKSPACE}"
-
-          git config core.autocrlf false
-          git config core.eol lf
-
-          # Compute new hash
-          NEW_HASH=$(sha256sum sync-output.txt | awk '{print $1}')
-          OLD_HASH=$(grep -m1 "## HASH:" sync-log.md | awk '{print $3}' | tr -d '\r\n' || echo "")
-
-          echo "🔍 OLD_HASH: '$OLD_HASH'"
-          echo "🔍 NEW_HASH: '$NEW_HASH'"
-
-          if [[ "$NEW_HASH" == "$OLD_HASH" ]]; then
-            echo "✅ No changes detected — skipping commit."
-            exit 0
-          else
-            echo "⚠️  Hash mismatch — committing new log."
-          fi
-
-          # Rebuild log
-          NOW=$(date -u +"%Y-%m-%d %H:%M UTC")
-          {
-            echo "# Weekly GitHub Org Sync Log ($NOW)"
-            echo "## HASH: $NEW_HASH"
-            echo '---'
-            cat sync-output.txt
-            echo '---'
-            echo '```text'
-            cat sync-output.txt
-            echo '```'
-          } > sync-log.md
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add sync-log.md
-          git diff --cached --quiet && echo "✅ No file changes, skipping commit." && exit 0
-          git commit -m "Auto-sync log ($NOW)"
-          git push origin HEAD
+          echo "### Sync Completed $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Repository | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          shopt -s nullglob
+          for log in admin/logs/*.log; do
+            repo=$(basename "$log" .log)
+            if grep -q "failed" "$log"; then
+              echo "| $repo | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $repo | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          shopt -u nullglob
