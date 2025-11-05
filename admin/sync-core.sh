@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ============================================================
-#  The Portal Realm --- Unified GitHub Sync Controller (bash)
+#  The Portal Realm --- Unified GitHub Sync Controller
 # ------------------------------------------------------------
-#  Runs file, issue type, label, and secret syncs for all enabled repos.
-#  Clean Markdown-safe output for GitHub workflow summaries.
+#  Runs all sync scripts for each enabled repo concurrently,
+#  captures logs separately, and merges them in order.
 # ============================================================
 
 set -euo pipefail
@@ -11,6 +11,8 @@ set -euo pipefail
 START_DIR="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPOS_FILE="$SCRIPT_DIR/repos.json"
+LOG_DIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOG_DIR"
 
 # --- Verify repos.json --------------------------------------------------------
 if [ ! -f "$REPOS_FILE" ]; then
@@ -22,40 +24,33 @@ echo "# The Portal Realm GitHub Sync"
 echo ""
 
 # --- Read enabled repos -------------------------------------------------------
-# Clean the JSON file (strip comments, fix trailing commas, handle CRLF)
 strip_comments() {
   perl -0777 -pe '
-    s{/\*.*?\*/}{}gs;          # remove /* ... */ blocks
-    s{//[^\r\n]*}{}g;          # remove // comments (CRLF or LF)
-    s/,\s*([}\]])/\1/g;        # remove trailing commas
+    s{/\*.*?\*/}{}gs;
+    s{//[^\r\n]*}{}g;
+    s/,\s*([}\]])/\1/g;
   ' "$1"
 }
 
-# Create a temp copy of the cleaned file
 CLEAN_REPOS=$(mktemp)
 strip_comments "$REPOS_FILE" > "$CLEAN_REPOS"
 
-# Now parse with jq
-repos=$(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
+mapfile -t REPOS < <(jq -c '.repos[] | select(.enabled == true)' "$CLEAN_REPOS")
 
 # --- Pre-check for archived repositories --------------------------------------
 echo "### Checking for archived repositories..."
 echo ""
 
 ARCHIVED_LIST=()
-
-while IFS= read -r repo; do
+for repo in "${REPOS[@]}"; do
   ORG=$(echo "$repo" | jq -r '.org')
   NAME=$(echo "$repo" | jq -r '.name')
   FULL="$ORG/$NAME"
-
-  # Query GitHub to see if the repo is archived
   IS_ARCHIVED=$(gh repo view "$FULL" --json isArchived -q '.isArchived' 2>/dev/null || echo "false")
-
   if [[ "$IS_ARCHIVED" == "true" ]]; then
     ARCHIVED_LIST+=("$FULL")
   fi
-done <<< "$repos"
+done
 
 if (( ${#ARCHIVED_LIST[@]} > 0 )); then
   echo "The following repositories are archived but marked as enabled:"
@@ -70,7 +65,7 @@ else
   echo ""
 fi
 
-# --- Sync labels for the source repo itself ----------------------------------
+# --- Self-label sync (runs immediately) ---------------------------------------
 if [ -n "${GITHUB_REPOSITORY:-}" ]; then
   echo "## Repository: $GITHUB_REPOSITORY (self)"
   echo ""
@@ -84,77 +79,90 @@ if [ -n "${GITHUB_REPOSITORY:-}" ]; then
   echo ""
 fi
 
-# --- Main sync loop -----------------------------------------------------------
-while IFS= read -r repo; do
-  ORG=$(echo "$repo" | jq -r '.org')
-  NAME=$(echo "$repo" | jq -r '.name')
+# --- Helper: per-repo sync sequence ------------------------------------------
+run_sync_for_repo() {
+  local repo_json="$1"
+  local ORG NAME FULL LOG_PATH
+  ORG=$(echo "$repo_json" | jq -r '.org')
+  NAME=$(echo "$repo_json" | jq -r '.name')
   FULL="$ORG/$NAME"
+  LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
 
-  echo "## Repository: $FULL"
-  echo ""
+  {
+    echo "## Repository: $FULL"
+    echo ""
 
-  # ------------------------------------------------------------
-  # [0/4] Secrets
-  # ------------------------------------------------------------
-  echo "### [0/4] Secrets"
-  bash "$SCRIPT_DIR/sync-secrets.sh" "$FULL" || {
-    echo "sync-secrets.sh failed for $FULL"
-    exit 1
-  }
-  echo ""
-  echo "---"
-  echo ""
+    declare -A steps=(
+      ["0"]="sync-secrets.sh|Secrets"
+      ["1"]="sync-files.sh|Templates and Policies"
+      ["2"]="sync-issue-types.sh|Issue Types"
+      ["3"]="sync-labels.sh|Labels"
+      ["4"]="sync-workflows.sh|Workflows"
+    )
 
-  # ------------------------------------------------------------
-  # [1/4] Templates and Policies
-  # ------------------------------------------------------------
-  echo "### [1/4] Templates and Policies"
-  bash "$SCRIPT_DIR/sync-files.sh" "$FULL" || {
-    echo "sync-files.sh failed for $FULL"
-    exit 1
-  }
-  echo ""
-  echo "---"
-  echo ""
+    for i in {0..4}; do
+      IFS='|' read -r script title <<< "${steps[$i]}"
+      echo "### [$i/4] $title"
+      if bash "$SCRIPT_DIR/$script" "$FULL"; then
+        echo "  $script succeeded"
+      else
+        echo "  $script failed for $FULL"
+      fi
+      echo ""
+      echo "---"
+      echo ""
+    done
 
-  # ------------------------------------------------------------
-  # [2/4] Issue Types
-  # ------------------------------------------------------------
-  echo "### [2/4] Issue Types"
-  bash "$SCRIPT_DIR/sync-issue-types.sh" "$FULL" || {
-    echo "sync-issue-types.sh failed for $FULL"
-    exit 1
-  }
-  echo ""
-  echo "---"
-  echo ""
+    echo "Done: $FULL"
+    echo ""
+  } > "$LOG_PATH" 2>&1
+}
 
-  # ------------------------------------------------------------
-  # [3/4] Labels
-  # ------------------------------------------------------------
-  echo "### [3/4] Labels"
-  bash "$SCRIPT_DIR/sync-labels.sh" "$FULL" || {
-    echo "sync-labels.sh failed for $FULL"
-    exit 1
-  }
-  echo ""
-  echo "---"
-  echo ""
+export -f run_sync_for_repo
+export SCRIPT_DIR LOG_DIR
 
-  # ------------------------------------------------------------
-  # [4/4] Workflows
-  # ------------------------------------------------------------
-  echo "### [4/4] Workflows"
-  bash "$SCRIPT_DIR/sync-workflows.sh" "$FULL" || {
-    echo "sync-workflows.sh failed for $FULL"
-    exit 1
-  }
-  echo ""
-  echo "---"
+# --- Run all repos concurrently ----------------------------------------------
+echo "### Launching parallel syncs..."
+echo ""
 
-  echo "Done: $FULL"
+MAX_JOBS=4  # adjust for safety / GH token limits
+
+running_jobs=0
+for repo_json in "${REPOS[@]}"; do
+  run_sync_for_repo "$repo_json" &
+  ((running_jobs++))
+
+  # simple job limiter
+  if (( running_jobs >= MAX_JOBS )); then
+    wait -n || true
+    ((running_jobs--))
+  fi
+done
+wait
+
+# --- Merge logs in order ------------------------------------------------------
+SYNC_LOG="$SCRIPT_DIR/sync-log.md"
+{
+  echo "# Sync Summary ($(date -u))"
   echo ""
-done <<< "$repos"
+  for repo_json in "${REPOS[@]}"; do
+    ORG=$(echo "$repo_json" | jq -r '.org')
+    NAME=$(echo "$repo_json" | jq -r '.name')
+    FULL="$ORG/$NAME"
+    LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
+
+    if [ -f "$LOG_PATH" ]; then
+      echo -e "\n## $FULL\n"
+      cat "$LOG_PATH"
+      echo ""
+    else
+      echo -e "\n## $FULL\nNo log found.\n"
+    fi
+  done
+} > "$SYNC_LOG"
+
+echo ""
+echo "All enabled repositories processed."
+echo "Combined log written to: $SYNC_LOG"
 
 cd "$START_DIR"
-echo "All enabled repositories processed successfully."
