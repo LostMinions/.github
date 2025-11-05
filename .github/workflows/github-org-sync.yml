@@ -1,8 +1,6 @@
-name: 🔄 Weekly GitHub Org Sync
+name: 🔄 GitHub Org Sync
 
 on:
-  schedule:
-    - cron: "0 3 * * 0"   # Sundays 03:00 UTC
   workflow_dispatch:
   push:
     branches: [ main, master ]
