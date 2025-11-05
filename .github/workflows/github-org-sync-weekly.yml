@@ -11,8 +11,6 @@ on:
 
 jobs:
   trigger-update:
-    if: ${{ !endsWith(github.repository, '/.github') }}
-
     name: Trigger Submodule Update
     runs-on: ubuntu-latest
     steps:
