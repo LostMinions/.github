@@ -110,15 +110,15 @@ for wf in "${WORKFLOWS[@]}"; do
     echo "  - Copied $wf"
   else
     echo "  - Creating dummy $wf (no source found)"
-    cat >"$DEST" <<YAML
-name: 💤 Dummy — $wf
-on: workflow_call:
-jobs:
-  none:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Placeholder for $wf — this workflow is not implemented for this repo."
-YAML
+    {
+      echo "name: 💤 Dummy — $wf"
+      echo "on: workflow_call:"
+      echo "jobs:"
+      echo "  none:"
+      echo "    runs-on: ubuntu-latest"
+      echo "    steps:"
+      echo "      - run: echo \"Placeholder for $wf — this workflow is not implemented for this repo.\""
+    } > "$DEST"
   fi
 done
 
