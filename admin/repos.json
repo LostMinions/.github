@@ -11,12 +11,12 @@
     /* ============================================================
        AUTOMATION & TOOLS
        ============================================================ */
-    { "org": "LostMinions", "name": "LostMinions.CSharpTemplate", "enabled": true, "description": "Standardized .NET 8 template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation", "workflows": ["test-compile.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, string helpers)", "workflows": ["publish.yml", "test-compile.yml"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup)", "workflows": ["publish.yml", "test-compile.yml"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)", "workflows": ["publish.yml", "test-compile.yml"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)", "workflows": ["publish.yml", "test-compile.yml"], "license": "mit" },
-    { "org": "LostMinions", "name": "KrushStock-DiscordBot", "enabled": true, "description": "Automated stock analysis and alerting Discord bot", "workflows": ["publish-bot.yml", "test-compile.yml"] },
+    { "org": "LostMinions", "name": "LostMinions.CSharpTemplate", "enabled": true, "description": "Standardized .NET 8 template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation", "workflows": ["compile.yml"] },
+    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, string helpers)", "workflows": ["publish.yml", "compile.yml"], "license": "mit" },
+    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup)", "workflows": ["publish.yml", "compile.yml"], "license": "mit" },
+    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)", "workflows": ["publish.yml", "compile.yml"], "license": "mit" },
+    { "org": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)", "workflows": ["publish.yml", "compile.yml"], "license": "mit" },
+    { "org": "LostMinions", "name": "KrushStock-DiscordBot", "enabled": true, "description": "Automated stock analysis and alerting Discord bot", "workflows": ["publish-bot.yml", "compile.yml"] },
 
     /* ============================================================
        ARCHIVED PROJECTS
