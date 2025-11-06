@@ -1,4 +1,4 @@
-name: 🤖 Publish Discord Bot Build (Fast)
+name: 🤖 Publish Discord Bot Build
 
 on:
   workflow_dispatch:
