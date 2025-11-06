@@ -1,16 +1,17 @@
 name: 📦 Publish Package
 
 on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/publish.yml"
+  workflow_call:
   workflow_dispatch:
     inputs:
       bump:
         description: 'Version bump type (major, minor, patch)'
         required: false
         default: 'patch'
-  push:
-    branches: [ main, master ]
-    paths:
-      - ".github/workflows/publish.yml"
 
 permissions:
   contents: write
@@ -62,6 +63,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      # 🔐 Configure NuGet (LostMinions feed)
       - name: 🔐 Configure NuGet for GitHub Packages
         shell: bash
         run: |

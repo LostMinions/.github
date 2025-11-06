@@ -1,22 +1,16 @@
-name: 🧪 C# Compile Test
+name: 🧪 Compile
 
 on:
-  workflow_dispatch:
   push:
     branches: [ main, master ]
     paths:
-      - ".github/workflows/test-compile.yml"
-      - "**/*.cs"
-      - "**/*.csproj"
-      - "**/*.targets"
-      - "*.sln"
+      - ".github/workflows/compile.yml"
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
-  compile-test:
-    if: |
-      !endsWith(github.repository, '/.github') &&
-      !contains(github.event.head_commit.message, '[skip ci]')
-
+  compile:
+    if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -50,48 +44,38 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: 🔍 Detect solution
+        id: solution
+        shell: bash
+        run: |
+          SOLUTION=$(find . -maxdepth 1 -name "*.sln" | head -n 1)
+          if [ -z "$SOLUTION" ]; then
+            echo "❌ No solution found."; exit 1
+          fi
+          echo "SOLUTION=$SOLUTION" >> $GITHUB_ENV
+          echo "🔍 Found solution: $SOLUTION"
+
       - name: 🔐 Configure NuGet for GitHub Packages
         shell: bash
         run: |
           echo "🔐 Configuring NuGet source..."
-
-          # Always use LostMinions feed for shared libraries
           FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
-
-          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
-            echo "📦 External repository detected — using LostMinions feed for shared libraries."
-          else
-            echo "📦 Repository belongs to LostMinions — using local org feed."
-          fi
-
-          # Clean up any existing source
           dotnet nuget remove source github --force >/dev/null 2>&1 || true
-
-          # Add the fixed feed URL
           dotnet nuget add source "$FEED_URL" \
             --name "github" \
             --username "TheKrush" \
             --password "${{ secrets.GH_TOKEN }}" \
             --store-password-in-clear-text
-
           echo "✅ NuGet source configured: $FEED_URL"
 
       - name: 🧱 Restore dependencies
         shell: bash
-        run: |
-          SOLUTION=$(find . -maxdepth 1 -name "*.sln" | head -n 1)
-          [ -z "$SOLUTION" ] && echo "❌ No solution found" && exit 1
-          echo "🔍 Found solution: $SOLUTION"
-          dotnet restore "$SOLUTION"
+        run: dotnet restore "$SOLUTION"
 
       - name: 🏗️ Build solution
         shell: bash
-        run: |
-          SOLUTION=$(find . -maxdepth 1 -name "*.sln" | head -n 1)
-          dotnet build "$SOLUTION" -c Release --no-restore --nologo --verbosity minimal
+        run: dotnet build "$SOLUTION" -c Release --no-restore --nologo --verbosity minimal
 
       - name: ✅ Verify Build Success
         shell: bash
-        run: |
-          SOLUTION=$(basename "$(find . -maxdepth 1 -name '*.sln' | head -n 1)")
-          echo "✅ $SOLUTION compiled successfully."
+        run: echo "✅ $(basename "$SOLUTION") compiled successfully."

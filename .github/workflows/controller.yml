@@ -1,0 +1,138 @@
+name: 🧠 Workflow Controller
+
+on:
+  push:
+    branches: [ '**' ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  analyze:
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    runs-on: ubuntu-latest
+    outputs:
+      run_compile: ${{ steps.check.outputs.run_compile }}
+      run_publish: ${{ steps.check.outputs.run_publish }}
+      run_publishbot: ${{ steps.check.outputs.run_publishbot }}
+      has_compile: ${{ steps.check.outputs.has_compile }}
+      has_publish: ${{ steps.check.outputs.has_publish }}
+      has_publishbot: ${{ steps.check.outputs.has_publishbot }}
+    steps:
+      - name: 🧾 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: 🔍 Analyze commit message, branch, and file changes
+        id: check
+        shell: bash
+        run: |
+          msg="${{ github.event.head_commit.message }}"
+          branch="${GITHUB_REF##*/}"
+          echo "Branch: $branch"
+          echo "Commit message: $msg"
+
+          # defaults
+          echo "run_compile=false" >> $GITHUB_OUTPUT
+          echo "run_publish=false" >> $GITHUB_OUTPUT
+          echo "run_publishbot=false" >> $GITHUB_OUTPUT
+
+          # skip CI completely
+          if [[ "$msg" == *"[skip ci]"* ]]; then
+            echo "Detected [skip ci]; exiting early."
+            exit 0
+          fi
+
+          # ----------------------------------------
+          # 🔧 Code-related file filters
+          # Add/remove patterns easily here
+          # ----------------------------------------
+          CODE_FILTERS=(
+            # C#
+            '\.cs$'
+            '\.csproj$'
+            '\.sln$'
+            '\.targets$'
+            'Directory\.Build\.'
+
+            # C/C++
+            '\.c$'
+            '\.cc$'
+            '\.cpp$'
+            '\.cxx$'
+            '\.h$'
+            '\.hh$'
+            '\.hpp$'
+            '\.hxx$'
+            '\.inl$'
+            '\.vcxproj$'
+            '\.vcxproj\.filters$'
+            '\.props$'
+          )
+          # ----------------------------------------
+
+          git diff --name-only HEAD~1 > changed.txt || true
+          echo "Changed files:"
+          cat changed.txt || echo "(none)"
+
+          pattern="${CODE_FILTERS[*]}"
+          if grep -E "${pattern// /|}" changed.txt >/dev/null; then
+            echo "Detected matching code file → compile enabled."
+            echo "run_compile=true" >> $GITHUB_OUTPUT
+          else
+            echo "No matching code changes → skipping compile."
+            echo "run_compile=false" >> $GITHUB_OUTPUT
+          fi
+          # ----------------------------------------
+
+          # allow publish/bot only on main, master, or release/*
+          if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == release/* ]]; then
+            [[ "$msg" == *"[publish]"* ]] && echo "run_publish=true" >> $GITHUB_OUTPUT
+            [[ "$msg" == *"[publish-bot]"* ]] && echo "run_publishbot=true" >> $GITHUB_OUTPUT
+          else
+            echo "Branch '$branch' not eligible for publish or bot publish."
+          fi
+
+          # detect workflow existence
+          [[ -f ".github/workflows/compile.yml" ]] && echo "has_compile=true" >> $GITHUB_OUTPUT || echo "has_compile=false" >> $GITHUB_OUTPUT
+          [[ -f ".github/workflows/publish.yml" ]] && echo "has_publish=true" >> $GITHUB_OUTPUT || echo "has_publish=false" >> $GITHUB_OUTPUT
+          [[ -f ".github/workflows/publish-bot.yml" ]] && echo "has_publishbot=true" >> $GITHUB_OUTPUT || echo "has_publishbot=false" >> $GITHUB_OUTPUT
+
+      - name: 🧠 Summary
+        run: |
+          echo "------------------------------------------"
+          echo "🧠 Workflow Controller Summary"
+          echo "------------------------------------------"
+          echo "Repository:   ${{ github.repository }}"
+          echo "Branch:       ${GITHUB_REF##*/}"
+          echo "Compile:      ${{ steps.check.outputs.run_compile }} (exists: ${{ steps.check.outputs.has_compile }})"
+          echo "Publish:      ${{ steps.check.outputs.run_publish }} (exists: ${{ steps.check.outputs.has_publish }})"
+          echo "Publish-Bot:  ${{ steps.check.outputs.run_publishbot }} (exists: ${{ steps.check.outputs.has_publishbot }})"
+          echo "------------------------------------------"
+
+  compile:
+    if: ${{ !endsWith(github.repository, '/.github') &&
+            needs.analyze.outputs.run_compile == 'true' &&
+            needs.analyze.outputs.has_compile == 'true' }}
+    needs: analyze
+    uses: ./.github/workflows/compile.yml
+    secrets: inherit
+
+  publish:
+    if: ${{ !endsWith(github.repository, '/.github') &&
+            needs.analyze.outputs.run_publish == 'true' &&
+            needs.analyze.outputs.has_publish == 'true' }}
+    needs: analyze
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+
+  publish-bot:
+    if: ${{ !endsWith(github.repository, '/.github') &&
+            needs.analyze.outputs.run_publishbot == 'true' &&
+            needs.analyze.outputs.has_publishbot == 'true' }}
+    needs: analyze
+    uses: ./.github/workflows/publish-bot.yml
+    secrets: inherit

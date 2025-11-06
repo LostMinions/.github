@@ -1,13 +1,13 @@
 name: 🔁 Update Submodules - Weekly
 
 on:
-  schedule:
-    - cron: "0 3 * * 0"   # Sundays 03:00 UTC
-  workflow_dispatch:
   push:
     branches: [ main, master ]
     paths:
       - ".github/workflows/update-submodules-weekly.yml"
+  schedule:
+    - cron: "0 3 * * 0"   # Sundays 03:00 UTC
+  workflow_dispatch:
 
 jobs:
   trigger-update:

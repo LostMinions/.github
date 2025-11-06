@@ -1,11 +1,11 @@
 name: 🔄 Update Submodules
 
 on:
-  workflow_dispatch:
   push:
     branches: [ main, master ]
     paths:
       - ".github/workflows/update-submodules.yml"
+  workflow_dispatch:
 
 jobs:
   submodule-update:
