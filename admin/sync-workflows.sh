@@ -111,13 +111,13 @@ for wf in "${WORKFLOWS[@]}"; do
   else
     echo "  - Creating dummy $wf (no source found)"
     {
-      echo "name: 💤 Dummy — $wf"
+      echo "name: 💤 Dummy - $wf"
       echo "on: workflow_call:"
       echo "jobs:"
       echo "  none:"
       echo "    runs-on: ubuntu-latest"
       echo "    steps:"
-      echo "      - run: echo \"Placeholder for $wf — this workflow is not implemented for this repo.\""
+      echo "      - run: echo \"Placeholder for $wf - this workflow is not implemented for this repo.\""
     } > "$DEST"
   fi
 done
