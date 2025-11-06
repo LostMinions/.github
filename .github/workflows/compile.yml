@@ -50,28 +50,31 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: 🔍 Detect solution or project
-        id: solution
-        shell: bash
-        run: |
-          SOLUTION=$(find . -maxdepth 1 -type f \( -name "*.sln" -o -name "*.csproj" \) | head -n 1)
-          if [ -z "$SOLUTION" ]; then
-            echo "❌ No solution or project file found."; exit 1
-          fi
-          echo "SOLUTION=$SOLUTION" >> $GITHUB_ENV
-          echo "🔍 Found build target: $SOLUTION"
-
+      # 🔐 Configure NuGet (LostMinions feed)
       - name: 🔐 Configure NuGet for GitHub Packages
         shell: bash
         run: |
           echo "🔐 Configuring NuGet source..."
+
+          # Always use LostMinions feed for shared libraries
           FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
+
+          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
+            echo "📦 External repository detected — using LostMinions feed for shared libraries."
+          else
+            echo "📦 Repository belongs to LostMinions — using local org feed."
+          fi
+
+          # Clean up any existing source
           dotnet nuget remove source github --force >/dev/null 2>&1 || true
+
+          # Add the fixed feed URL
           dotnet nuget add source "$FEED_URL" \
             --name "github" \
             --username "TheKrush" \
             --password "${{ secrets.GH_TOKEN }}" \
             --store-password-in-clear-text
+
           echo "✅ NuGet source configured: $FEED_URL"
 
       - name: 💾 Cache NuGet packages
@@ -83,6 +86,17 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+
+      - name: 🔍 Detect solution or project
+        id: solution
+        shell: bash
+        run: |
+          SOLUTION=$(find . -maxdepth 1 -type f \( -name "*.sln" -o -name "*.csproj" \) | head -n 1)
+          if [ -z "$SOLUTION" ]; then
+            echo "❌ No solution or project file found."; exit 1
+          fi
+          echo "SOLUTION=$SOLUTION" >> $GITHUB_ENV
+          echo "🔍 Found build target: $SOLUTION"
 
       - name: 🧱 Restore dependencies
         shell: bash
