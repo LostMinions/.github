@@ -103,6 +103,7 @@ done
 for wf in "${WORKFLOWS[@]}"; do
   SRC="$SOURCE_DIR/$wf"
   DEST=".github/workflows/$wf"
+  mkdir -p "$(dirname "$DEST")"
 
   if [ -f "$SRC" ]; then
     cp "$SRC" "$DEST"
