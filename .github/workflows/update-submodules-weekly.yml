@@ -7,13 +7,12 @@ on:
       - ".github/workflows/update-submodules-weekly.yml"
   schedule:
     - cron: "0 3 * * 0"   # Sundays 03:00 UTC
-  workflow_dispatch:
 
 jobs:
   trigger-update:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
-    name: Trigger Submodule Update
+    timeout-minutes: 5
+    name: Trigger Update Submodules
     runs-on: ubuntu-latest
     steps:
       - name: 📨 Dispatch update-submodules.yml

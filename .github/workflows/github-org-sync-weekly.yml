@@ -1,17 +1,17 @@
 name: 🔄 GitHub Org Sync - Weekly
 
 on:
-  schedule:
-    - cron: "0 1 * * 0"   # Sundays 01:00 UTC
-  workflow_dispatch:
   push:
     branches: [ main, master ]
     paths:
       - ".github/workflows/github-org-sync-weekly.yml"
+  schedule:
+    - cron: "0 1 * * 0"   # Sundays 01:00 UTC
 
 jobs:
   trigger-update:
-    name: Trigger Submodule Update
+    timeout-minutes: 5
+    name: Trigger GitHub Org Sync
     runs-on: ubuntu-latest
     steps:
       - name: 📨 Dispatch update-submodules.yml

@@ -5,16 +5,20 @@ on:
     branches: [ main, master ]
     paths:
       - ".github/workflows/update-submodules.yml"
+  workflow_call:
   workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   submodule-update:
     if: ${{ !endsWith(github.repository, '/.github') }}
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      actions: write
+
+    timeout-minutes: 5
 
     steps:
       - name: 🔑 Validate GH_TOKEN

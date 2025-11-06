@@ -29,8 +29,10 @@ on:
       - "CODE_OF_CONDUCT.md"
 
 jobs:
-  sync:
+  org-sync:
     runs-on: ubuntu-latest
+
+    timeout-minutes: 5
 
     steps:
       - name: 🔑 Validate GH_TOKEN
@@ -68,7 +70,6 @@ jobs:
 
       - name: 🔮 Run Org Sync
         shell: bash
-        timeout-minutes: 2
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           MAX_JOBS: ${{ github.event.inputs.max_jobs || 4 }}

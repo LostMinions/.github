@@ -13,7 +13,11 @@ permissions:
 jobs:
   analyze:
     if: ${{ !endsWith(github.repository, '/.github') }}
+
     runs-on: ubuntu-latest
+
+    timeout-minutes: 5
+
     outputs:
       run_compile: ${{ steps.check.outputs.run_compile }}
       run_publish: ${{ steps.check.outputs.run_publish }}
@@ -21,6 +25,7 @@ jobs:
       has_compile: ${{ steps.check.outputs.has_compile }}
       has_publish: ${{ steps.check.outputs.has_publish }}
       has_publishbot: ${{ steps.check.outputs.has_publishbot }}
+
     steps:
       - name: 🧾 Checkout
         uses: actions/checkout@v4

@@ -18,15 +18,11 @@ permissions:
 
 jobs:
   build-and-release:
-    if: |
-      !endsWith(github.repository, '/.github') &&
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      (
-        github.event_name == 'workflow_dispatch' ||
-        contains(github.event.head_commit.message, '[publish]')
-      )
+    if: ${{ !endsWith(github.repository, '/.github') }}
 
     runs-on: ubuntu-latest
+
+    timeout-minutes: 5
 
     steps:
       - name: 🔑 Validate GH_TOKEN

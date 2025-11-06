@@ -19,15 +19,11 @@ permissions:
 
 jobs:
   publish:
-    if: |
-      !endsWith(github.repository, '/.github') &&
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      (
-        github.event_name == 'workflow_dispatch' ||
-        contains(github.event.head_commit.message, '[publish]')
-      )
+    if: ${{ !endsWith(github.repository, '/.github') }}
 
     runs-on: ubuntu-latest
+
+    timeout-minutes: 5
     env:
       NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
 
