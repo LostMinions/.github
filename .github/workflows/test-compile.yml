@@ -13,7 +13,10 @@ on:
 
 jobs:
   compile-test:
-    if: ${{ !endsWith(github.repository, '/.github') }}
+    if: |
+      !endsWith(github.repository, '/.github') &&
+      !contains(github.event.head_commit.message, '[skip ci]')
+
     runs-on: ubuntu-latest
 
     steps:
