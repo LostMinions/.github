@@ -112,7 +112,8 @@ for wf in "${WORKFLOWS[@]}"; do
     echo "  - Creating dummy $wf (no source found)"
     {
       echo "name: 💤 Dummy - $wf"
-      echo "on: workflow_call:"
+      echo "on:"
+      echo "  workflow_call:"
       echo "jobs:"
       echo "  none:"
       echo "    runs-on: ubuntu-latest"
