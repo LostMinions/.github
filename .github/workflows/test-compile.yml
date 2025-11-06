@@ -1,4 +1,4 @@
-name: 🧪 C# Compilation Test
+name: 🧪 C# Compile Test
 
 on:
   workflow_dispatch:
@@ -13,37 +13,26 @@ on:
 jobs:
   compile-test:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: 🔑 Validate GH_TOKEN
-        shell: pwsh
+        shell: bash
         run: |
-          try {
-            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
-            if (-not $r.login) { throw "Invalid" }
-            Write-Host "✅ Token OK: $($r.login)"
-          } catch {
-            Write-Host "❌ Bad or expired GH_TOKEN"
-            exit 1
-          }
+          echo "Validating GitHub token..."
+          if curl -s -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" https://api.github.com/user | grep -q '"login"'; then
+            echo "✅ Token OK"
+          else
+            echo "❌ Bad or expired GH_TOKEN"; exit 1
+          fi
 
       - name: ⚙️ Configure Git
-        shell: pwsh
+        shell: bash
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global credential.helper store
-
-          $gitCreds = if ($IsWindows) {
-            Join-Path $env:USERPROFILE ".git-credentials"
-          } else {
-            Join-Path $env:HOME ".git-credentials"
-          }
-
-          "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" | Out-File -FilePath $gitCreds -Encoding ascii
-          Write-Host "✅ Git credentials stored at $gitCreds"
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -52,39 +41,37 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧰 Setup .NET 8 SDK
+      - name: 🧰 Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
       - name: 🔐 Configure NuGet for GitHub Packages
-        shell: pwsh
+        shell: bash
         run: |
-          Write-Host "Adding GitHub Packages source for LostMinions..."
-          dotnet nuget remove source github -v q -f | Out-Null
-          dotnet nuget add source "https://nuget.pkg.github.com/LostMinions/index.json" `
-            --name "github" `
-            --username "TheKrush" `
-            --password "${{ secrets.GH_TOKEN }}" `
-            --store-password-in-clear-text | Out-Null
-          Write-Host "✅ NuGet source added: https://nuget.pkg.github.com/LostMinions/"
+          dotnet nuget remove source github --force >/dev/null 2>&1 || true
+          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --name "github" \
+            --username "TheKrush" \
+            --password "${{ secrets.GH_TOKEN }}" \
+            --store-password-in-clear-text
 
       - name: 🧱 Restore dependencies
-        shell: pwsh
+        shell: bash
         run: |
-          $solution = (Get-ChildItem -Path . -Filter *.sln -Depth 1 | Select-Object -First 1).FullName
-          Write-Host "🔍 Found solution: $solution"
-          dotnet restore $solution
+          SOLUTION=$(find . -maxdepth 1 -name "*.sln" | head -n 1)
+          [ -z "$SOLUTION" ] && echo "❌ No solution found" && exit 1
+          echo "🔍 Found solution: $SOLUTION"
+          dotnet restore "$SOLUTION"
 
       - name: 🏗️ Build solution
-        shell: pwsh
+        shell: bash
         run: |
-          $solution = (Get-ChildItem -Path . -Filter *.sln -Depth 1 | Select-Object -First 1).FullName
-          Write-Host "⚙️  Building solution: $solution"
-          dotnet build $solution --configuration Release --no-restore
+          SOLUTION=$(find . -maxdepth 1 -name "*.sln" | head -n 1)
+          dotnet build "$SOLUTION" -c Release --no-restore --nologo --verbosity minimal
 
       - name: ✅ Verify Build Success
-        shell: pwsh
+        shell: bash
         run: |
-          $solution = (Get-ChildItem -Path . -Filter *.sln -Depth 1 | Select-Object -First 1).Name
-          Write-Host "✅ $solution compiled successfully on GitHub Actions."
+          SOLUTION=$(basename "$(find . -maxdepth 1 -name '*.sln' | head -n 1)")
+          echo "✅ $SOLUTION compiled successfully."
