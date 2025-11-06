@@ -50,12 +50,28 @@ jobs:
       - name: 🔐 Configure NuGet for GitHub Packages
         shell: bash
         run: |
+          echo "🔐 Configuring NuGet source..."
+
+          # Always use LostMinions feed for shared libraries
+          FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
+
+          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
+            echo "📦 External repository detected — using LostMinions feed for shared libraries."
+          else
+            echo "📦 Repository belongs to LostMinions — using local org feed."
+          fi
+
+          # Clean up any existing source
           dotnet nuget remove source github --force >/dev/null 2>&1 || true
-          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+
+          # Add the fixed feed URL
+          dotnet nuget add source "$FEED_URL" \
             --name "github" \
             --username "TheKrush" \
             --password "${{ secrets.GH_TOKEN }}" \
             --store-password-in-clear-text
+
+          echo "✅ NuGet source configured: $FEED_URL"
 
       - name: 🧱 Restore dependencies
         shell: bash

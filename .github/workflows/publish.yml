@@ -81,8 +81,7 @@ jobs:
 
           echo "✅ NuGet source configured: $FEED_URL"
 
-      # 🔍 Detect project + version bump
-      - name: Detect project
+      - name: 🔍 Detect project
         id: detect
         run: |
           PROJECT=$(find . -maxdepth 1 -name "*.csproj" | head -n 1)
@@ -90,7 +89,7 @@ jobs:
           echo "project=$PROJECT" >> $GITHUB_OUTPUT
           echo "📦 Project: $PROJECT"
 
-      - name: Determine next version
+      - name: 🔢 Determine next version
         id: version
         run: |
           git fetch --tags --quiet
@@ -106,24 +105,38 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "🔢 Version: $VERSION"
 
-      # 🔨 Build + pack + push
-      - run: dotnet restore ${{ steps.detect.outputs.project }}
-      - run: dotnet build ${{ steps.detect.outputs.project }} -c Release --no-restore
-      - run: |
+      - name: 🧱 Restore dependencies
+        run: dotnet restore "${{ steps.detect.outputs.project }}"
+
+      - name: 🏗️ Build project
+        run: dotnet build "${{ steps.detect.outputs.project }}" -c Release --no-restore
+
+      - name: 📦 Pack NuGet package
+        run: |
           cd $(dirname "${{ steps.detect.outputs.project }}")
-          dotnet pack $(basename "${{ steps.detect.outputs.project }}") -c Release --no-restore --no-build \
-            -p:PackageVersion=${{ steps.version.outputs.version }} -p:IncludeSymbols=true -p:IncludeSource=true
-      - run: |
+          dotnet pack $(basename "${{ steps.detect.outputs.project }}") \
+            -c Release \
+            --no-restore \
+            --no-build \
+            -p:PackageVersion=${{ steps.version.outputs.version }} \
+            -p:IncludeSymbols=true \
+            -p:IncludeSource=true
+
+      - name: 🚀 Push package to GitHub Packages
+        run: |
           dotnet nuget push "bin/Release/*.nupkg" \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            --api-key ${{ secrets.GH_TOKEN }} --skip-duplicate
+            --api-key ${{ secrets.GH_TOKEN }} \
+            --skip-duplicate
 
-      # 🏷️ Tag + release
-      - run: |
+      - name: 🏷️ Create Git tag
+        run: |
           TAG="v${{ steps.version.outputs.version }}"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
-      - uses: softprops/action-gh-release@v2
+
+      - name: 📰 Publish GitHub release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.version.outputs.version }}"
           name: "📦 ${{ github.event.repository.name }} ${{ steps.version.outputs.version }}"

@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 🔐 Validate GH_TOKEN
       - name: 🔑 Validate GH_TOKEN
         shell: bash
         run: |
@@ -32,7 +31,6 @@ jobs:
             echo "❌ Bad or expired GH_TOKEN"; exit 1
           fi
 
-      # ⚙️ Configure Git
       - name: ⚙️ Configure Git
         shell: bash
         run: |
@@ -42,7 +40,6 @@ jobs:
           echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
           echo "✅ Git credentials stored"
 
-      # 🧾 Checkout repository
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
         with:
@@ -61,6 +58,8 @@ jobs:
         shell: bash
         run: |
           echo "🔐 Configuring NuGet source..."
+
+          # Always use LostMinions feed for shared libraries
           FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
 
           if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
@@ -69,15 +68,18 @@ jobs:
             echo "📦 Repository belongs to LostMinions — using local org feed."
           fi
 
+          # Clean up any existing source
           dotnet nuget remove source github --force >/dev/null 2>&1 || true
+
+          # Add the fixed feed URL
           dotnet nuget add source "$FEED_URL" \
             --name "github" \
             --username "TheKrush" \
             --password "${{ secrets.GH_TOKEN }}" \
             --store-password-in-clear-text
+
           echo "✅ NuGet source configured: $FEED_URL"
 
-      # 🔍 Detect Bot Project
       - name: 🔍 Detect Bot Project
         id: detect
         shell: bash
@@ -89,7 +91,6 @@ jobs:
           echo "🤖 Found bot project: $BOT_PROJECT"
           echo "bot_project=$BOT_PROJECT" >> $GITHUB_OUTPUT
 
-      # 🔢 Determine next version
       - name: 🔢 Determine next version automatically
         id: version
         shell: bash
@@ -119,15 +120,12 @@ jobs:
           echo "🔢 Using version: $NEW_VERSION"
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      # 🧱 Restore dependencies
       - name: 🧱 Restore dependencies
         run: dotnet restore "${{ steps.detect.outputs.bot_project }}" --verbosity minimal
 
-      # 🏗️ Build bot
       - name: 🏗️ Build bot
         run: dotnet build "${{ steps.detect.outputs.bot_project }}" -c Release --no-restore --nologo --verbosity minimal
 
-      # 🚀 Publish bot (Windows self-contained)
       - name: 🚀 Publish bot (Windows self-contained)
         id: publish
         shell: bash
@@ -144,7 +142,6 @@ jobs:
             --no-restore
           echo "output=$OUTPUT" >> $GITHUB_OUTPUT
 
-      # 📦 Zip published output
       - name: 📦 Zip published output
         id: zip
         shell: bash
@@ -156,7 +153,6 @@ jobs:
           (cd "$PUBLISH_DIR" && zip -r "../$ZIP_PATH" .)
           echo "zip_path=$ZIP_PATH" >> $GITHUB_OUTPUT
 
-      # 🏷️ Create Git Tag
       - name: 🏷️ Create Git Tag
         id: tag
         shell: bash
@@ -166,7 +162,6 @@ jobs:
           git push origin "$TAG"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-      # 🚀 Create GitHub Release
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
