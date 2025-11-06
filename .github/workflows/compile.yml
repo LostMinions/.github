@@ -16,6 +16,9 @@ jobs:
 
     timeout-minutes: 5
 
+    env:
+      NUGET_PACKAGES: ~/.nuget/packages
+
     steps:
       - name: 🔑 Validate GH_TOKEN
         shell: bash
@@ -47,16 +50,16 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: 🔍 Detect solution
+      - name: 🔍 Detect solution or project
         id: solution
         shell: bash
         run: |
-          SOLUTION=$(find . -maxdepth 1 -name "*.sln" | head -n 1)
+          SOLUTION=$(find . -maxdepth 1 -type f \( -name "*.sln" -o -name "*.csproj" \) | head -n 1)
           if [ -z "$SOLUTION" ]; then
-            echo "❌ No solution found."; exit 1
+            echo "❌ No solution or project file found."; exit 1
           fi
           echo "SOLUTION=$SOLUTION" >> $GITHUB_ENV
-          echo "🔍 Found solution: $SOLUTION"
+          echo "🔍 Found build target: $SOLUTION"
 
       - name: 🔐 Configure NuGet for GitHub Packages
         shell: bash
@@ -71,9 +74,19 @@ jobs:
             --store-password-in-clear-text
           echo "✅ NuGet source configured: $FEED_URL"
 
+      - name: 💾 Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.local/share/NuGet/v3-cache
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: 🧱 Restore dependencies
         shell: bash
-        run: dotnet restore "$SOLUTION"
+        run: dotnet restore "$SOLUTION" --verbosity quiet
 
       - name: 🏗️ Build solution
         shell: bash
@@ -81,4 +94,4 @@ jobs:
 
       - name: ✅ Verify Build Success
         shell: bash
-        run: echo "✅ $(basename "$SOLUTION") compiled successfully."
+        run: echo "✅ $(basename "$SOLUTION") built successfully."
