@@ -7,6 +7,10 @@ on:
         description: "Version bump type (major, minor, patch)"
         required: false
         default: "patch"
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/publish-bot.yml"
 
 permissions:
   contents: write
