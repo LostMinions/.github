@@ -19,39 +19,29 @@ permissions:
 jobs:
   publish:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
     runs-on: ubuntu-latest
     env:
       NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
+      # 🔁 Shared setup identical to compile-test
       - name: 🔑 Validate GH_TOKEN
-        shell: pwsh
+        shell: bash
         run: |
-          try {
-            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
-            if (-not $r.login) { throw "Invalid" }
-            Write-Host "✅ Token OK: $($r.login)"
-          } catch {
-            Write-Host "❌ Bad or expired GH_TOKEN"
-            exit 1
-          }
+          echo "Validating GitHub token..."
+          if curl -s -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" https://api.github.com/user | grep -q '"login"'; then
+            echo "✅ Token OK"
+          else
+            echo "❌ Bad or expired GH_TOKEN"; exit 1
+          fi
 
       - name: ⚙️ Configure Git
-        shell: pwsh
+        shell: bash
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global credential.helper store
-
-          $gitCreds = if ($IsWindows) {
-            Join-Path $env:USERPROFILE ".git-credentials"
-          } else {
-            Join-Path $env:HOME ".git-credentials"
-          }
-
-          "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" | Out-File -FilePath $gitCreds -Encoding ascii
-          Write-Host "✅ Git credentials stored at $gitCreds"
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -60,107 +50,83 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧱 Setup .NET 8
+      - name: 🧰 Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
-          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          dotnet-version: '8.0.x'
 
-      - name: 🔍 Detect project
-        id: detect
+      - name: 🔐 Configure NuGet for GitHub Packages
         shell: bash
+        run: |
+          echo "🔐 Configuring NuGet source..."
+
+          # Always use LostMinions feed for shared libraries
+          FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
+
+          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
+            echo "📦 External repository detected — using LostMinions feed for shared libraries."
+          else
+            echo "📦 Repository belongs to LostMinions — using local org feed."
+          fi
+
+          # Clean up any existing source
+          dotnet nuget remove source github --force >/dev/null 2>&1 || true
+
+          # Add the fixed feed URL
+          dotnet nuget add source "$FEED_URL" \
+            --name "github" \
+            --username "TheKrush" \
+            --password "${{ secrets.GH_TOKEN }}" \
+            --store-password-in-clear-text
+
+          echo "✅ NuGet source configured: $FEED_URL"
+
+      # 🔍 Detect project + version bump
+      - name: Detect project
+        id: detect
         run: |
           PROJECT=$(find . -maxdepth 1 -name "*.csproj" | head -n 1)
-          if [ -z "$PROJECT" ]; then
-            echo "❌ No .csproj file found in repository root."
-            exit 1
-          fi
-          echo "📦 Detected project: $PROJECT"
+          [ -z "$PROJECT" ] && echo "❌ No .csproj file found" && exit 1
           echo "project=$PROJECT" >> $GITHUB_OUTPUT
+          echo "📦 Project: $PROJECT"
 
-      - name: 🔢 Determine next version automatically
+      - name: Determine next version
         id: version
-        shell: bash
         run: |
           git fetch --tags --quiet
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          echo "Latest tag: $LATEST_TAG"
-
-          if [ -z "$LATEST_TAG" ]; then
-            MAJOR=1; MINOR=0; PATCH=0
-          else
-            # Remove leading "v" and any 4th version segment
-            BASE_VERSION=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d'.' -f1-3)
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-          fi
-
-          BUMP_TYPE="${{ github.event.inputs.bump || 'patch' }}"
-          echo "Bump type: $BUMP_TYPE"
-
-          case "$BUMP_TYPE" in
-            major)
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-              ;;
-            minor)
-              MINOR=$((MINOR + 1))
-              PATCH=0
-              ;;
-            patch)
-              PATCH=$((PATCH + 1))
-              ;;
-            *)
-              echo "❌ Unknown bump type: $BUMP_TYPE"; exit 1 ;;
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          BASE=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+          case "${{ github.event.inputs.bump }}" in
+            major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
+            minor) ((MINOR++)); PATCH=0 ;;
+            *) ((PATCH++)) ;;
           esac
+          VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "🔢 Version: $VERSION"
 
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "🔢 Using version: $NEW_VERSION"
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-      - name: 🧱 Restore dependencies
-        run: dotnet restore ${{ steps.detect.outputs.project }}
-
-      - name: 🏗️ Build project
-        run: dotnet build ${{ steps.detect.outputs.project }} -c Release --no-restore
-
-      - name: 📦 Pack project
-        run: |
+      # 🔨 Build + pack + push
+      - run: dotnet restore ${{ steps.detect.outputs.project }}
+      - run: dotnet build ${{ steps.detect.outputs.project }} -c Release --no-restore
+      - run: |
           cd $(dirname "${{ steps.detect.outputs.project }}")
-          dotnet pack $(basename "${{ steps.detect.outputs.project }}") \
-            -c Release \
-            --no-restore \
-            --no-build \
-            -p:PackageVersion=${{ steps.version.outputs.version }} \
-            -p:ContinuousIntegrationBuild=true \
-            -p:IncludeSymbols=true \
-            -p:IncludeSource=true
-
-      - name: 🚀 Publish to GitHub Packages
-        run: |
+          dotnet pack $(basename "${{ steps.detect.outputs.project }}") -c Release --no-restore --no-build \
+            -p:PackageVersion=${{ steps.version.outputs.version }} -p:IncludeSymbols=true -p:IncludeSource=true
+      - run: |
           dotnet nuget push "bin/Release/*.nupkg" \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            --api-key ${{ secrets.GH_TOKEN }} \
-            --skip-duplicate
+            --api-key ${{ secrets.GH_TOKEN }} --skip-duplicate
 
-      - name: 🏷️ Create Git Tag
-        id: tag
-        run: |
+      # 🏷️ Tag + release
+      - run: |
           TAG="v${{ steps.version.outputs.version }}"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-      - name: 📰 Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
-          tag_name: "${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}"
-          name: "📦 ${{ github.event.repository.name }} ${{ steps.tag.outputs.tag }}"
-          body: |
-            **Package:** ${{ github.repository }}
-            **Version:** ${{ steps.version.outputs.version }}
-            **Published by:** ${{ github.actor }}
-          files: |
-            bin/Release/*.nupkg
+          tag_name: "v${{ steps.version.outputs.version }}"
+          name: "📦 ${{ github.event.repository.name }} ${{ steps.version.outputs.version }}"
+          files: bin/Release/*.nupkg
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
