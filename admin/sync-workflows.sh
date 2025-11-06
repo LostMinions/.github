@@ -60,13 +60,13 @@ fi
 
 # --- Deprecated workflow list ---
 DEPRECATED_WORKFLOWS=(
-  "test-compile.yml",
+  "test-compile.yml"
   "weekly-submodule-update.yml"
 )
 
 # --- Build workflow list ---
 WORKFLOWS=(
-  "controller.yml",
+  "controller.yml"
   "update-submodules.yml"
 )
 
