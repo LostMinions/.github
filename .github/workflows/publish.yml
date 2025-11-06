@@ -86,6 +86,16 @@ jobs:
 
           echo "✅ NuGet source configured: $FEED_URL"
 
+      - name: 💾 Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.local/share/NuGet/v3-cache
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: 🔍 Detect project
         id: detect
         run: |
