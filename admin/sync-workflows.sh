@@ -99,13 +99,25 @@ for old in "${DEPRECATED_WORKFLOWS[@]}"; do
   fi
 done
 
+# --- Copy workflows or create dummies ---
 for wf in "${WORKFLOWS[@]}"; do
   SRC="$SOURCE_DIR/$wf"
+  DEST=".github/workflows/$wf"
+
   if [ -f "$SRC" ]; then
-    cp "$SRC" ".github/workflows/$wf"
+    cp "$SRC" "$DEST"
     echo "  - Copied $wf"
   else
-    echo "  - Missing source file: $wf"
+    echo "  - Creating dummy $wf (no source found)"
+    cat >"$DEST" <<YAML
+name: 💤 Dummy — $wf
+on: workflow_call:
+jobs:
+  none:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Placeholder for $wf — this workflow is not implemented for this repo."
+YAML
   fi
 done
 
