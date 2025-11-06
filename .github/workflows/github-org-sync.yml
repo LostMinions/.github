@@ -68,6 +68,7 @@ jobs:
 
       - name: 🔮 Run Org Sync
         shell: bash
+        timeout-minutes: 2
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           MAX_JOBS: ${{ github.event.inputs.max_jobs || 4 }}
