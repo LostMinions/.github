@@ -13,7 +13,6 @@
       "PULL_REQUEST_TEMPLATE"
     ],
     "workflows": [
-      "controller.yml",
       "update-submodules.yml"
     ]
   },
