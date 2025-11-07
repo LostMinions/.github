@@ -90,8 +90,21 @@ if [ -n "$EXTRA_WORKFLOWS" ]; then
   done <<< "$EXTRA_WORKFLOWS"
 fi
 
-# Deduplicate
+# --- Handle per-repo workflow exclusions -------------------------------------
+EXCLUDE_WORKFLOWS=()
+if jq -e '.exclude_workflows' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+  mapfile -t EXCLUDE_WORKFLOWS < <(echo "$REPO_CONFIG" | jq -r '.exclude_workflows[]?' 2>/dev/null || true)
+fi
+
+# Deduplicate first
 mapfile -t WORKFLOWS < <(printf "%s\n" "${WORKFLOWS[@]}" | awk '!seen[$0]++')
+
+# Remove any excluded workflows
+if ((${#EXCLUDE_WORKFLOWS[@]})); then
+  for ex in "${EXCLUDE_WORKFLOWS[@]}"; do
+    WORKFLOWS=("${WORKFLOWS[@]/$ex}")
+  done
+fi
 
 echo "Syncing workflows for $FULL_REPO"
 mkdir -p .github/workflows
