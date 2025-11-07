@@ -10,6 +10,18 @@ on:
 
 jobs:
   trigger-update:
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
-    uses: ./.github/workflows/github-org-sync.yml
-    secrets: inherit
+
+    steps:
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🚀 Trigger github org sync
+        uses: ./.github/workflows/github-org-sync.yml
+        secrets: inherit
