@@ -3,6 +3,7 @@
 # LostMinions --- GitHub Org Usage Check
 # Checks Actions minutes and/or Packages bandwidth.
 # ------------------------------------------------------------
+
 set -euo pipefail
 
 ORG="${ORG_NAME:-LostMinions}"
