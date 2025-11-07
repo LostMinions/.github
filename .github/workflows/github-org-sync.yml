@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Actions usage
-        uses: ./.github/actions/check-usage-action
+        uses: ./actions/check-usage-action
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
