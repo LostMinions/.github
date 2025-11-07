@@ -4,49 +4,44 @@
 # ------------------------------------------------------------
 #  Creates or updates organization-level issue types via GraphQL API.
 #  Requires: gh CLI authenticated with full repo/org scope.
-#  Usage: bash sync-issue-types.sh <org/repo>
-#  Markdown-safe output (no colors, emojis, or special chars)
+#  Usage: bash sync-issue-types.sh <org/repo> [workdir]
 # ============================================================
 
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-  echo "Usage: bash sync-issue-types.sh <org/repo>"
+  echo "Usage: bash sync-issue-types.sh <org/repo> [workdir]"
   exit 1
 fi
 
 FULL_REPO="$1"
+WORKDIR="${2:-}" # ignored; kept for consistent interface
+
 ORG="${FULL_REPO%%/*}"   # Extract org before first slash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TYPES_FILE="$SCRIPT_DIR/issue-types.json"
 
-# --- Dependency check --------------------------------------------------------
-for tool in gh jq perl; do
+# --- Load common helpers ------------------------------------------------------
+. "$SCRIPT_DIR/sync-common.sh"
+
+# --- Dependency check ---------------------------------------------------------
+for tool in gh jq; do
   if ! command -v "$tool" &>/dev/null; then
     echo "Missing dependency: $tool"
     exit 1
   fi
 done
 
-# --- strip_comments() --------------------------------------------------------
-strip_comments() {
-  perl -0777 -pe '
-    s{/\*.*?\*/}{}gs;          # remove /* ... */ blocks
-    s{//[^\n]*}{}g;            # remove // line comments
-    s/,\s*([}\]])/\1/g;        # remove trailing commas
-  ' "$1"
-}
-
-# --- Prepare cleaned JSON copy ----------------------------------------------
+# --- Prepare cleaned JSON copy -----------------------------------------------
 if [ ! -f "$TYPES_FILE" ]; then
   echo "Missing file: $TYPES_FILE"
   exit 1
 fi
 
 CLEAN_TYPES=$(mktemp)
-strip_comments "$TYPES_FILE" > "$CLEAN_TYPES"
+clean_json_file "$TYPES_FILE" "$CLEAN_TYPES"
 
-# --- Retrieve organization ID -----------------------------------------------
+# --- Retrieve organization ID -------------------------------------------------
 ORG_ID=$(gh api graphql -f query="
 {
   organization(login: \"$ORG\") { id }
@@ -62,7 +57,7 @@ TYPE_COUNT=$(jq '. | length' "$CLEAN_TYPES")
 echo "Syncing $TYPE_COUNT issue types for $FULL_REPO"
 echo ""
 
-# --- Fetch existing types ----------------------------------------------------
+# --- Fetch existing types -----------------------------------------------------
 EXISTING_JSON=$(gh api graphql -f query="
 {
   organization(login: \"$ORG\") {
@@ -73,7 +68,7 @@ EXISTING_JSON=$(gh api graphql -f query="
 }
 " --jq '.data.organization.issueTypes.nodes')
 
-# --- Iterate through new definitions ----------------------------------------
+# --- Iterate through new definitions -----------------------------------------
 jq -c '.[]' "$CLEAN_TYPES" | while read -r t; do
   NAME=$(echo "$t" | jq -r '.name')
   COLOR_HEX=$(echo "$t" | jq -r '.color')
@@ -123,33 +118,25 @@ jq -c '.[]' "$CLEAN_TYPES" | while read -r t; do
   fi
 done
 
-# --- Cleanup: remove stale issue types --------------------------------------
-#echo "Checking for stale issue types to remove..."
-
-# Build list of valid names from source
+# --- Cleanup: remove stale issue types ---------------------------------------
 VALID_NAMES=$(jq -r '.[].name' "$CLEAN_TYPES" | tr -d '\r' | sort)
-
-# Extract all existing type names from org
 EXISTING_NAMES=$(echo "$EXISTING_JSON" | jq -r '.[].name' | tr -d '\r' | sort)
-
-# Find names that exist in org but not in source
 STALE_NAMES=$(comm -23 <(echo "$EXISTING_NAMES") <(echo "$VALID_NAMES"))
 
 if [[ -z "$STALE_NAMES" ]]; then
   : # no stale issue types
-  #echo "- No stale issue types to remove."
 else
   echo "$STALE_NAMES" | while read -r STALE; do
     [[ -z "$STALE" ]] && continue
     STALE_ID=$(echo "$EXISTING_JSON" | jq -r --arg STALE "$STALE" '.[] | select(.name==$STALE) | .id')
     if [[ -n "$STALE_ID" && "$STALE_ID" != "null" ]]; then
       echo "- Removing: $STALE"
-     gh api graphql -f query="
-     mutation {
-       deleteIssueType(input: {issueTypeId: \"$STALE_ID\"}) {
-         clientMutationId
-       }
-     }" >/dev/null
+      gh api graphql -f query="
+      mutation {
+        deleteIssueType(input: {issueTypeId: \"$STALE_ID\"}) {
+          clientMutationId
+        }
+      }" >/dev/null
     fi
   done
 fi

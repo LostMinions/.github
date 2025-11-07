@@ -1,0 +1,43 @@
+{
+  // Global definitions affecting all repos
+  "defaults": {
+    "actions": [],
+    "files": [
+      "CONTRIBUTING.md",
+      "SECURITY.md",
+      "CODE_OF_CONDUCT.md"
+    ],
+    "scripts": [],
+    "templates": [
+      "ISSUE_TEMPLATE",
+      "PULL_REQUEST_TEMPLATE"
+    ],
+    "workflows": [
+      "controller.yml",
+      "update-submodules.yml"
+    ]
+  },
+
+  // Items here are deleted if they still exist in target repos
+  "deprecated": {
+    "actions": [
+      "setup-nuget-old",
+      "build-dotnet-old"
+    ],
+    "files": [
+      "README-template.md",
+      "OLD_CONTRIBUTING.md"
+    ],
+    "scripts": [
+      "old-usage-check.sh",
+      "legacy-deploy.sh"
+    ],
+    "templates": [
+      "OLD_ISSUE_TEMPLATE"
+    ],
+    "workflows": [
+      "weekly-submodule-update.yml",
+      "test-compile.yml"
+    ]
+  }
+}

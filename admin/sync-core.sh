@@ -8,11 +8,22 @@
 
 set -euo pipefail
 
+DEBUG_MODE=false
+if [[ "${1:-}" == "--debug" ]]; then
+  DEBUG_MODE=true
+  shift
+  echo "[Debug mode active] --- only the first enabled repo will be processed."
+  echo ""
+fi
+
 START_DIR="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPOS_FILE="$SCRIPT_DIR/repos.json"
 LOG_DIR="$SCRIPT_DIR/logs"
 mkdir -p "$LOG_DIR"
+
+# --- Load shared helpers ------------------------------------------------------
+. "$SCRIPT_DIR/sync-common.sh"
 
 # --- Verify repos.json --------------------------------------------------------
 if [ ! -f "$REPOS_FILE" ]; then
@@ -20,23 +31,21 @@ if [ ! -f "$REPOS_FILE" ]; then
   exit 1
 fi
 
-ORG_NAME="${GITHUB_REPOSITORY%%/*}"
+# Determine org name (local fallback for GH Actions variable)
+if [[ -z "${GITHUB_REPOSITORY:-}" ]]; then
+  ORG_NAME="LostMinions"   # fallback when run locally
+else
+  ORG_NAME="${GITHUB_REPOSITORY%%/*}"
+fi
+
 echo "============================================================"
 echo "$ORG_NAME GitHub Sync Started"
 echo "============================================================"
 echo ""
 
 # --- Read enabled repos -------------------------------------------------------
-strip_comments() {
-  perl -0777 -pe '
-    s{/\*.*?\*/}{}gs;
-    s{//[^\r\n]*}{}g;
-    s/,\s*([}\]])/\1/g;
-  ' "$1"
-}
-
 CLEAN_REPOS=$(mktemp)
-strip_comments "$REPOS_FILE" > "$CLEAN_REPOS"
+clean_json_file "$REPOS_FILE" "$CLEAN_REPOS"
 
 REPOS=()
 while IFS= read -r line; do
@@ -88,40 +97,63 @@ fi
 # --- Helper: per-repo sync sequence ------------------------------------------
 run_sync_for_repo() {
   local repo_json="$1"
-  local ORG NAME FULL LOG_PATH
+  local ORG NAME FULL LOG_PATH TMPDIR
   ORG=$(echo "$repo_json" | jq -r '.org')
   NAME=$(echo "$repo_json" | jq -r '.name')
   FULL="$ORG/$NAME"
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
+  TMPDIR=$(mktemp -d)
 
   {
-    echo ""
     echo "------------------------------------------------------------"
     echo "Repository: $FULL"
     echo "------------------------------------------------------------"
 
+    echo "Cloning repository once..."
+    if ! gh repo clone "$FULL" "$TMPDIR" -- --depth=1 >/dev/null 2>&1; then
+      echo "Failed to clone $FULL"
+      exit 1
+    fi
+    echo ""
+
+    cd "$TMPDIR"
+
     declare -A steps=(
       ["0"]="sync-secrets.sh|Secrets"
-      ["1"]="sync-files.sh|Templates and Policies"
-      ["2"]="sync-issue-types.sh|Issue Types"
-      ["3"]="sync-labels.sh|Labels"
-      ["4"]="sync-workflows.sh|Workflows"
+      ["1"]="sync-community.sh|Community and License Files"
+      ["2"]="sync-templates.sh|Templates"
+      ["3"]="sync-issue-types.sh|Issue Types"
+      ["4"]="sync-labels.sh|Labels"
+      ["5"]="sync-actions.sh|Actions"
+      ["6"]="sync-scripts.sh|Scripts"
+      ["7"]="sync-workflows.sh|Workflows"
     )
 
-    for i in {0..4}; do
+    # --- Run steps in numeric order ----------------------------------------------
+    for i in $(printf "%s\n" "${!steps[@]}" | sort -n); do
       IFS='|' read -r script title <<< "${steps[$i]}"
-      echo "Step $((i+1))/5: $title"
-      if bash "$SCRIPT_DIR/$script" "$FULL"; then
-        echo "  Success: $script"
+      echo "-> Step $((i+1)): $title"
+      if bash "$SCRIPT_DIR/$script" "$FULL" "$TMPDIR"; then
+        echo ""
+        echo "$title complete"
       else
-        echo "  Failed:  $script"
+        echo ""
+        echo "$title failed"
       fi
-      echo ""
-      echo "---"
       echo ""
     done
 
-    echo "Completed repository: $FULL"
+    echo "Committing and pushing all updates..."
+    if [ -n "$(git status --porcelain)" ]; then
+      git add -A
+      git commit -m "Sync .github assets and metadata" >/dev/null || true
+      git push origin HEAD >/dev/null 2>&1 && echo "Pushed updates" || echo "Push failed"
+    else
+      echo "No changes to commit"
+    fi
+
+    cd "$SCRIPT_DIR"
+    rm -rf "$TMPDIR"
     echo ""
   } > "$LOG_PATH" 2>&1
 }
@@ -129,11 +161,26 @@ run_sync_for_repo() {
 export -f run_sync_for_repo
 export SCRIPT_DIR LOG_DIR
 
+# --- Launch jobs --------------------------------------------------------------
+if [[ "$DEBUG_MODE" == true ]]; then
+  echo "Running in debug mode (single repo)..."
+  if ((${#REPOS[@]})); then
+    run_sync_for_repo "${REPOS[0]}"
+  else
+    echo "No enabled repositories found."
+    exit 1
+  fi
+  echo ""
+  echo "[Debug complete --- exiting early]"
+  exit 0
+fi
+
+# Normal parallel mode ---------------------------------------------------------
 echo "Launching parallel syncs..."
 echo ""
 echo "Repos detected: ${#REPOS[@]}"
 echo "Max parallel jobs: ${MAX_JOBS:-4}"
-printf '  - %s\n' "${REPOS[@]}"
+printf '- %s\n' "${REPOS[@]}"
 echo ""
 
 MAX_JOBS=${MAX_JOBS:-4}
@@ -141,7 +188,6 @@ running_jobs=0
 pids=()
 repo_names=()
 
-# --- disable -e so a child failure or wait error won't abort main ---
 set +e
 
 for repo_json in "${REPOS[@]}"; do
@@ -170,10 +216,10 @@ for repo_json in "${REPOS[@]}"; do
   fi
 done
 
-# --- Wait for remaining jobs to finish ---
 echo ""
 echo "Waiting for remaining sync jobs to finish..."
 exit_status=0
+
 for i in "${!pids[@]}"; do
   pid=${pids[$i]}
   repo=${repo_names[$i]}
@@ -185,7 +231,21 @@ for i in "${!pids[@]}"; do
   fi
 done
 
-# --- re-enable -e after concurrency block ---
+# --- Ordered log merge after all jobs finish ----------------------------------
+echo ""
+echo "Merging logs in launch order..."
+for i in "${!repo_names[@]}"; do
+  repo=${repo_names[$i]}
+  LOG_PATH="$LOG_DIR/${repo//\//-}.log"
+  if [ -f "$LOG_PATH" ]; then
+    echo "------------------------------------------------------------"
+    echo "Repository: $repo"
+    echo "------------------------------------------------------------"
+    cat "$LOG_PATH"
+    echo ""
+  fi
+done
+
 set -e
 exit $exit_status
 

@@ -1,52 +1,54 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Workflow Sync (per repo)
+#  Lost Minions --- Workflow Sync (single-clone version)
 # ------------------------------------------------------------
-#  Syncs selected workflows for one repo.
-#  Always includes update-submodules.yml.
-#  Usage: bash sync-workflows.sh <org/repo>
+#  Automatically syncs and maintains workflows inside an
+#  existing cloned repository, using:
+#    * auto-discovery from template .github/workflows
+#    * manifest.json for defaults & deprecations
+#    * repos.json for per-repo workflow activation
+#
+#  Usage:
+#    bash sync-workflows.sh <org/repo> <workdir>
 # ============================================================
 
 set -euo pipefail
 
-if [ $# -lt 1 ]; then
-  echo "Usage: bash sync-workflows.sh <org/repo>"
+# --- Arguments ---------------------------------------------------------------
+if [ $# -lt 2 ]; then
+  echo "Usage: bash sync-workflows.sh <org/repo> <workdir>"
   exit 1
 fi
 
-FULL_REPO="$1"
+FULL_REPO="$1"      # e.g. LostMinions/LostMinions.Core
+WORKDIR="$2"        # already-cloned repo folder
+
+# --- Paths -------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SOURCE_DIR="$ROOT_DIR/.github/workflows"
 REPOS_FILE="$SCRIPT_DIR/repos.json"
+MANIFEST_FILE="$SCRIPT_DIR/manifest.json"
 
-TMPDIR=$(mktemp -d)
-cleanup() {
-  cd "$SCRIPT_DIR" || true
-  rm -rf "$TMPDIR" || true
-}
-trap cleanup EXIT
+# --- Load shared helper functions --------------------------------------------
+. "$SCRIPT_DIR/sync-common.sh"
 
-for cmd in gh git jq; do
+cd "$WORKDIR"
+
+# --- Dependency check ---------------------------------------------------------
+for cmd in git jq; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "Missing dependency: $cmd"
     exit 1
   fi
 done
 
-# --- Find repo config from repos.json ---
-strip_comments() {
-  perl -0777 -pe '
-    s{/\*.*?\*/}{}gs;
-    s{//[^\r\n]*}{}g;
-    s/,\s*([}\]])/\1/g;
-  ' "$1"
-}
-
+# --- Parse repo configuration from repos.json --------------------------------
 CLEAN_JSON=$(mktemp)
-strip_comments "$REPOS_FILE" > "$CLEAN_JSON"
+clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
 
-REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" '.repos[] | select((.org + "/" + .name) == $full)' "$CLEAN_JSON")
+REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
+  '.repos[] | select((.org + "/" + .name) == $full)' "$CLEAN_JSON")
 
 if [ -z "$REPO_CONFIG" ]; then
   echo "Repo not found or not enabled in repos.json: $FULL_REPO"
@@ -58,17 +60,28 @@ if [ "$(echo "$REPO_CONFIG" | jq -r '.enabled')" != "true" ]; then
   exit 0
 fi
 
-# --- Deprecated workflow list ---
-DEPRECATED_WORKFLOWS=(
-  "test-compile.yml"
-  "weekly-submodule-update.yml"
-)
+# --- Read defaults & deprecations from manifest.json --------------------------
+DEFAULT_WORKFLOWS=()
+DEPRECATED_WORKFLOWS=()
+if [ -f "$MANIFEST_FILE" ]; then
+  CLEAN_MANIFEST=$(mktemp)
+  clean_json_file "$MANIFEST_FILE" "$CLEAN_MANIFEST"
 
-# --- Build workflow list ---
-WORKFLOWS=(
-  "controller.yml"
-  "update-submodules.yml"
-)
+  # Defaults
+  if jq -e '.defaults.workflows' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t DEFAULT_WORKFLOWS < <(jq -r '.defaults.workflows[]?' "$CLEAN_MANIFEST")
+  fi
+
+  # Deprecations
+  if jq -e '.deprecated.workflows' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t DEPRECATED_WORKFLOWS < <(jq -r '.deprecated.workflows[]?' "$CLEAN_MANIFEST")
+  fi
+
+  rm -f "$CLEAN_MANIFEST"
+fi
+
+# --- Combine defaults with per-repo workflows --------------------------------
+WORKFLOWS=("${DEFAULT_WORKFLOWS[@]}")
 
 EXTRA_WORKFLOWS=$(echo "$REPO_CONFIG" | jq -r '.workflows[]?' 2>/dev/null || true)
 if [ -n "$EXTRA_WORKFLOWS" ]; then
@@ -81,46 +94,37 @@ fi
 mapfile -t WORKFLOWS < <(printf "%s\n" "${WORKFLOWS[@]}" | awk '!seen[$0]++')
 
 echo "Syncing workflows for $FULL_REPO"
-echo ""
-
-if ! gh repo clone "$FULL_REPO" "$TMPDIR" -- --depth=1 >/dev/null 2>&1; then
-  echo "Failed to clone $FULL_REPO"
-  exit 1
-fi
-cd "$TMPDIR"
-
 mkdir -p .github/workflows
 
-# --- Remove deprecated workflows (clean up old names) ---
-for old in "${DEPRECATED_WORKFLOWS[@]}"; do
-  if [ -f "$TMPDIR/.github/workflows/$old" ]; then
-    echo "  - Removing deprecated $old"
-    rm -f "$TMPDIR/.github/workflows/$old"
-  fi
-done
+# --- Remove deprecated workflows ---------------------------------------------
+if ((${#DEPRECATED_WORKFLOWS[@]})); then
+  remove_deprecated ".github/workflows" "${DEPRECATED_WORKFLOWS[@]}"
+fi
 
-# --- Discover all known workflows dynamically from template repo ---
+# --- Discover all template workflows -----------------------------------------
 mapfile -t ALL_WORKFLOWS < <(find "$SOURCE_DIR" -maxdepth 1 -type f -name "*.yml" -printf "%f\n" | sort)
 
 echo "Detected ${#ALL_WORKFLOWS[@]} workflows in template:"
-printf '  - %s\n' "${ALL_WORKFLOWS[@]}"
+if ((${#ALL_WORKFLOWS[@]})); then
+  printf -- '- %s\n' "${ALL_WORKFLOWS[@]}"
+else
+  echo "(no workflows found)"
+fi
 echo ""
 
-# --- Copy selected workflows; dummy the rest ---
+# --- Copy or dummy depending on repo config ----------------------------------
 for wf in "${ALL_WORKFLOWS[@]}"; do
   SRC="$SOURCE_DIR/$wf"
   DEST=".github/workflows/$wf"
   mkdir -p "$(dirname "$DEST")"
 
   if printf '%s\n' "${WORKFLOWS[@]}" | grep -qx "$wf"; then
-    # Copy if explicitly requested for this repo
-    cp "$SRC" "$DEST"
-    echo "  - Copied $wf"
+    cp -f "$SRC" "$DEST"
+    echo "- Copied $wf"
   else
-    # Not listed for this repo → dummy it
-    echo "  - Creating dummy $wf"
+    echo "- Creating dummy $wf"
     {
-      echo "name: 💤 Dummy - $wf"
+      echo "name: Dummy - $wf"
       echo "on:"
       echo "  workflow_call:"
       echo "jobs:"
@@ -132,17 +136,7 @@ for wf in "${ALL_WORKFLOWS[@]}"; do
   fi
 done
 
-if [ -n "$(git status --porcelain)" ]; then
-  git add .github/workflows
-  git commit -m "Sync workflows from template repo" >/dev/null || true
-  if git push origin HEAD >/dev/null 2>&1; then
-    echo "  - Updated $FULL_REPO"
-  else
-    echo "! Push failed for $FULL_REPO"
-  fi
-else
-  echo "  - No workflow changes for $FULL_REPO"
-fi
-
+# --- Stage changes only (commit handled by sync-core) ------------------------
+git add .github/workflows >/dev/null 2>&1 || true
 echo ""
-echo "Finished syncing workflows for $FULL_REPO"
+echo "Workflows staged for $FULL_REPO"
