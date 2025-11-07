@@ -6,7 +6,7 @@ on:
     paths:
       - ".github/workflows/github-org-sync-weekly.yml"
   schedule:
-    - cron: "0 1 * * 0"   # Sundays 01:00 UTC
+    - cron: "0 2 * * 0"   # Sundays 01:00 UTC
 
 jobs:
   trigger-org-sync:
