@@ -23,6 +23,7 @@ on:
       # - "LICENSE"
       - "SECURITY.md"
       - "CODE_OF_CONDUCT.md"
+
   workflow_call:
   workflow_dispatch:
     inputs:
@@ -66,14 +67,17 @@ jobs:
       - name: 📊 Summary
         run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+  # ----------------------------------------
+  # 🧠 Org Sync
+  # ----------------------------------------
   org-sync:
     needs: precheck
     if: ${{ needs.precheck.outputs.over_limit != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
-      - name: 🧰 Minimal checkout for local actions
+      - name: 🧰 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
@@ -153,4 +157,4 @@ jobs:
     if: ${{ needs.precheck.outputs.over_limit == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "⚠️ Skipped build — org usage near or over limit."
+      - run: echo "⚠️ Skipped org sync — org usage near or over limit."
