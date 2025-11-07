@@ -72,12 +72,3 @@ jobs:
             git push origin HEAD:"${{ github.ref_name }}"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
-
-      - name: 🚀 Trigger Compile Workflow
-        if: steps.update_submodules.outputs.updated == 'true'
-        uses: peter-evans/workflow-dispatch@v3
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: ${{ github.repository }}
-          workflow: "compile.yml"
-          ref: ${{ github.ref_name }}
