@@ -24,16 +24,16 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: ⚙️ Setup Git
-        uses: ./.github/actions/setup-git
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
-
-      - name: 🧮 Check GitHub Actions Usage
+      - name: 🧮 Check GitHub Actions usage
         uses: ./.github/actions/check-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
+
+      - name: ⚙️ Validate and Configure Git
+        uses: ./.github/actions/setup-git
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
