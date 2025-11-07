@@ -11,32 +11,14 @@ on:
 jobs:
   compile:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
     runs-on: ubuntu-latest
-
     timeout-minutes: 5
 
-    env:
-      NUGET_PACKAGES: $HOME/.nuget/packages
-
     steps:
-      - name: 🔑 Validate GH_TOKEN
-        shell: bash
-        run: |
-          echo "Validating GitHub token..."
-          if curl -s -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" https://api.github.com/user | grep -q '"login"'; then
-            echo "✅ Token OK"
-          else
-            echo "❌ Bad or expired GH_TOKEN"; exit 1
-          fi
-
-      - name: ⚙️ Configure Git
-        shell: bash
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper store
-          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+      - name: ⚙️ Validate and Configure Git
+        uses: ./.github/actions/setup-git
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Actions usage
         uses: ./.github/actions/check-usage
@@ -44,66 +26,14 @@ jobs:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
 
-      - name: 🧰 Setup .NET 8
-        uses: actions/setup-dotnet@v4
+      - name: ⚙️ Setup .NET + NuGet
+        uses: ./.github/actions/setup-dotnet-nuget
         with:
-          dotnet-version: '8.0.x'
+          gh-token: ${{ secrets.GH_TOKEN }}
+          owner: ${{ github.repository_owner }}
 
-      # 🔐 Configure NuGet (LostMinions feed)
-      - name: 🔐 Configure NuGet for GitHub Packages
-        shell: bash
-        run: |
-          echo "🔐 Configuring NuGet source..."
-
-          # Always use LostMinions feed for shared libraries
-          FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
-
-          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
-            echo "📦 External repository detected — using LostMinions feed for shared libraries."
-          else
-            echo "📦 Repository belongs to LostMinions — using local org feed."
-          fi
-
-          # Clean up any existing source
-          dotnet nuget remove source github --force >/dev/null 2>&1 || true
-
-          # Add the fixed feed URL
-          dotnet nuget add source "$FEED_URL" \
-            --name "github" \
-            --username "TheKrush" \
-            --password "${{ secrets.GH_TOKEN }}" \
-            --store-password-in-clear-text
-
-          echo "✅ NuGet source configured: $FEED_URL"
-
-      - name: 💾 Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.nuget/packages
-            ~/.local/share/NuGet/v3-cache
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: 🔍 Detect solution or project
-        id: solution
-        shell: bash
-        run: |
-          SOLUTION=$(find . -maxdepth 1 -type f \( -name "*.sln" -o -name "*.csproj" \) | head -n 1)
-          if [ -z "$SOLUTION" ]; then
-            echo "❌ No solution or project file found."; exit 1
-          fi
-          echo "SOLUTION=$SOLUTION" >> $GITHUB_ENV
-          echo "🔍 Found build target: $SOLUTION"
-
-      - name: 🧱 Restore dependencies
-        shell: bash
-        run: dotnet restore "$SOLUTION" --verbosity quiet
-
-      - name: 🏗️ Build solution
-        shell: bash
-        run: dotnet build "$SOLUTION" -c Release --no-restore --nologo --verbosity minimal
+      - name: 🏗️ Build .NET project
+        uses: ./.github/actions/build-dotnet-solution
 
       - name: ✅ Verify Build Success
         shell: bash

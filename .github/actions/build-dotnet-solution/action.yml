@@ -1,0 +1,39 @@
+name: "Build .NET Solution or Project"
+description: "Detects a .sln or .csproj, restores dependencies, and builds in Release mode."
+
+inputs:
+  configuration:
+    description: "Build configuration (Debug or Release)"
+    default: "Release"
+  verbosity:
+    description: "MSBuild verbosity level"
+    default: "minimal"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔍 Detect solution or project
+      id: detect
+      shell: bash
+      run: |
+        SOLUTION=$(find . -maxdepth 1 -type f \( -name "*.sln" -o -name "*.csproj" \) | head -n 1)
+        if [ -z "$SOLUTION" ]; then
+          echo "❌ No solution or project file found."; exit 1
+        fi
+        echo "SOLUTION=$SOLUTION" >> $GITHUB_ENV
+        echo "🔍 Found build target: $SOLUTION"
+
+    - name: 🧱 Restore dependencies
+      shell: bash
+      run: |
+        export NUGET_PACKAGES="$HOME/.nuget/packages"
+        dotnet restore "$SOLUTION" --verbosity quiet
+
+    - name: 🏗️ Build solution
+      shell: bash
+      run: |
+        dotnet build "$SOLUTION" \
+          -c "${{ inputs.configuration }}" \
+          --no-restore \
+          --nologo \
+          --verbosity "${{ inputs.verbosity }}"

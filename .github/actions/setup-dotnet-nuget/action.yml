@@ -1,0 +1,55 @@
+name: "Setup .NET and NuGet for LostMinions"
+description: "Sets up .NET SDK, configures LostMinions NuGet feed, and caches packages."
+
+inputs:
+  dotnet-version:
+    description: "SDK version to install"
+    default: "8.0.x"
+  gh-token:
+    description: "GitHub token for NuGet feed authentication"
+    required: true
+  owner:
+    description: "Repository owner (org)"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🧰 Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: 🔐 Configure NuGet feed
+      shell: bash
+      run: |
+        echo "🔐 Configuring LostMinions NuGet feed..."
+        FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
+
+        if [ "${{ inputs.owner }}" != "LostMinions" ]; then
+          echo "📦 External repository detected — using LostMinions feed for shared libraries."
+        else
+          echo "📦 Repository belongs to LostMinions — using local org feed."
+        fi
+
+        # Clean up existing feed
+        dotnet nuget remove source github --force >/dev/null 2>&1 || true
+
+        # Add feed with credentials
+        dotnet nuget add source "$FEED_URL" \
+          --name "github" \
+          --username "TheKrush" \
+          --password "${{ inputs.gh-token }}" \
+          --store-password-in-clear-text
+
+        echo "✅ NuGet source configured: $FEED_URL"
+
+    - name: 💾 Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.nuget/packages
+          ~/.local/share/NuGet/v3-cache
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
