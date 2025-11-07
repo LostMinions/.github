@@ -13,13 +13,18 @@ permissions:
   actions: write
 
 jobs:
-  submodule-update:
+  # ----------------------------------------
+  # 🧩 Precheck
+  # ----------------------------------------
+  precheck:
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit }}
 
     steps:
-      - name: 🧰 Minimal checkout for local actions
+      - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
@@ -27,21 +32,34 @@ jobs:
             .github/scripts
           fetch-depth: 1
 
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
       - name: 🧮 Check GitHub Usage
         id: usage
         uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
-          # org-name: ${{ github.repository_owner }}
           check-actions: "true"
           check-packages-bandwidth: "false"
 
-      - name: 🚫 Skip if over limit
-        if: steps.usage.outputs.result != 'success'
-        run: |
-          echo "⚠️ Usage near or over limit — skipping rest of job."
-          exit 0
+      - name: 📊 Summary
+        run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+  # ----------------------------------------
+  # 🔄 Update Submodules
+  # ----------------------------------------
+  submodule-update:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      updated: ${{ steps.update_submodules.outputs.updated }}
+
+    steps:
       - name: ⚙️ Validate and Configure Git
         uses: ./.github/actions/setup-git
         with:
@@ -76,3 +94,29 @@ jobs:
             git push origin HEAD:"${{ github.ref_name }}"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
+
+  # ----------------------------------------
+  # 🚀 Trigger Compile Workflow (if updated)
+  # ----------------------------------------
+  trigger-compile:
+    needs: submodule-update
+    if: ${{ needs.submodule-update.outputs.updated == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Trigger Compile Workflow
+        uses: peter-evans/workflow-dispatch@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: "compile.yml"
+          ref: ${{ github.ref_name }}
+
+  # ----------------------------------------
+  # 🚫 Skipped (if over usage limit)
+  # ----------------------------------------
+  skipped:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "⚠️ Skipped submodule update — org usage near or over limit."
