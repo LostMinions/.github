@@ -34,16 +34,35 @@ runs:
         echo "📦 Checking for latest LostMinions.Packages bundle..."
         mkdir -p local-packages
 
-        latest_url=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
-          https://api.github.com/repos/LostMinions/LostMinions.Packages/releases/latest | \
-          jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url')
+        # Fetch release metadata
+        api_response=$(curl -fsSL \
+          -H "Authorization: token $GH_TOKEN" \
+          -H "Accept: application/vnd.github+json" \
+          https://api.github.com/repos/LostMinions/LostMinions.Packages/releases/latest)
 
-        if curl -fsL -H "Authorization: Bearer $GH_TOKEN" -o local-packages/LostMinions.Packages.zip "$latest_url"; then
-          echo "✅ Bundle found. Extracting..."
-          unzip -o local-packages/LostMinions.Packages.zip -d local-packages >/dev/null
-          echo "local-packages" > .nuget-local-source
+        # Extract the asset API URL for the .zip file
+        asset_api_url=$(echo "$api_response" | jq -r '.assets[] | select(.name | endswith(".zip")) | .url' | head -n 1)
+
+        if [[ -n "$asset_api_url" && "$asset_api_url" != "null" ]]; then
+          echo "📎 Found bundle asset:"
+          echo "   $asset_api_url"
+          echo "⬇️ Downloading bundle via API..."
+
+          if curl -L \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/octet-stream" \
+            -o local-packages/LostMinions.Packages.zip \
+            "$asset_api_url"; then
+
+            echo "✅ Bundle downloaded successfully. Extracting..."
+            unzip -o local-packages/LostMinions.Packages.zip -d local-packages >/dev/null
+            echo "local-packages" > .nuget-local-source
+          else
+            echo "⚠️ Failed to download bundle asset via API. Falling back to GitHub Packages feed."
+            rm -f .nuget-local-source
+          fi
         else
-          echo "⚠️ No local bundle found (or download failed). Will use GitHub Packages feed only."
+          echo "⚠️ No .zip asset found in latest release. Falling back to GitHub Packages feed."
           rm -f .nuget-local-source
         fi
 
