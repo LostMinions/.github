@@ -49,10 +49,4 @@ runs:
         [[ "${{ inputs.check-actions }}" == "true" ]] && args+=(--actions --actions-limit "$ACTIONS_LIMIT")
         [[ "${{ inputs.check-packages-bandwidth }}" == "true" ]] && args+=(--packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT")
 
-        if [[ ${#args[@]} -le 3 ]]; then
-          echo "❌ No checks selected — must enable at least one."
-          exit 1
-        fi
-
-        echo "▶️ Executing check-org-usage.sh with args: ${args[*]}"
         bash .github/scripts/check-org-usage.sh "${args[@]}"

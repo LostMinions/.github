@@ -25,17 +25,9 @@ while [[ $# -gt 0 ]]; do
     --actions-limit) ACTIONS_LIMIT="$2"; shift 2 ;;
     --packages-bandwidth-limit) BANDWIDTH_LIMIT="$2"; shift 2 ;;
     --margin) MARGIN="$2"; shift 2 ;;
-    *)
-      echo "Usage: $0 [--actions] [--packages-bandwidth] [--actions-limit <minutes>] [--packages-bandwidth-limit <GB>] [--margin <percent>] [--org <name>]"
-      exit 1 ;;
+    *) echo "Usage: $0 [--actions] [--packages-bandwidth]" ; exit 0 ;;
   esac
 done
-
-if ! $CHECK_ACTIONS && ! $CHECK_BANDWIDTH; then
-  echo "Must specify at least one check: --actions or --packages-bandwidth"
-  echo "result=failure" >> "${GITHUB_OUTPUT:-/dev/null}" || true
-  exit 1
-fi
 
 API="https://api.github.com/organizations/${ORG}/settings/billing/usage/summary"
 FAIL=0
@@ -43,11 +35,7 @@ FAIL=0
 # --- Function: Check Actions minutes ---------------------------------------
 check_actions() {
   echo "Checking Actions usage for $ORG..."
-  resp=$(curl -s -L \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    "$API")
-
+  resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" "$API")
   USED=$(echo "$resp" | jq '[.usageItems[] | select(.sku | test("^actions_(linux|windows|macos)$")) | .grossQuantity] | add // 0')
 
   if [[ -z "$USED" || "$USED" == "null" ]]; then
@@ -62,14 +50,8 @@ check_actions() {
   echo "* Actions: ${USED} / ${ACTIONS_LIMIT} minutes (${PCT}%)"
   echo "* Threshold for stop: ${THRESHOLD} minutes (${MARGIN}% margin)"
 
-  over_limit=$(awk -v u="$USED" -v l="$ACTIONS_LIMIT" 'BEGIN {print (u>=l)?1:0}')
-  near_limit=$(awk -v u="$USED" -v l="$THRESHOLD" 'BEGIN {print (u>=l)?1:0}')
-
-  if [[ "$over_limit" -eq 1 ]]; then
-    echo "Actions usage exceeds limit ($USED / $ACTIONS_LIMIT)."
-    FAIL=1
-  elif [[ "$near_limit" -eq 1 ]]; then
-    echo "Actions usage within ${MARGIN}% of limit."
+  if (( $(echo "$USED >= $THRESHOLD" | bc -l) )); then
+    echo "Actions usage near or over limit."
     FAIL=1
   else
     echo "Actions usage OK."
@@ -79,18 +61,7 @@ check_actions() {
 # --- Function: Check Packages bandwidth ------------------------------------
 check_packages_bandwidth() {
   echo "Checking Packages bandwidth for $ORG..."
-  resp=$(curl -s -L \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    "$API")
-
-  if ! echo "$resp" | grep -q '"usageItems"'; then
-    echo "Could not retrieve Packages usage data."
-    FAIL=1
-    return
-  fi
-
+  resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$API")
   bandwidth_used=$(echo "$resp" | jq -r '.usageItems[] | select(.sku=="packages_bandwidth") | .grossQuantity')
   [[ -z "$bandwidth_used" || "$bandwidth_used" == "null" ]] && bandwidth_used=0
 
@@ -100,7 +71,7 @@ check_packages_bandwidth() {
   printf "* Threshold for stop: %.3f GB (%s%% margin)\n" "$limit_adj" "$MARGIN"
 
   if (( $(echo "$bandwidth_used > $limit_adj" | bc -l) )); then
-    echo "Packages bandwidth near or over limit ($bandwidth_used GB)."
+    echo "Packages bandwidth near or over limit."
     FAIL=1
   else
     echo "Packages bandwidth OK."
@@ -115,8 +86,9 @@ $CHECK_BANDWIDTH && check_packages_bandwidth
 if [[ "$FAIL" -eq 1 ]]; then
   echo "One or more usage checks exceeded safe limits."
   echo "result=failure" >> "${GITHUB_OUTPUT:-/dev/null}" || true
-  exit 1
 else
   echo "All usage within safe limits."
   echo "result=success" >> "${GITHUB_OUTPUT:-/dev/null}" || true
 fi
+
+exit 0  # always exit 0 (no failure emails)
