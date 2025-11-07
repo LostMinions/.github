@@ -35,7 +35,7 @@ jobs:
         if: steps.usage.outputs.over_limit == 'true'
         run: |
           echo "⚠️ Usage near or over limit — skipping rest of job."
-          exit 0
+          exit 78
 
       - name: ⚙️ Validate and Configure Git
         uses: ./.github/actions/setup-git
