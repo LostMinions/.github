@@ -1,5 +1,5 @@
 name: "Setup .NET and NuGet for LostMinions"
-description: "Sets up .NET SDK, configures LostMinions NuGet feed, and caches packages."
+description: "Sets up .NET SDK, configures local LostMinions package bundle (if available), and falls back to GitHub Packages feed."
 
 inputs:
   dotnet-version:
@@ -15,35 +15,70 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # ------------------------------------------------------------
+    # 🧰 Setup .NET SDK
+    # ------------------------------------------------------------
     - name: 🧰 Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ inputs.dotnet-version }}
 
+    # ------------------------------------------------------------
+    # 📦 Attempt to Download Latest LostMinions.Packages Bundle
+    # ------------------------------------------------------------
+    - name: 📥 Download Latest LostMinions.Packages Bundle
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        echo "📦 Checking for latest LostMinions.Packages bundle..."
+        mkdir -p local-packages
+
+        latest_url="https://github.com/LostMinions/LostMinions.Packages/releases/latest/download/LostMinions.Packages.zip"
+
+        if curl -fsL -H "Authorization: Bearer $GH_TOKEN" -o local-packages/LostMinions.Packages.zip "$latest_url"; then
+          echo "✅ Bundle found. Extracting..."
+          unzip -o local-packages/LostMinions.Packages.zip -d local-packages >/dev/null
+          echo "local-packages" > .nuget-local-source
+        else
+          echo "⚠️ No local bundle found (or download failed). Will use GitHub Packages feed only."
+          rm -f .nuget-local-source
+        fi
+
+    # ------------------------------------------------------------
+    # 🔐 Configure NuGet sources
+    # ------------------------------------------------------------
     - name: 🔐 Configure NuGet feed
       shell: bash
       run: |
-        echo "🔐 Configuring LostMinions NuGet feed..."
+        echo "🔧 Configuring NuGet sources..."
         FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
 
-        if [ "${{ inputs.owner }}" != "LostMinions" ]; then
-          echo "📦 External repository detected — using LostMinions feed for shared libraries."
+        # Clean up old feeds
+        dotnet nuget remove source github --force >/dev/null 2>&1 || true
+        dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
+
+        # Local feed first if available
+        if [ -f ".nuget-local-source" ] && [ -d "$(cat .nuget-local-source)" ]; then
+          LOCAL_DIR="$(cat .nuget-local-source)"
+          echo "📦 Using local package bundle: $LOCAL_DIR"
+          dotnet nuget add source "$LOCAL_DIR" --name "local-packages"
         else
-          echo "📦 Repository belongs to LostMinions — using local org feed."
+          echo "⚠️ No local packages directory found."
         fi
 
-        # Clean up existing feed
-        dotnet nuget remove source github --force >/dev/null 2>&1 || true
-
-        # Add feed with credentials
+        # Always add fallback GitHub Packages feed
         dotnet nuget add source "$FEED_URL" \
           --name "github" \
           --username "TheKrush" \
           --password "${{ inputs.gh-token }}" \
           --store-password-in-clear-text
 
-        echo "✅ NuGet source configured: $FEED_URL"
+        echo "✅ NuGet sources configured."
 
+    # ------------------------------------------------------------
+    # 💾 Cache restored NuGet packages
+    # ------------------------------------------------------------
     - name: 💾 Cache NuGet packages
       uses: actions/cache@v4
       with:
