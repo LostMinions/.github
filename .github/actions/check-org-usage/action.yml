@@ -1,5 +1,5 @@
 name: "Check GitHub Org Usage"
-description: "Checks GitHub Actions minutes or Packages bandwidth usage and outputs an over_limit flag."
+description: "Checks GitHub Actions minutes, Packages bandwidth, or other usage categories using CLI flags."
 
 inputs:
   gh-token:
@@ -9,10 +9,12 @@ inputs:
     description: "Organization name"
     required: true
     default: "LostMinions"
-  mode:
-    description: "Usage type to check: actions, packages, or both"
-    required: false
-    default: "actions"
+  check-actions:
+    description: "Run the Actions usage check"
+    default: "false"
+  check-packages-bandwidth:
+    description: "Run the Packages bandwidth check"
+    default: "false"
   actions-limit:
     description: "Actions usage limit (minutes)"
     default: "2000"
@@ -25,7 +27,7 @@ inputs:
 
 outputs:
   over_limit:
-    description: "True if usage is near or over the configured limit"
+    description: "True if any usage is near or over the configured limit"
     value: ${{ steps.check.outputs.result == 'failure' }}
 
 runs:
@@ -37,25 +39,26 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
         ORG_NAME: ${{ inputs.org-name }}
-        MODE: ${{ inputs.mode }}
         ACTIONS_LIMIT: ${{ inputs.actions-limit }}
         PKG_BANDWIDTH_LIMIT: ${{ inputs.packages-bandwidth-limit }}
         MARGIN: ${{ inputs.margin }}
       run: |
-        echo "🧮 Checking usage for '$MODE'..."
-        case "$MODE" in
-          actions)
-            bash .github/scripts/check-org-usage.sh --actions --actions-limit "$ACTIONS_LIMIT" --margin "$MARGIN"
-            ;;
-          packages)
-            bash .github/scripts/check-org-usage.sh --packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT" --margin "$MARGIN"
-            ;;
-          both|all)
-            bash .github/scripts/check-org-usage.sh --actions --packages-bandwidth \
-              --actions-limit "$ACTIONS_LIMIT" --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT" --margin "$MARGIN"
-            ;;
-          *)
-            echo "❌ Invalid mode: $MODE (expected: actions, packages, or both)"
-            exit 1
-            ;;
-        esac
+        echo "🧮 Running GitHub usage checks..."
+        args=()
+        args+=(--org "$ORG_NAME" --token "$GH_TOKEN" --margin "$MARGIN")
+
+        if [[ "${{ inputs.check-actions }}" == "true" ]]; then
+          args+=(--actions --actions-limit "$ACTIONS_LIMIT")
+        fi
+
+        if [[ "${{ inputs.check-packages-bandwidth }}" == "true" ]]; then
+          args+=(--packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT")
+        fi
+
+        if [[ ${#args[@]} -le 3 ]]; then
+          echo "❌ No checks selected — must enable at least one."
+          exit 1
+        fi
+
+        echo "▶️ Executing check-org-usage.sh with args: ${args[*]}"
+        bash .github/scripts/check-org-usage.sh "${args[@]}"
