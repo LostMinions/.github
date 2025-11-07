@@ -71,6 +71,18 @@ ROOT_FILES=(
   "$SOURCE_DIR/CODE_OF_CONDUCT.md"
 )
 
+# Define explicitly managed scripts
+MANAGED_SCRIPTS=(
+  "check-org-gh-actions-usage.sh"
+  # Add more shared scripts here as needed
+)
+
+# Scripts that should be deleted if found in repo
+DEPRECATED_SCRIPTS=(
+  "old-usage-check.sh"
+  "legacy-deploy.sh"
+)
+
 strip_comments() {
   perl -0777 -pe '
     s{/\*.*?\*/}{}gs;
@@ -99,6 +111,35 @@ for d in "${TEMPLATE_DIRS[@]}"; do
     cp -r "$d" .github/
   fi
 done
+
+# --- Sync .github/scripts  ---------------------------------------------------
+SCRIPT_SOURCE="$SOURCE_DIR/.github/scripts"
+if [ -d "$SCRIPT_SOURCE" ]; then
+  echo "- Syncing managed .github/scripts ..."
+
+  mkdir -p .github/scripts
+
+  # --- Remove deprecated scripts ---------------------------------------------
+  for old in "${DEPRECATED_SCRIPTS[@]}"; do
+    if [ -f ".github/scripts/$old" ]; then
+      echo "- Removing deprecated script: $old"
+      rm -f ".github/scripts/$old"
+    fi
+  done
+
+  # --- Copy / update managed scripts -----------------------------------------
+  for script in "${MANAGED_SCRIPTS[@]}"; do
+    SRC="$SCRIPT_SOURCE/$script"
+    DEST=".github/scripts/$script"
+    if [ -f "$SRC" ]; then
+      echo "- Updating $script"
+      cp -f "$SRC" "$DEST"
+      chmod +x "$DEST" 2>/dev/null || true
+    else
+      echo "- Warning: missing source for $script"
+    fi
+  done
+fi
 
 # --- Remove stale license file (swap protection) -----------------------------
 if [[ "$LICENSE_TYPE" == "mit" ]]; then

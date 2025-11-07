@@ -30,6 +30,20 @@ jobs:
             echo "❌ Bad or expired GH_TOKEN"; exit 1
           fi
 
+      - name: 🔍 Check Actions usage
+        id: usage
+        continue-on-error: true
+        env:
+          ORG_NAME: ${{ github.repository_owner }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: bash .github/scripts/check-org-gh-actions-usage.sh --limit 2000 --margin 5
+
+      - name: ⏹ Skip rest of job if limit hit
+        if: steps.usage.outcome != 'success'
+        run: |
+          echo "⚠️ Actions usage too high — skipping remaining steps."
+          exit 0
+
       - name: ⚙️ Configure Git
         shell: bash
         run: |
