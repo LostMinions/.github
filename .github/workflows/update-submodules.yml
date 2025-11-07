@@ -60,10 +60,13 @@ jobs:
       updated: ${{ steps.update_submodules.outputs.updated }}
 
     steps:
-      - name: ⚙️ Validate and Configure Git
-        uses: ./.github/actions/setup-git
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
+      - name: ⚙️ Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
