@@ -32,7 +32,44 @@ on:
         default: "4"
 
 jobs:
+  # ----------------------------------------
+  # 🧩 Precheck
+  # ----------------------------------------
+  precheck:
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit }}
+
+    steps:
+      - name: 🧾 Minimal Checkout for Local Actions
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions
+            .github/scripts
+          fetch-depth: 1
+
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧮 Check GitHub Usage
+        id: usage
+        uses: ./.github/actions/check-org-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          check-actions: "true"
+          check-packages-bandwidth: "true"
+
+      - name: 📊 Summary
+        run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
+
   org-sync:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -45,25 +82,13 @@ jobs:
             .github/scripts
           fetch-depth: 1
 
-      - name: 🧮 Check GitHub Usage
-        id: usage
-        uses: ./.github/actions/check-org-usage
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
-          # org-name: ${{ github.repository_owner }}
-          check-actions: "true"
-          check-packages-bandwidth: "false"
-
-      - name: 🚫 Skip if over limit
-        if: steps.usage.outputs.result != 'success'
+      - name: ⚙️ Configure Git
+        shell: bash
         run: |
-          echo "⚠️ Usage near or over limit — skipping rest of job."
-          exit 0
-
-      - name: ⚙️ Validate and Configure Git
-        uses: ./.github/actions/setup-git
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -120,3 +145,13 @@ jobs:
             fi
           done
           shopt -u nullglob
+
+  # ----------------------------------------
+  # 🚫 Skipped (if over usage limit)
+  # ----------------------------------------
+  skipped:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "⚠️ Skipped build — org usage near or over limit."

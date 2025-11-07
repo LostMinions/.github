@@ -21,8 +21,12 @@
   // Items here are deleted if they still exist in target repos
   "deprecated": {
     "actions": [
-      "setup-nuget-old",
-      "build-dotnet-old"
+      "build-dotnet-package",
+      "build-dotnet-release",
+      "check-usage-action",
+      "check-usage-package",
+      "check-usage",
+      "setup-git"
     ],
     "files": [
       "README-template.md",

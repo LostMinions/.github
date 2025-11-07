@@ -17,13 +17,18 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  # ----------------------------------------
+  # 🧩 Precheck
+  # ----------------------------------------
+  precheck:
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit }}
 
     steps:
-      - name: 🧰 Minimal checkout for local actions
+      - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
@@ -31,25 +36,39 @@ jobs:
             .github/scripts
           fetch-depth: 1
 
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
       - name: 🧮 Check GitHub Usage
         id: usage
         uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
-          # org-name: ${{ github.repository_owner }}
           check-actions: "true"
           check-packages-bandwidth: "true"
 
-      - name: 🚫 Skip if over limit
-        if: steps.usage.outputs.result != 'success'
-        run: |
-          echo "⚠️ Usage near or over limit — skipping rest of job."
-          exit 0
+      - name: 📊 Summary
+        run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
-      - name: ⚙️ Validate and Configure Git
-        uses: ./.github/actions/setup-git
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
+  # ----------------------------------------
+  # 🚀 Publish Bot
+  # ----------------------------------------
+  publish:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: ⚙️ Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -59,9 +78,19 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: 🤖 Publish Discord Bot Release
-        uses: ./.github/actions/build-dotnet-release
+        uses: ./.github/actions/publish-dotnet-release
         with:
           project_filter: "*Bot.csproj"
           bump: ${{ github.event.inputs.bump }}
           runtime: "win-x64"
           gh-token: ${{ secrets.GH_TOKEN }}
+
+  # ----------------------------------------
+  # 🚫 Skipped (if over usage limit)
+  # ----------------------------------------
+  skipped:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "⚠️ Skipped build — org usage near or over limit."

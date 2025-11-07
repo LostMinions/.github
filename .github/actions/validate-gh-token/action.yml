@@ -1,0 +1,20 @@
+name: "Validate GH_TOKEN"
+description: "Validates the provided GitHub token."
+
+inputs:
+  gh-token:
+    description: "GitHub token to validate and configure"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔑 Validate GH_TOKEN
+      shell: bash
+      run: |
+        echo "Validating GitHub token..."
+        if curl -s -H "Authorization: Bearer ${{ inputs.gh-token }}" https://api.github.com/user | grep -q '"login"'; then
+          echo "✅ Token OK"
+        else
+          echo "❌ Bad or expired GH_TOKEN"; exit 1
+        fi

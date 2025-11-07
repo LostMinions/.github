@@ -9,20 +9,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ----------------------------------------
+  # 🧩 Precheck
+  # ----------------------------------------
   precheck:
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 3
     outputs:
       over_limit: ${{ steps.usage.outputs.over_limit }}
+
     steps:
-      - name: 🧰 Minimal checkout for local actions
+      - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
             .github/actions
             .github/scripts
           fetch-depth: 1
+
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Usage
         id: usage
@@ -33,8 +42,11 @@ jobs:
           check-packages-bandwidth: "true"
 
       - name: 📊 Summary
-        run: echo "✅ Usage result: ${{ steps.usage.outputs.over_limit }}"
+        run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+  # ----------------------------------------
+  # 🏗️ Compile
+  # ----------------------------------------
   compile:
     needs: precheck
     if: ${{ needs.precheck.outputs.over_limit != 'true' }}
@@ -42,10 +54,13 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: ⚙️ Validate and Configure Git
-        uses: ./.github/actions/setup-git
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
+      - name: ⚙️ Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -68,7 +83,10 @@ jobs:
         shell: bash
         run: echo "✅ Build completed successfully."
 
- skipped:
+  # ----------------------------------------
+  # 🚫 Skipped (if over usage limit)
+  # ----------------------------------------
+  skipped:
     needs: precheck
     if: ${{ needs.precheck.outputs.over_limit == 'true' }}
     runs-on: ubuntu-latest
