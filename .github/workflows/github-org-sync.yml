@@ -36,20 +36,13 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: 🧾 Checkout Repository
+      - name: 🧰 Minimal checkout for local actions
         uses: actions/checkout@v4
         with:
-          #fetch-depth: 1
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
-
-      - name: 🧩 Normalize .github action path (for .github repo only)
-        if: ${{ github.repository == 'LostMinions/.github' }}
-        run: |
-          echo "📎 Ensuring .github/.github points to repo root..."
-          mkdir -p .github
-          ln -sfn .. .github/.github
-          ls -ld .github .github/.github
+          sparse-checkout: |
+            .github/actions
+            .github/scripts
+          fetch-depth: 1
 
       - name: 🧮 Check GitHub Actions usage
         uses: ./.github/actions/check-usage-action
