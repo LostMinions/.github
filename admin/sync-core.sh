@@ -180,7 +180,7 @@ echo "Launching parallel syncs..."
 echo ""
 echo "Repos detected: ${#REPOS[@]}"
 echo "Max parallel jobs: ${MAX_JOBS:-4}"
-printf '- %s\n' "${REPOS[@]}"
+printf -- '- %s\n' "${REPOS[@]}"
 echo ""
 
 MAX_JOBS=${MAX_JOBS:-4}
