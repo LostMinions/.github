@@ -19,6 +19,11 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: 🧩 Test fetch
+        run: gh api repos/peter-evans/workflow-dispatch
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: 🧰 Minimal checkout for local actions
         uses: actions/checkout@v4
         with:
