@@ -13,6 +13,7 @@ jobs:
   # 🧩 Precheck
   # ----------------------------------------
   precheck:
+    name: 🧮 Precheck (Usage & Token)
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
@@ -48,6 +49,7 @@ jobs:
   # 🏗️ Compile
   # ----------------------------------------
   compile:
+    name: 🏗️ Compile
     needs: precheck
     if: ${{ needs.precheck.outputs.over_limit != 'true' }}
     runs-on: ubuntu-latest
@@ -87,6 +89,7 @@ jobs:
   # 🚫 Skipped (if over usage limit)
   # ----------------------------------------
   skipped:
+    name: 🚫 Skipped (Usage Limit)
     needs: precheck
     if: ${{ needs.precheck.outputs.over_limit == 'true' }}
     runs-on: ubuntu-latest
