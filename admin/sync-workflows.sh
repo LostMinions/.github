@@ -105,11 +105,7 @@ fi
 mapfile -t ALL_WORKFLOWS < <(find "$SOURCE_DIR" -maxdepth 1 -type f -name "*.yml" -printf "%f\n" | sort)
 
 echo "Detected ${#ALL_WORKFLOWS[@]} workflows in template:"
-if ((${#ALL_WORKFLOWS[@]})); then
-  printf -- '- %s\n' "${ALL_WORKFLOWS[@]}"
-else
-  echo "(no workflows found)"
-fi
+printf -- '- %s\n' "${ALL_WORKFLOWS[@]}"
 echo ""
 
 # --- Copy or dummy depending on repo config ----------------------------------
