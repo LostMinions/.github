@@ -1,12 +1,6 @@
 name: 🔄 GitHub Org Sync
 
 on:
-  workflow_dispatch:
-    inputs:
-      max_jobs:
-        description: "Maximum concurrent repos to sync"
-        required: false
-        default: "4"
   push:
     branches: [ main, master ]
     paths:
@@ -29,6 +23,13 @@ on:
 #      - "LICENSE"
       - "SECURITY.md"
       - "CODE_OF_CONDUCT.md"
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      max_jobs:
+        description: "Maximum concurrent repos to sync"
+        required: false
+        default: "4"
 
 jobs:
   org-sync:
