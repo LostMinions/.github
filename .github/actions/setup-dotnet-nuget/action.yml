@@ -34,7 +34,9 @@ runs:
         echo "📦 Checking for latest LostMinions.Packages bundle..."
         mkdir -p local-packages
 
-        latest_url="https://github.com/LostMinions/LostMinions.Packages/releases/latest/download/LostMinions.Packages.zip"
+        latest_url=$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+          https://api.github.com/repos/LostMinions/LostMinions.Packages/releases/latest | \
+          jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url')
 
         if curl -fsL -H "Authorization: Bearer $GH_TOKEN" -o local-packages/LostMinions.Packages.zip "$latest_url"; then
           echo "✅ Bundle found. Extracting..."
