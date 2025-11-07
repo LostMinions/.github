@@ -38,33 +38,11 @@ jobs:
           git config --global credential.helper store
           echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
-      - name: 🧰 Checkout .github only
-        uses: actions/checkout@v4
+      - name: 🧮 Check GitHub Actions usage
+        uses: ./.github/actions/check-usage
         with:
-          sparse-checkout: |
-            .github
-          fetch-depth: 1
-
-      - name: 🔍 Check Actions usage
-        id: usage
-        continue-on-error: true
-        env:
-          ORG_NAME: ${{ github.repository_owner }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: bash .github/scripts/check-org-gh-actions-usage.sh --limit 2000 --margin 5
-
-      - name: ⏹ Skip rest of job if limit hit
-        if: steps.usage.outcome != 'success'
-        run: |
-          echo "⚠️ Actions usage too high — skipping remaining steps."
-          exit 0
-
-      - name: 🧾 Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
 
       - name: 🧰 Setup .NET 8
         uses: actions/setup-dotnet@v4
