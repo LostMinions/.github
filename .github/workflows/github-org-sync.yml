@@ -39,12 +39,12 @@ jobs:
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          #fetch-depth: 1
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Actions usage
-        uses: ./actions/check-usage-action
+        uses: ./.github/actions/check-usage-action
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
