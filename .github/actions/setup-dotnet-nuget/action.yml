@@ -56,7 +56,7 @@ runs:
 
             echo "✅ Bundle downloaded successfully. Extracting..."
             unzip -o local-packages/LostMinions.Packages.zip -d local-packages >/dev/null
-            echo "local-packages" > .nuget-local-source
+            echo "$(pwd)/local-packages" > .nuget-local-source
           else
             echo "⚠️ Failed to download bundle asset via API. Falling back to GitHub Packages feed."
             rm -f .nuget-local-source
