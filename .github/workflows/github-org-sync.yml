@@ -35,24 +35,16 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: 🔑 Validate GH_TOKEN
-        shell: pwsh
-        run: |
-          try {
-            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
-            if (-not $r.login) { throw "Invalid" }
-            Write-Host "✅ Token OK: $($r.login)"
-          } catch {
-            Write-Host "❌ Bad or expired GH_TOKEN"
-            exit 1
-          }
+      - name: ⚙️ Validate and Configure Git
+        uses: ./.github/actions/setup-git
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: ⚙️ Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper store
-          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+      - name: 🧮 Check GitHub Actions usage
+        uses: ./.github/actions/check-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
