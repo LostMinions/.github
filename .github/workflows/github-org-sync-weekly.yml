@@ -9,19 +9,7 @@ on:
     - cron: "0 1 * * 0"   # Sundays 01:00 UTC
 
 jobs:
-  trigger-update:
+  trigger-org-sync:
     if: ${{ !endsWith(github.repository, '/.github') }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: 🧾 Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
-
-      - name: 🚀 Trigger github org sync
-        uses: ./.github/workflows/github-org-sync.yml
-        secrets: inherit
+    uses: ./.github/workflows/github-org-sync.yml
+    secrets: inherit
