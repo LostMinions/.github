@@ -24,13 +24,13 @@ jobs:
           fetch-depth: 1
 
       - name: 🧮 Check GitHub Actions usage
-        uses: ./.github/actions/check-usage
+        uses: ./.github/actions/check-usage-action
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
 
       - name: 🧮 Check GitHub Packages usage
-        uses: ./.github/actions/check-package-usage
+        uses: ./.github/actions/check-usage-package
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
