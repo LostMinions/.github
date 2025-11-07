@@ -38,6 +38,12 @@ jobs:
           gh-token: ${{ secrets.GH_TOKEN }}
           org-name: ${{ github.repository_owner }}
 
+      - name: 🧮 Check GitHub Packages usage
+        uses: ./.github/actions/check-package-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
+
       - name: ⚙️ Validate and Configure Git
         uses: ./.github/actions/setup-git
         with:

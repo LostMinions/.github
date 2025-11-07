@@ -47,10 +47,10 @@ near_limit=$(awk -v u="$USED" -v l="$THRESHOLD" 'BEGIN {print (u>=l) ? 1 : 0}')
 
 if [[ "$over_limit" -eq 1 ]]; then
   echo "Usage exceeds free-tier limit ($USED / $LIMIT) --- canceling job."
-  exit 99
+  exit 1
 elif [[ "$near_limit" -eq 1 ]]; then
   echo "Usage within ${MARGIN_PCT}% of limit ($USED / $LIMIT) --- stopping to avoid overage."
-  exit 98
+  exit 1
 else
   echo "Usage within limit --- continuing workflow."
 fi

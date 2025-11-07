@@ -1,0 +1,49 @@
+name: "Check GitHub Packages Usage"
+description: "Performs a minimal checkout, checks org GitHub Packages storage/bandwidth usage, and stops the job if near or over limit."
+
+inputs:
+  gh-token:
+    description: "GitHub token with billing read access"
+    required: true
+  org-name:
+    description: "Organization name"
+    required: true
+    default: "LostMinions"
+  bandwidth-limit:
+    description: "Maximum allowed bandwidth in GB"
+    default: "1.0"
+  storage-limit:
+    description: "Maximum allowed storage in GB"
+    default: "0.5"
+  margin:
+    description: "Margin percentage before stopping job"
+    default: "5"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🧰 Checkout .github only
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          .github
+        fetch-depth: 1
+
+    - name: 🔍 Check Packages Usage
+      id: usage
+      shell: bash
+      continue-on-error: true
+      env:
+        ORG_NAME: ${{ inputs.org-name }}
+        GH_TOKEN: ${{ inputs.gh-token }}
+        BANDWIDTH_LIMIT: ${{ inputs.bandwidth-limit }}
+        STORAGE_LIMIT: ${{ inputs.storage-limit }}
+        MARGIN: ${{ inputs.margin }}
+      run: bash .github/scripts/check-org-gh-packages-usage.sh
+
+    - name: ⏹ Stop job if near/over limit
+      if: steps.usage.outcome != 'success'
+      shell: bash
+      run: |
+        echo "⚠️ GitHub Packages usage too high — skipping job."
+        exit 0
