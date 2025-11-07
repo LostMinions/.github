@@ -76,4 +76,3 @@ jobs:
           repository: ${{ github.repository }}
           workflow: "compile.yml"
           ref: ${{ github.ref_name }}
-          inputs: {}
