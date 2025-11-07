@@ -1,0 +1,36 @@
+name: 🧱 Build .NET Project
+description: Detects and builds a .NET solution or project.
+
+inputs:
+  project_filter:
+    description: "Optional file pattern (e.g. *Bot.csproj)"
+    default: "*.csproj"
+  configuration:
+    default: "Release"
+  verbosity:
+    default: "minimal"
+
+outputs:
+  project:
+    value: ${{ steps.detect.outputs.project }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: detect
+      shell: bash
+      run: |
+        PROJECT=$(find . -type f -name "${{ inputs.project_filter }}" | head -n 1)
+        [ -z "$PROJECT" ] && echo "❌ No project found!" && exit 1
+        echo "project=$PROJECT" >> $GITHUB_OUTPUT
+        echo "📦 Found project: $PROJECT"
+
+    - shell: bash
+      run: dotnet restore "${{ steps.detect.outputs.project }}" --verbosity quiet
+
+    - shell: bash
+      run: dotnet build "${{ steps.detect.outputs.project }}" \
+            -c "${{ inputs.configuration }}" \
+            --no-restore \
+            --nologo \
+            --verbosity "${{ inputs.verbosity }}"

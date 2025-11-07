@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump type (major, minor, patch)'
+        description: "Version bump type (major, minor, patch)"
         required: false
-        default: 'patch'
+        default: "patch"
 
 permissions:
   contents: write
@@ -20,32 +20,20 @@ permissions:
 jobs:
   publish:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
     runs-on: ubuntu-latest
-
     timeout-minutes: 5
-    env:
-      NUGET_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     steps:
-      # 🔁 Shared setup identical to compile-test
-      - name: 🔑 Validate GH_TOKEN
-        shell: bash
-        run: |
-          echo "Validating GitHub token..."
-          if curl -s -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" https://api.github.com/user | grep -q '"login"'; then
-            echo "✅ Token OK"
-          else
-            echo "❌ Bad or expired GH_TOKEN"; exit 1
-          fi
+      - name: ⚙️ Setup Git
+        uses: ./.github/actions/setup-git
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: ⚙️ Configure Git
-        shell: bash
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper store
-          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+      - name: 🧮 Check GitHub Actions Usage
+        uses: ./.github/actions/check-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -54,107 +42,8 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧰 Setup .NET 8
-        uses: actions/setup-dotnet@v4
+      - name: 📦 Publish .NET Package
+        uses: ./.github/actions/build-dotnet-package
         with:
-          dotnet-version: '8.0.x'
-
-      # 🔐 Configure NuGet (LostMinions feed)
-      - name: 🔐 Configure NuGet for GitHub Packages
-        shell: bash
-        run: |
-          echo "🔐 Configuring NuGet source..."
-
-          # Always use LostMinions feed for shared libraries
-          FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
-
-          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
-            echo "📦 External repository detected — using LostMinions feed for shared libraries."
-          else
-            echo "📦 Repository belongs to LostMinions — using local org feed."
-          fi
-
-          # Clean up any existing source
-          dotnet nuget remove source github --force >/dev/null 2>&1 || true
-
-          # Add the fixed feed URL
-          dotnet nuget add source "$FEED_URL" \
-            --name "github" \
-            --username "TheKrush" \
-            --password "${{ secrets.GH_TOKEN }}" \
-            --store-password-in-clear-text
-
-          echo "✅ NuGet source configured: $FEED_URL"
-
-      - name: 💾 Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.nuget/packages
-            ~/.local/share/NuGet/v3-cache
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: 🔍 Detect project
-        id: detect
-        run: |
-          PROJECT=$(find . -maxdepth 1 -name "*.csproj" | head -n 1)
-          [ -z "$PROJECT" ] && echo "❌ No .csproj file found" && exit 1
-          echo "project=$PROJECT" >> $GITHUB_OUTPUT
-          echo "📦 Project: $PROJECT"
-
-      - name: 🔢 Determine next version
-        id: version
-        run: |
-          git fetch --tags --quiet
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
-          BASE=${LATEST_TAG#v}
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
-          case "${{ github.event.inputs.bump }}" in
-            major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
-            minor) ((MINOR++)); PATCH=0 ;;
-            *) ((PATCH++)) ;;
-          esac
-          VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "🔢 Version: $VERSION"
-
-      - name: 🧱 Restore dependencies
-        run: dotnet restore "${{ steps.detect.outputs.project }}"
-
-      - name: 🏗️ Build project
-        run: dotnet build "${{ steps.detect.outputs.project }}" -c Release --no-restore
-
-      - name: 📦 Pack NuGet package
-        run: |
-          cd $(dirname "${{ steps.detect.outputs.project }}")
-          dotnet pack $(basename "${{ steps.detect.outputs.project }}") \
-            -c Release \
-            --no-restore \
-            --no-build \
-            -p:PackageVersion=${{ steps.version.outputs.version }} \
-            -p:IncludeSymbols=true \
-            -p:IncludeSource=true
-
-      - name: 🚀 Push package to GitHub Packages
-        run: |
-          dotnet nuget push "bin/Release/*.nupkg" \
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            --api-key ${{ secrets.GH_TOKEN }} \
-            --skip-duplicate
-
-      - name: 🏷️ Create Git tag
-        run: |
-          TAG="v${{ steps.version.outputs.version }}"
-          git tag -a "$TAG" -m "Release $TAG"
-          git push origin "$TAG"
-
-      - name: 📰 Publish GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "v${{ steps.version.outputs.version }}"
-          name: "📦 ${{ github.event.repository.name }} ${{ steps.version.outputs.version }}"
-          files: bin/Release/*.nupkg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          bump: ${{ github.event.inputs.bump }}
+          gh-token: ${{ secrets.GH_TOKEN }}

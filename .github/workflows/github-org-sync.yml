@@ -20,6 +20,8 @@ on:
       # --- Template folders to watch
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
+      - ".github/actions/**"
+      - ".github/scripts/**"
       - ".github/workflows/**"
 
       # --- Governance documents
@@ -31,16 +33,15 @@ on:
 jobs:
   org-sync:
     runs-on: ubuntu-latest
-
     timeout-minutes: 5
 
     steps:
-      - name: ⚙️ Validate and Configure Git
+      - name: ⚙️ Setup Git
         uses: ./.github/actions/setup-git
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧮 Check GitHub Actions usage
+      - name: 🧮 Check GitHub Actions Usage
         uses: ./.github/actions/check-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
@@ -53,7 +54,8 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: ⚙️ Install tools
+      - name: ⚙️ Install Tools
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y git gh jq perl
@@ -85,6 +87,7 @@ jobs:
 
       - name: 📄 Show Summary
         if: always()
+        shell: bash
         run: |
           echo "### Sync Completed $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

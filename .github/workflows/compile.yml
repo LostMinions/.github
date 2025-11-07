@@ -15,12 +15,12 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: ⚙️ Validate and Configure Git
+      - name: ⚙️ Setup Git
         uses: ./.github/actions/setup-git
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧮 Check GitHub Actions usage
+      - name: 🧮 Check GitHub Actions Usage
         uses: ./.github/actions/check-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
@@ -33,15 +33,16 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: ⚙️ Setup .NET + NuGet
+      - name: ⚙️ Setup .NET and NuGet
         uses: ./.github/actions/setup-dotnet-nuget
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           owner: ${{ github.repository_owner }}
 
-      - name: 🏗️ Build .NET project
-        uses: ./.github/actions/build-dotnet-solution
+      - name: 🧱 Build .NET Project
+        id: build
+        uses: ./.github/actions/build-dotnet
 
       - name: ✅ Verify Build Success
         shell: bash
-        run: echo "✅ $(basename "$SOLUTION") built successfully."
+        run: echo "✅ Build completed successfully."

@@ -1,0 +1,62 @@
+name: 📦 Publish .NET Package
+description: Builds, packs, and publishes a NuGet package to GitHub Packages.
+
+inputs:
+  project_filter:
+    default: "*.csproj"
+  bump:
+    default: "patch"
+  gh-token:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: ⚙️ Setup .NET and NuGet
+      uses: ./.github/actions/setup-dotnet-nuget
+      with:
+        gh-token: ${{ inputs.gh-token }}
+        owner: ${{ github.repository_owner }}
+
+    - name: 🧱 Build Project
+      uses: ./.github/actions/build-dotnet
+      with:
+        project_filter: ${{ inputs.project_filter }}
+
+    - name: 🔢 Determine Version
+      id: version
+      uses: ./.github/actions/bump-version
+      with:
+        bump: ${{ inputs.bump }}
+
+    - name: 📦 Pack NuGet Package
+      shell: bash
+      run: |
+        OUTDIR="artifacts"
+        mkdir -p "$OUTDIR"
+        dotnet pack "${{ steps.build-dotnet.outputs.project }}" \
+          -c Release \
+          --no-restore \
+          --no-build \
+          -p:PackageVersion=${{ steps.version.outputs.version }} \
+          -p:IncludeSymbols=true \
+          -p:IncludeSource=true \
+          -o "$OUTDIR"
+        echo "✅ Package built in $OUTDIR"
+
+    - name: 🚀 Push Package to GitHub Packages
+      shell: bash
+      run: |
+        dotnet nuget push "artifacts/*.nupkg" \
+          --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+          --api-key "${{ inputs.gh-token }}" \
+          --skip-duplicate
+        echo "✅ Package published."
+
+    - name: 🏷️ Tag & Publish Release
+      uses: ./.github/actions/publish-github-release
+      with:
+        version: ${{ steps.version.outputs.version }}
+        gh-token: ${{ inputs.gh-token }}
+        files: artifacts/*.nupkg
+        title: "📦 ${{ github.event.repository.name }}"

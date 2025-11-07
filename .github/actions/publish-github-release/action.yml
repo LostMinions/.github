@@ -1,0 +1,36 @@
+name: 🏷️ Tag and Publish GitHub Release
+description: Creates a git tag and GitHub release for any build output.
+
+inputs:
+  version:
+    description: "Version string (e.g. 1.2.3)"
+    required: true
+  gh-token:
+    description: "GitHub token for pushing and creating releases"
+    required: true
+  files:
+    description: "Path to artifact(s) to attach (e.g. artifacts/*.nupkg)"
+    required: true
+  title:
+    description: "Release title"
+    default: "📦 Release"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🏷️ Create Git Tag
+      shell: bash
+      run: |
+        TAG="v${{ inputs.version }}"
+        git tag -a "$TAG" -m "Release $TAG"
+        git push origin "$TAG"
+        echo "✅ Tagged: $TAG"
+
+    - name: 🚀 Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: "v${{ inputs.version }}"
+        name: "${{ inputs.title }} v${{ inputs.version }}"
+        files: ${{ inputs.files }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh-token }}

@@ -1,0 +1,67 @@
+name: 🤖 Publish .NET Release
+description: Builds, publishes, and zips a self-contained .NET application.
+
+inputs:
+  project_filter:
+    default: "*Bot.csproj"
+  bump:
+    default: "patch"
+  runtime:
+    default: "win-x64"
+  gh-token:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: ⚙️ Setup .NET and NuGet
+      uses: ./.github/actions/setup-dotnet-nuget
+      with:
+        gh-token: ${{ inputs.gh-token }}
+        owner: ${{ github.repository_owner }}
+
+    - name: 🧱 Build Project
+      uses: ./.github/actions/build-dotnet
+      with:
+        project_filter: ${{ inputs.project_filter }}
+
+    - name: 🔢 Determine Version
+      id: version
+      uses: ./.github/actions/bump-version
+      with:
+        bump: ${{ inputs.bump }}
+
+    - name: 🚀 Publish Application
+      id: publish
+      shell: bash
+      run: |
+        OUTPUT="$(pwd)/publish"
+        echo "🚀 Publishing build to: $OUTPUT"
+        dotnet publish "${{ steps.build-dotnet.outputs.project }}" \
+          -c Release \
+          -r "${{ inputs.runtime }}" \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          -o "$OUTPUT" \
+          --no-restore
+        echo "output=$OUTPUT" >> $GITHUB_OUTPUT
+
+    - name: 📦 Zip Output
+      id: zip
+      shell: bash
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        ZIP_PATH="release-$VERSION.zip"
+        PUBLISH_DIR="${{ steps.publish.outputs.output }}"
+        echo "📦 Creating archive: $ZIP_PATH"
+        (cd "$PUBLISH_DIR" && zip -r "../$ZIP_PATH" .)
+        echo "zip_path=$ZIP_PATH" >> $GITHUB_OUTPUT
+
+    - name: 🏷️ Tag & Publish Release
+      uses: ./.github/actions/publish-github-release
+      with:
+        version: ${{ steps.version.outputs.version }}
+        gh-token: ${{ inputs.gh-token }}
+        files: ${{ steps.zip.outputs.zip_path }}
+        title: "🤖 ${{ github.event.repository.name }}"

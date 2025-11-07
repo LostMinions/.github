@@ -15,39 +15,20 @@ permissions:
 jobs:
   submodule-update:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
     runs-on: ubuntu-latest
-
     timeout-minutes: 5
 
     steps:
-      - name: 🔑 Validate GH_TOKEN
-        shell: pwsh
-        run: |
-          try {
-            $r = Invoke-RestMethod https://api.github.com/user -Headers @{Authorization="Bearer ${{secrets.GH_TOKEN}}"} -ErrorAction Stop
-            if (-not $r.login) { throw "Invalid" }
-            Write-Host "✅ Token OK: $($r.login)"
-          } catch {
-            Write-Host "❌ Bad or expired GH_TOKEN"
-            exit 1
-          }
+      - name: ⚙️ Setup Git
+        uses: ./.github/actions/setup-git
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: ⚙️ Configure Git
-        shell: pwsh
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper store
-
-          $gitCreds = if ($IsWindows) {
-            Join-Path $env:USERPROFILE ".git-credentials"
-          } else {
-            Join-Path $env:HOME ".git-credentials"
-          }
-
-          "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" | Out-File -FilePath $gitCreds -Encoding ascii
-          Write-Host "✅ Git credentials stored at $gitCreds"
+      - name: 🧮 Check GitHub Actions Usage
+        uses: ./.github/actions/check-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -58,6 +39,7 @@ jobs:
 
       - name: 🔄 Update All Submodules
         id: update_submodules
+        shell: bash
         run: |
           echo "🔄 Resetting and updating all submodules..."
           git submodule foreach --recursive 'git reset --hard'
@@ -73,17 +55,17 @@ jobs:
             NOW=$(date -u +"%Y-%m-%d %H:%M UTC")
             git commit -m "🔄 Update submodules to latest ($NOW)"
             echo "⬆️ Pushing changes..."
-            git pull --rebase origin ${{ github.ref_name }} || true
-            git push origin HEAD:${{ github.ref_name }}
+            git pull --rebase origin "${{ github.ref_name }}" || true
+            git push origin HEAD:"${{ github.ref_name }}"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: 🚀 Trigger Test Compile Workflow
+      - name: 🚀 Trigger Compile Workflow
         if: steps.update_submodules.outputs.updated == 'true'
-        run: |
-          echo "✅ Triggering test-compile.yml..."
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/test-compile.yml/dispatches \
-            -d '{"ref": "${{ github.ref_name }}"}'
+        uses: peter-evans/workflow-dispatch@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: ${{ github.repository }}
+          workflow: "compile.yml"
+          ref: ${{ github.ref_name }}
+          inputs: {}

@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Version bump type (major, minor, patch)'
+        description: "Version bump type (major, minor, patch)"
         required: false
-        default: 'patch'
+        default: "patch"
 
 permissions:
   contents: write
@@ -19,30 +19,20 @@ permissions:
 jobs:
   build-and-release:
     if: ${{ !endsWith(github.repository, '/.github') }}
-
     runs-on: ubuntu-latest
-
     timeout-minutes: 5
 
     steps:
-      - name: 🔑 Validate GH_TOKEN
-        shell: bash
-        run: |
-          echo "Validating GitHub token..."
-          if curl -s -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" https://api.github.com/user | grep -q '"login"'; then
-            echo "✅ Token OK"
-          else
-            echo "❌ Bad or expired GH_TOKEN"; exit 1
-          fi
+      - name: ⚙️ Setup Git
+        uses: ./.github/actions/setup-git
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: ⚙️ Configure Git
-        shell: bash
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper store
-          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
-          echo "✅ Git credentials stored"
+      - name: 🧮 Check GitHub Actions Usage
+        uses: ./.github/actions/check-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
 
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
@@ -51,140 +41,10 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧰 Setup .NET 8 SDK
-        uses: actions/setup-dotnet@v4
+      - name: 🤖 Publish Discord Bot Release
+        uses: ./.github/actions/build-dotnet-release
         with:
-          dotnet-version: "8.0.x"
-
-      # 🔐 Configure NuGet (LostMinions feed)
-      - name: 🔐 Configure NuGet for GitHub Packages
-        shell: bash
-        run: |
-          echo "🔐 Configuring NuGet source..."
-
-          # Always use LostMinions feed for shared libraries
-          FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
-
-          if [ "${{ github.repository_owner }}" != "LostMinions" ]; then
-            echo "📦 External repository detected — using LostMinions feed for shared libraries."
-          else
-            echo "📦 Repository belongs to LostMinions — using local org feed."
-          fi
-
-          # Clean up any existing source
-          dotnet nuget remove source github --force >/dev/null 2>&1 || true
-
-          # Add the fixed feed URL
-          dotnet nuget add source "$FEED_URL" \
-            --name "github" \
-            --username "TheKrush" \
-            --password "${{ secrets.GH_TOKEN }}" \
-            --store-password-in-clear-text
-
-          echo "✅ NuGet source configured: $FEED_URL"
-
-      - name: 💾 Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.nuget/packages
-            ~/.local/share/NuGet/v3-cache
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: 🔍 Detect Bot Project
-        id: detect
-        shell: bash
-        run: |
-          BOT_PROJECT=$(find . -type f -name "*Bot.csproj" | head -n 1)
-          if [ -z "$BOT_PROJECT" ]; then
-            echo "❌ No Bot project (*.Bot.csproj) found!"; exit 1
-          fi
-          echo "🤖 Found bot project: $BOT_PROJECT"
-          echo "bot_project=$BOT_PROJECT" >> $GITHUB_OUTPUT
-
-      - name: 🔢 Determine next version automatically
-        id: version
-        shell: bash
-        run: |
-          git fetch --tags --quiet
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          echo "Latest tag: $LATEST_TAG"
-
-          if [ -z "$LATEST_TAG" ]; then
-            MAJOR=1; MINOR=0; PATCH=0
-          else
-            BASE_VERSION=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d'.' -f1-3)
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-          fi
-
-          BUMP_TYPE="${{ github.event.inputs.bump || 'patch' }}"
-          echo "Bump type: $BUMP_TYPE"
-
-          case "$BUMP_TYPE" in
-            major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
-            minor) ((MINOR++)); PATCH=0 ;;
-            patch) ((PATCH++)) ;;
-            *) echo "❌ Unknown bump type: $BUMP_TYPE"; exit 1 ;;
-          esac
-
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "🔢 Using version: $NEW_VERSION"
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-      - name: 🧱 Restore dependencies
-        run: dotnet restore "${{ steps.detect.outputs.bot_project }}" --verbosity minimal
-
-      - name: 🏗️ Build bot
-        run: dotnet build "${{ steps.detect.outputs.bot_project }}" -c Release --no-restore --nologo --verbosity minimal
-
-      - name: 🚀 Publish bot (Windows self-contained)
-        id: publish
-        shell: bash
-        run: |
-          OUTPUT="$(pwd)/publish"
-          echo "🚀 Publishing Windows build to: $OUTPUT"
-          dotnet publish "${{ steps.detect.outputs.bot_project }}" \
-            -c Release \
-            -r win-x64 \
-            --self-contained true \
-            -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
-            -o "$OUTPUT" \
-            --no-restore
-          echo "output=$OUTPUT" >> $GITHUB_OUTPUT
-
-      - name: 📦 Zip published output
-        id: zip
-        shell: bash
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          ZIP_PATH="bot-release-$VERSION.zip"
-          PUBLISH_DIR="${{ steps.publish.outputs.output }}"
-          echo "📦 Creating archive: $ZIP_PATH"
-          (cd "$PUBLISH_DIR" && zip -r "../$ZIP_PATH" .)
-          echo "zip_path=$ZIP_PATH" >> $GITHUB_OUTPUT
-
-      - name: 🏷️ Create Git Tag
-        id: tag
-        shell: bash
-        run: |
-          TAG="v${{ steps.version.outputs.version }}"
-          git tag -a "$TAG" -m "Bot release $TAG"
-          git push origin "$TAG"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-      - name: 🚀 Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: "🤖 Bot Release ${{ steps.tag.outputs.tag }}"
-          body: |
-            **Repository:** ${{ github.repository }}
-            **Version:** ${{ steps.version.outputs.version }}
-            **Published by:** ${{ github.actor }}
-          files: |
-            ${{ steps.zip.outputs.zip_path }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          project_filter: "*Bot.csproj"
+          bump: ${{ github.event.inputs.bump }}
+          runtime: "win-x64"
+          gh-token: ${{ secrets.GH_TOKEN }}
