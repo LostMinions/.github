@@ -24,6 +24,14 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: 🧰 Minimal checkout for local actions
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions
+            .github/scripts
+          fetch-depth: 1
+
       - name: 🧮 Check GitHub Actions usage
         uses: ./.github/actions/check-usage
         with:
