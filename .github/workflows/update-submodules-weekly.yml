@@ -6,7 +6,7 @@ on:
     paths:
       - ".github/workflows/update-submodules-weekly.yml"
   schedule:
-    - cron: "0 3 * * 0"   # Sundays 03:00 UTC
+    - cron: "0 1 * * 0"   # Sundays 01:00 UTC
 
 jobs:
   trigger-update:
