@@ -9,7 +9,8 @@ on:
     - cron: "0 3 * * 0"   # Sundays 03:00 UTC
 
 jobs:
-  trigger-update:
+  trigger:
+    name: ⏰
     if: ${{ !endsWith(github.repository, '/.github') }}
     uses: ./.github/workflows/update-submodules.yml
     secrets: inherit
