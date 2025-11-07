@@ -9,11 +9,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  compile:
+  precheck:
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-
+    timeout-minutes: 2
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit }}
     steps:
       - name: 🧰 Minimal checkout for local actions
         uses: actions/checkout@v4
@@ -31,12 +32,16 @@ jobs:
           check-actions: "true"
           check-packages-bandwidth: "true"
 
-      - name: 🚫 Skip if over limit
-        if: steps.usage.outputs.over_limit == 'true'
-        run: |
-          echo "⚠️ Usage near or over limit — skipping rest of job."
-          exit 78
+      - name: 📊 Summary
+        run: echo "✅ Usage result: ${{ steps.usage.outputs.over_limit }}"
 
+  compile:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
       - name: ⚙️ Validate and Configure Git
         uses: ./.github/actions/setup-git
         with:
@@ -62,3 +67,10 @@ jobs:
       - name: ✅ Verify Build Success
         shell: bash
         run: echo "✅ Build completed successfully."
+
+ skipped:
+    needs: precheck
+    if: ${{ needs.precheck.outputs.over_limit == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "⚠️ Skipped build — org usage near or over limit."
