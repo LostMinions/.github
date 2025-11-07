@@ -44,16 +44,10 @@ runs:
         MARGIN: ${{ inputs.margin }}
       run: |
         echo "🧮 Running GitHub usage checks..."
-        args=()
-        args+=(--org "$ORG_NAME" --token "$GH_TOKEN" --margin "$MARGIN")
+        args=(--org "$ORG_NAME" --token "$GH_TOKEN" --margin "$MARGIN")
 
-        if [[ "${{ inputs.check-actions }}" == "true" ]]; then
-          args+=(--actions --actions-limit "$ACTIONS_LIMIT")
-        fi
-
-        if [[ "${{ inputs.check-packages-bandwidth }}" == "true" ]]; then
-          args+=(--packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT")
-        fi
+        [[ "${{ inputs.check-actions }}" == "true" ]] && args+=(--actions --actions-limit "$ACTIONS_LIMIT")
+        [[ "${{ inputs.check-packages-bandwidth }}" == "true" ]] && args+=(--packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT")
 
         if [[ ${#args[@]} -le 3 ]]; then
           echo "❌ No checks selected — must enable at least one."
