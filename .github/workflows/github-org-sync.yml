@@ -36,13 +36,12 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: 🧰 Minimal checkout for local actions
+      - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
         with:
-          sparse-checkout: |
-            .github/actions
-            .github/scripts
-          fetch-depth: 1
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Actions usage
         uses: ./.github/actions/check-usage-action
@@ -54,13 +53,6 @@ jobs:
         uses: ./.github/actions/setup-git
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
-
-      - name: 🧾 Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
 
       - name: ⚙️ Install tools
         run: |

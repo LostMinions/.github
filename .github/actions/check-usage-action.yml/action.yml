@@ -17,13 +17,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: 🧰 Checkout .github only
-      uses: actions/checkout@v4
-      with:
-        sparse-checkout: |
-          .github
-        fetch-depth: 1
-
     - name: 🔍 Check Actions usage
       id: usage
       shell: bash
