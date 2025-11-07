@@ -14,6 +14,9 @@ inputs:
   title:
     description: "Release title"
     default: "📦 Release"
+  keep-latest:
+    description: "Number of releases to keep when cleaning up old ones"
+    default: "5"
 
 runs:
   using: "composite"
@@ -22,6 +25,7 @@ runs:
       shell: bash
       run: |
         TAG="v${{ inputs.version }}"
+        echo "🏷️ Creating tag: $TAG"
         git tag -a "$TAG" -m "Release $TAG"
         git push origin "$TAG"
         echo "✅ Tagged: $TAG"
@@ -38,7 +42,7 @@ runs:
     - name: 🧹 Clean up older releases
       uses: dev-drprasad/delete-older-releases@v0.3.3
       with:
-        keep_latest: 5
+        keep_latest: ${{ inputs.keep-latest }}
         delete_tags: false
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.gh-token }}
