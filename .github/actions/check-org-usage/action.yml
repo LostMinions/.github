@@ -1,0 +1,59 @@
+name: "Check GitHub Org Usage"
+description: "Checks GitHub Actions minutes or Packages bandwidth usage and outputs an over_limit flag."
+
+inputs:
+  gh-token:
+    description: "GitHub token with billing read access"
+    required: true
+  org-name:
+    description: "Organization name"
+    required: true
+  mode:
+    description: "Usage type to check: actions or packages"
+    required: false
+    default: "actions"
+  actions-limit:
+    description: "Actions usage limit (minutes)"
+    default: "2000"
+  packages-bandwidth-limit:
+    description: "Packages bandwidth limit (GB)"
+    default: "1.0"
+  margin:
+    description: "Margin percentage before stopping job"
+    default: "5"
+
+outputs:
+  over_limit:
+    description: "True if usage is near or over the configured limit"
+    value: ${{ steps.check.outcome != 'success' }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔍 Check Org Usage
+      id: check
+      shell: bash
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+        ORG_NAME: ${{ inputs.org-name }}
+        MODE: ${{ inputs.mode }}
+        ACTIONS_LIMIT: ${{ inputs.actions-limit }}
+        PKG_BANDWIDTH: ${{ inputs.packages-bandwidth-limit }}
+        MARGIN: ${{ inputs.margin }}
+      run: |
+        echo "🧮 Checking usage for '$MODE'..."
+        case "$MODE" in
+          actions)
+            bash .github/scripts/check-org-gh-actions-usage.sh \
+              --limit "$ACTIONS_LIMIT" --margin "$MARGIN"
+            ;;
+          packages)
+            bash .github/scripts/check-org-gh-packages-usage.sh \
+              --limit "$PKG_BANDWIDTH" --margin "$MARGIN"
+            ;;
+          *)
+            echo "❌ Invalid mode: $MODE (expected: actions or packages)"
+            exit 1
+            ;;
+        esac

@@ -44,11 +44,20 @@ jobs:
             .github/scripts
           fetch-depth: 1
 
-      - name: 🧮 Check GitHub Actions usage
-        uses: ./.github/actions/check-usage-action
+      - name: 🧮 Check GitHub Usage
+        id: usage
+        uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
-          org-name: ${{ github.repository_owner }}
+          # org-name: ${{ github.repository_owner }}
+          check-actions: "true"
+          check-packages-bandwidth: "false"
+
+      - name: 🚫 Skip if over limit
+        if: steps.usage.outputs.result != 'success'
+        run: |
+          echo "⚠️ Usage near or over limit — skipping rest of job."
+          exit 0
 
       - name: ⚙️ Validate and Configure Git
         uses: ./.github/actions/setup-git

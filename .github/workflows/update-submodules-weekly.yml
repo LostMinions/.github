@@ -12,14 +12,5 @@ jobs:
   trigger-update:
     if: ${{ !endsWith(github.repository, '/.github') }}
     timeout-minutes: 5
-    name: Trigger Update Submodules
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📨 Dispatch update-submodules.yml
-        run: |
-          echo "🔁 Triggering update-submodules.yml..."
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GH_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/update-submodules.yml/dispatches \
-            -d '{"ref": "${{ github.ref_name }}"}'
+    uses: ./.github/workflows/update-submodules.yml
+    secrets: inherit
