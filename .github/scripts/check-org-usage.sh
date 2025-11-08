@@ -78,7 +78,7 @@ check_packages_bandwidth() {
 
   limit_adj=$(awk "BEGIN {print $BANDWIDTH_LIMIT * (1 - $MARGIN / 100)}")
 
-  printf "* Bandwidth: %.3f GB / Limit: %.2f GB\n" "$bandwidth_used" "$BANDWIDTH_LIMIT"
+  printf "* Bandwidth: %.2f GB / Limit: %.2f GB\n" "$bandwidth_used" "$BANDWIDTH_LIMIT"
   printf "* Threshold for stop: %.3f GB (%s%% margin)\n" "$limit_adj" "$MARGIN"
 
   if [[ "$(safe_cmp "$bandwidth_used > $limit_adj")" == "1" ]]; then
