@@ -4,7 +4,7 @@ description: Detects and builds a .NET solution or project.
 inputs:
   project_filter:
     description: "Optional file pattern (e.g. *Bot.csproj)"
-    default: "*.csproj"
+    default: "*.sln"
   configuration:
     default: "Release"
   verbosity:
