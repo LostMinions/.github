@@ -27,11 +27,7 @@ runs:
         else
           BASE=${LATEST#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
-
-          # ✅ FIX: store the bump input safely in a normal bash variable
           bump="${INPUT_BUMP:-${{ inputs.bump }}}"
-
-          # ✅ FIX: reference the bash variable instead of the GitHub one
           case "$bump" in
             major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
             minor) ((MINOR++)); PATCH=0 ;;
