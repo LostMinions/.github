@@ -56,7 +56,7 @@ jobs:
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           check-actions: "true"
-          check-packages-bandwidth: "true"
+          check-packages-bandwidth: "false"
 
       - name: 📊 Summary
         run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
