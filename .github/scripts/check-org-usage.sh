@@ -38,7 +38,10 @@ safe_cmp() { # usage: safe_cmp "1 > 0"
 
 # --- Function: Check Actions minutes ---------------------------------------
 check_actions() {
-  echo "Checking Actions usage for $ORG..."
+  local mode_tag
+  if $CHECK_ACTIONS; then mode_tag="(enforced)"; else mode_tag="(info-only)"; fi
+
+  echo "Checking Actions usage for $ORG $mode_tag"
   resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" "$API" || true)
   USED=$(echo "$resp" | jq '[.usageItems[] | select(.sku | test("^actions_(linux|windows|macos)$")) | .grossQuantity] | add // 0')
 
@@ -64,7 +67,10 @@ check_actions() {
 
 # --- Function: Check Packages bandwidth ------------------------------------
 check_packages_bandwidth() {
-  echo "Checking Packages bandwidth for $ORG..."
+  local mode_tag
+  if $CHECK_BANDWIDTH; then mode_tag="(enforced)"; else mode_tag="(info-only)"; fi
+
+  echo "Checking Packages bandwidth for $ORG $mode_tag"
   resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$API" || true)
   bandwidth_used=$(echo "$resp" | jq -r '.usageItems[] | select(.sku=="packages_bandwidth") | .grossQuantity')
   [[ -z "$bandwidth_used" || "$bandwidth_used" == "null" ]] && bandwidth_used=0
@@ -84,6 +90,7 @@ check_packages_bandwidth() {
 
 # --- Always run both checks ------------------------------------------------
 check_actions
+echo ""
 check_packages_bandwidth
 
 # --- Final status ----------------------------------------------------------
