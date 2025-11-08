@@ -27,15 +27,16 @@ $nugetDir      = Join-Path $env:APPDATA "NuGet"
 $nugetConfig   = Join-Path $nugetDir "NuGet.Config"
 $localPackages = Join-Path $repoRoot "local-packages"
 $bundleZip     = Join-Path $repoRoot "LostMinions.Packages.zip"
+$versionFile   = Join-Path $repoRoot ".local-packages-version"
+$bundleExtracted = $false
 
 if (-not (Test-Path $nugetDir)) {
     New-Item -ItemType Directory -Path $nugetDir | Out-Null
 }
 
-# --- Step 1: Check for latest bundle ---------------------------------------
+# --- Step 1: Fetch or verify latest package bundle -------------------------
 Write-Host "Checking for latest LostMinions.Packages bundle..."
 $apiUrl = "https://api.github.com/repos/$Owner/LostMinions.Packages/releases/latest"
-$versionFile = Join-Path $repoRoot ".local-packages-version"
 
 $headers = @{
     "Authorization" = "token $Token"
@@ -43,98 +44,81 @@ $headers = @{
     "User-Agent"    = "LostMinions-SetupScript"
 }
 
+# Handle empty or missing version file
+if ((Test-Path $versionFile) -and ((Get-Item $versionFile).Length -eq 0)) {
+    Write-Host "Detected empty version file --- deleting to force re-download."
+    Remove-Item $versionFile -Force
+}
+
 try {
-    $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers
-
-    # Normalize paths relative to script location
-    $scriptRoot   = Split-Path -Parent $PSCommandPath
-    $versionFile  = Join-Path $scriptRoot ".local-packages-version"
-    $localPackages = Join-Path $scriptRoot "local-packages"
-    $bundleZip    = Join-Path $scriptRoot "LostMinions.Packages.zip"
-
-    $latestVersion  = $release.tag_name.Trim()
-    $currentVersion = if (Test-Path $versionFile) {
-        (Get-Content $versionFile -Raw).Trim()
-    } else {
-        ""
-    }
-
-    Write-Host "Current version: '$currentVersion'"
-    Write-Host "Latest version:  '$latestVersion'"
-
-    if ($currentVersion -eq $latestVersion -and (Test-Path $localPackages)) {
-        Write-Host "Already up-to-date ($latestVersion). Skipping download."
-        return
-    }
-
-    # otherwise download the new one
-    $asset = $release.assets | Where-Object { $_.name -like "*.zip" } | Select-Object -First 1
-    if ($asset -and $asset.url) {
-        Write-Host "Found new asset ($latestVersion): $($asset.name)"
-        Write-Host "Downloading via GitHub API..."
-        if (Test-Path $bundleZip) { Remove-Item $bundleZip -Force }
-        Invoke-WebRequest -Uri $asset.url `
-            -Headers @{ "Authorization" = "token $Token"; "Accept" = "application/octet-stream" } `
-            -OutFile $bundleZip
-        Write-Host "Download complete."
-
-        # Extract and mark new version
-        if (-not (Test-Path $localPackages)) {
-            New-Item -ItemType Directory -Path $localPackages | Out-Null
-        }
-        Write-Host "Extracting bundle..."
-        Expand-Archive -Force -Path $bundleZip -DestinationPath $localPackages
-        Remove-Item $bundleZip -Force
-        Write-Host "Extracted to: $localPackages"
-        Set-Content -Path $versionFile -Value $latestVersion
-        Write-Host "Recorded version: $latestVersion -> $versionFile"
-    }
-    else {
-        Write-Host "No .zip asset found in latest release."
+    $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers -ErrorAction Stop
+    if (-not $release -or -not $release.tag_name) {
+        throw "GitHub API returned no release information (check token or repo access)."
     }
 }
 catch {
-    Write-Host "Failed to fetch or download bundle:"
-    Write-Host $_.Exception.Message
+    Write-Warning "Failed to contact GitHub API: $($_.Exception.Message)"
+    $release = $null
 }
 
-# --- Step 2: Extract fresh (without wiping older packages) ------------------
+$latestVersion  = if ($release) { ($release.tag_name -replace '^v', '').Trim() } else { 'unknown' }
+$currentVersion = if ((Test-Path $versionFile) -and ((Get-Item $versionFile).Length -gt 0)) {
+    ((Get-Content $versionFile -Raw).Trim() -replace '^v', '')
+} else {
+    ''
+}
+
+Write-Host "Current version: '$currentVersion'"
+Write-Host "Latest version:  '$latestVersion'"
+
+if ($latestVersion -eq 'unknown' -or $currentVersion -ne $latestVersion -or -not (Test-Path $localPackages)) {
+    Write-Host "Update required --- downloading latest bundle..."
+
+    try {
+        if (-not $release) {
+            $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers -ErrorAction Stop
+            $latestVersion = ($release.tag_name -replace '^v', '').Trim()
+        }
+
+        $asset = $release.assets | Where-Object { $_.name -like "*.zip" } | Select-Object -First 1
+        if ($asset -and $asset.url) {
+            if (Test-Path $bundleZip) { Remove-Item $bundleZip -Force }
+            Write-Host "Found bundle asset ($latestVersion): $($asset.name)"
+            Invoke-WebRequest -Uri $asset.url `
+                -Headers @{ "Authorization" = "token $Token"; "Accept" = "application/octet-stream" } `
+                -OutFile $bundleZip
+            Write-Host "Download complete."
+
+            if (-not (Test-Path $localPackages)) {
+                New-Item -ItemType Directory -Path $localPackages | Out-Null
+            }
+
+            Write-Host "Extracting bundle..."
+            Expand-Archive -Force -Path $bundleZip -DestinationPath $localPackages
+            Remove-Item $bundleZip -Force
+            Set-Content -Path $versionFile -Value $latestVersion
+            $bundleExtracted = $true
+            Write-Host "Extracted and recorded version: $latestVersion -> $versionFile"
+        }
+        else {
+            Write-Warning "No .zip asset found in latest release."
+        }
+    }
+    catch {
+        Write-Warning "Failed to download or extract bundle: $($_.Exception.Message)"
+    }
+}
+else {
+    Write-Host "Already up-to-date ($latestVersion). Skipping download."
+    $bundleExtracted = $true
+}
+
+# --- Step 2: Ensure local-packages folder exists ----------------------------
 if (-not (Test-Path $localPackages)) {
     New-Item -ItemType Directory -Path $localPackages | Out-Null
     Write-Host "Created local-packages directory."
 } else {
-    Write-Host "Updating existing local-packages --- old packages will remain."
-}
-
-if (Test-Path $bundleZip) {
-    Write-Host "Extracting bundle (overwriting existing versions)..."
-    Expand-Archive -Force -Path $bundleZip -DestinationPath $localPackages
-    Write-Host "Extracted to: $localPackages"
-
-    try {
-        Remove-Item $bundleZip -Force
-        Write-Host "Cleaned up bundle ZIP."
-    } catch {
-        Write-Host "Could not remove $bundleZip ($_)."
-    }
-} else {
-    Write-Host "No bundle found after download attempt; skipping extraction."
-}
-
-if (Test-Path $bundleZip) {
-    Write-Host "Extracting bundle..."
-    Expand-Archive -Force -Path $bundleZip -DestinationPath $localPackages
-    Write-Host "Extracted to: $localPackages"
-
-    # Clean up ZIP after successful extraction
-    try {
-        Remove-Item $bundleZip -Force
-        Write-Host "Cleaned up bundle ZIP."
-    } catch {
-        Write-Host "Could not remove $bundleZip ($_)."
-    }
-} else {
-    Write-Host "No bundle found after download attempt; skipping extraction."
+    Write-Host "Using existing local-packages directory."
 }
 
 # --- Step 3: Configure NuGet sources ---------------------------------------
@@ -155,7 +139,10 @@ $xml = @"
 </configuration>
 "@
 
-if (-not (Test-Path $nugetDir)) { New-Item -ItemType Directory -Path $nugetDir | Out-Null }
+if (-not (Test-Path $nugetDir)) {
+    New-Item -ItemType Directory -Path $nugetDir | Out-Null
+}
+
 $xml | Out-File -FilePath $nugetConfig -Encoding utf8 -Force
 Write-Host "NuGet configuration written to: $nugetConfig"
 
