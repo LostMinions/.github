@@ -20,7 +20,9 @@ runs:
     - id: detect
       shell: bash
       run: |
-        PROJECT=$(find . -type f -name "${{ inputs.project_filter }}" | head -n 1)
+        pattern="${{ inputs.project_filter }}"
+        echo "🔍 Searching for $pattern"
+        PROJECT=$(find . -type f -name "$pattern" -print | head -n 1)
         if [ -z "$PROJECT" ]; then
           echo "❌ No project found!"
           exit 1
