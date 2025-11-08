@@ -146,8 +146,39 @@ run_sync_for_repo() {
     echo "Committing and pushing all updates..."
     if [ -n "$(git status --porcelain)" ]; then
       git add -A
-      git commit -m "Sync .github assets and metadata" >/dev/null || true
-      git push origin HEAD >/dev/null 2>&1 && echo "Pushed updates" || echo "Push failed"
+      git reset .DS_Store Thumbs.db 2>/dev/null || true
+
+      # Summarize what changed (top-level folders or files)
+      changed=$(git status --porcelain | awk '{print $NF}' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+      changed_summary=$(echo "$changed" | sed 's/ $//')
+
+      # Compose an intelligent commit message
+      file_count=$(git status --porcelain | wc -l | awk '{print $1}')
+
+      commit_msg="Sync $file_count file"
+      [[ "$file_count" -ne 1 ]] && commit_msg+="s"
+      commit_msg+=":"
+
+      [[ "$changed_summary" == *"actions"* ]]   && commit_msg+=" actions"
+      [[ "$changed_summary" == *"scripts"* ]]   && commit_msg+=" scripts"
+      [[ "$changed_summary" == *"workflows"* ]] && commit_msg+=" workflows"
+      [[ "$changed_summary" == *"templates"* ]] && commit_msg+=" templates"
+      [[ "$changed_summary" == *"issue"* ]]     && commit_msg+=" issue-types"
+      [[ "$changed_summary" == *"labels"* ]]    && commit_msg+=" labels"
+      [[ "$changed_summary" == *"community"* ]] && commit_msg+=" community"
+      [[ "$changed_summary" == *"secrets"* ]]   && commit_msg+=" secrets"
+
+      commit_msg=$(echo "$commit_msg" | sed 's/:- /: /')  # normalize dashes
+
+      # Fallback if nothing matched
+      if [[ "$commit_msg" == "Sync $file_count file:" || "$commit_msg" == "Sync $file_count files:" ]]; then
+        commit_msg="Sync $file_count file"
+        [[ "$file_count" -ne 1 ]] && commit_msg+="s"
+        commit_msg+=" (.github assets and metadata)"
+      fi
+
+      git commit -m "$commit_msg" >/dev/null || true
+      git push origin HEAD >/dev/null 2>&1 && echo "Pushed updates: $commit_msg" || echo "Push failed"
     else
       echo "No changes to commit"
     fi
