@@ -11,12 +11,14 @@ on:
         description: "Version bump type (major, minor, patch)"
         required: false
         default: "patch"
+        type: string
   workflow_dispatch:
     inputs:
       bump:
         description: "Version bump type (major, minor, patch)"
         required: false
         default: "patch"
+        type: string
 
 permissions:
   contents: write
