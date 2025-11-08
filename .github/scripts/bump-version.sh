@@ -27,9 +27,9 @@ else
   echo "Bump type: '${bump}'"
 
   case "$bump" in
-    major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
-    minor) ((MINOR++)); PATCH=0 ;;
-    patch|*) ((PATCH++)) ;;
+    major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+    minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+    patch|*) PATCH=$((PATCH + 1)) ;;
   esac
 
   VERSION="$MAJOR.$MINOR.$PATCH"
