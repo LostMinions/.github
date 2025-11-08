@@ -64,6 +64,6 @@ runs:
     - name: 🧹 Delete old NuGet packages
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GH_TOKEN: ${{ inputs.gh-token }}
       run: |
         bash .github/scripts/delete-old-nuget-packages.sh
