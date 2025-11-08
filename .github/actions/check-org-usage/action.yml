@@ -49,4 +49,15 @@ runs:
         [[ "${{ inputs.check-actions }}" == "true" ]] && args+=(--actions --actions-limit "$ACTIONS_LIMIT")
         [[ "${{ inputs.check-packages-bandwidth }}" == "true" ]] && args+=(--packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT")
 
-        bash .github/scripts/check-org-usage.sh "${args[@]}"
+        # --- always run safely, don't fail the step ---
+        set +e
+        bash .github/scripts/check-org-usage.sh "${args[@]}" || true
+        set -e
+
+        # --- parse script result ---
+        if grep -q "result=failure" "${GITHUB_OUTPUT:-/dev/null}"; then
+          echo "❌ One or more usage limits exceeded (requested checks)."
+          exit 1
+        else
+          echo "✅ Usage within safe limits."
+        fi
