@@ -44,6 +44,7 @@ runs:
         MARGIN: ${{ inputs.margin }}
       run: |
         echo "🧮 Running GitHub usage checks..."
+        echo ""
         args=(--org "$ORG_NAME" --token "$GH_TOKEN" --margin "$MARGIN")
 
         [[ "${{ inputs.check-actions }}" == "true" ]] && args+=(--actions --actions-limit "$ACTIONS_LIMIT")
