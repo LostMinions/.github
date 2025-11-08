@@ -23,16 +23,21 @@ runs:
         LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
         if [[ -z "$LATEST" ]]; then
           echo "🆕 No existing tags found. Starting at v1.0.0"
-          BASE="1.0.0"
-          VERSION="$BASE"
+          VERSION="1.0.0"
         else
           BASE=${LATEST#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
-          case "${{ inputs.bump }}" in
+
+          # ✅ FIX: store the bump input safely in a normal bash variable
+          bump="${INPUT_BUMP:-${{ inputs.bump }}}"
+
+          # ✅ FIX: reference the bash variable instead of the GitHub one
+          case "$bump" in
             major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
             minor) ((MINOR++)); PATCH=0 ;;
-            *) ((PATCH++)) ;;
+            patch|*) ((PATCH++)) ;;
           esac
+
           VERSION="$MAJOR.$MINOR.$PATCH"
         fi
 
