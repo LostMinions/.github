@@ -6,6 +6,11 @@ on:
     paths:
       - ".github/workflows/publish.yml"
   workflow_call:
+    inputs:
+      bump:
+        description: "Version bump type (major, minor, patch)"
+        required: false
+        default: "patch"
   workflow_dispatch:
     inputs:
       bump:

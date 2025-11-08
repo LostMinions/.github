@@ -13,6 +13,12 @@ on:
         default: "*.sln"
         type: string
   workflow_dispatch:
+    inputs:
+      project_filter:
+        description: "File pattern for project or solution to build"
+        required: false
+        default: "*.sln"
+        type: string
 
 jobs:
   # ----------------------------------------

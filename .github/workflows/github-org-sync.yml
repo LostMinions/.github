@@ -25,6 +25,11 @@ on:
       - "CODE_OF_CONDUCT.md"
 
   workflow_call:
+    inputs:
+      max_jobs:
+        description: "Maximum concurrent repos to sync"
+        required: false
+        default: "4"
   workflow_dispatch:
     inputs:
       max_jobs:
