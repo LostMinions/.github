@@ -3,7 +3,7 @@ description: Builds, publishes, and zips a self-contained .NET application.
 
 inputs:
   project_filter:
-    default: "*Bot.csproj"
+    default: "*.sln"
   bump:
     default: "patch"
   runtime:
