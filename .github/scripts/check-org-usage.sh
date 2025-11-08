@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------
-# LostMinions --- GitHub Org Usage Check (safe always-exit-0)
+# LostMinions --- GitHub Org Usage Check
 # ------------------------------------------------------------
 
 set -euo pipefail
