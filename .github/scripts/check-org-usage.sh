@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # ------------------------------------------------------------
-# LostMinions --- GitHub Org Usage Check
-# Checks Actions minutes and/or Packages bandwidth.
+# LostMinions --- GitHub Org Usage Check (safe always-exit-0)
 # ------------------------------------------------------------
 
 set -euo pipefail
@@ -33,10 +32,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+safe_cmp() { # usage: safe_cmp "1 > 0"
+  awk "BEGIN {print ($1) ? 1 : 0}" 2>/dev/null || echo 0
+}
+
 # --- Function: Check Actions minutes ---------------------------------------
 check_actions() {
   echo "Checking Actions usage for $ORG..."
-  resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" "$API")
+  resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" "$API" || true)
   USED=$(echo "$resp" | jq '[.usageItems[] | select(.sku | test("^actions_(linux|windows|macos)$")) | .grossQuantity] | add // 0')
 
   if [[ -z "$USED" || "$USED" == "null" ]]; then
@@ -51,7 +54,7 @@ check_actions() {
   echo "* Actions: ${USED} / ${ACTIONS_LIMIT} minutes (${PCT}%)"
   echo "* Threshold for stop: ${THRESHOLD} minutes (${MARGIN}% margin)"
 
-  if (( $(echo "$USED >= $THRESHOLD" | bc -l) )); then
+  if [[ "$(safe_cmp "$USED >= $THRESHOLD")" == "1" ]]; then
     echo "Actions usage near or over limit."
     $CHECK_ACTIONS && FAIL=1
   else
@@ -62,7 +65,7 @@ check_actions() {
 # --- Function: Check Packages bandwidth ------------------------------------
 check_packages_bandwidth() {
   echo "Checking Packages bandwidth for $ORG..."
-  resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$API")
+  resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$API" || true)
   bandwidth_used=$(echo "$resp" | jq -r '.usageItems[] | select(.sku=="packages_bandwidth") | .grossQuantity')
   [[ -z "$bandwidth_used" || "$bandwidth_used" == "null" ]] && bandwidth_used=0
 
@@ -71,7 +74,7 @@ check_packages_bandwidth() {
   printf "* Bandwidth: %.3f GB / Limit: %.2f GB\n" "$bandwidth_used" "$BANDWIDTH_LIMIT"
   printf "* Threshold for stop: %.3f GB (%s%% margin)\n" "$limit_adj" "$MARGIN"
 
-  if (( $(echo "$bandwidth_used > $limit_adj" | bc -l) )); then
+  if [[ "$(safe_cmp "$bandwidth_used > $limit_adj")" == "1" ]]; then
     echo "Packages bandwidth near or over limit."
     $CHECK_BANDWIDTH && FAIL=1
   else
@@ -92,4 +95,4 @@ else
   echo "result=success" >> "${GITHUB_OUTPUT:-/dev/null}" || true
 fi
 
-exit 0  # always exit 0 (no failure emails)
+exit 0  # always exit 0
