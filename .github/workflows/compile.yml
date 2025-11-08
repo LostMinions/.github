@@ -11,9 +11,7 @@ on:
         description: "File pattern for project or solution to build"
         required: false
         default: "*.sln"
-    secrets:
-      GH_TOKEN:
-        required: true
+        type: string
   workflow_dispatch:
 
 jobs:
