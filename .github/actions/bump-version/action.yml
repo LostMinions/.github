@@ -19,15 +19,26 @@ runs:
         # Be resilient — repo might have no tags yet
         git fetch --tags --quiet || true
 
+        echo "🔍 Available tags in this repository:"
+        git tag --sort=-creatordate || echo "(none)"
+        echo
+
         # Try to find the latest tag; default to v1.0.0 if none exist
-        LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        LATEST=$(git describe --tags --abbrev=0 2>/dev/null || git tag --sort=-creatordate | head -n1 || echo "")
+        echo "📎 LATEST detected tag: '${LATEST}'"
+        echo
+
         if [[ -z "$LATEST" ]]; then
           echo "🆕 No existing tags found. Starting at v1.0.0"
           VERSION="1.0.0"
         else
           BASE=${LATEST#v}
+          echo "📦 Normalized base version: '$BASE'"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+
           bump="${INPUT_BUMP:-${{ inputs.bump }}}"
+          echo "🔧 Bump type: '$bump'"
+
           case "$bump" in
             major) ((MAJOR++)); MINOR=0; PATCH=0 ;;
             minor) ((MINOR++)); PATCH=0 ;;
@@ -37,5 +48,6 @@ runs:
           VERSION="$MAJOR.$MINOR.$PATCH"
         fi
 
+        echo
+        echo "✅ Final computed version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "🔢 Version: $VERSION"
