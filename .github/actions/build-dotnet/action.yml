@@ -21,17 +21,13 @@ runs:
       shell: bash
       run: |
         PROJECT=$(find . -type f -name "${{ inputs.project_filter }}" | head -n 1)
-        [ -z "$PROJECT" ] && echo "❌ No project found!" && exit 1
-        echo "project=$PROJECT" >> $GITHUB_OUTPUT
-        echo "PROJECT=$PROJECT" >> $GITHUB_ENV
+        if [ -z "$PROJECT" ]; then
+          echo "❌ No project found!"
+          exit 1
+        fi
+        echo "project=$PROJECT" >> "$GITHUB_OUTPUT"
+        echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
         echo "📦 Found project: $PROJECT"
 
-    - shell: bash
-      run: dotnet restore "$PROJECT" --verbosity quiet
-
-    - shell: bash
-      run: dotnet build "$PROJECT" \
-            -c "${{ inputs.configuration }}" \
-            --no-restore \
-            --nologo \
-            --verbosity "${{ inputs.verbosity }}"
+        dotnet restore "$PROJECT" --verbosity quiet
+        dotnet build "$PROJECT" -c "${{ inputs.configuration }}" --no-restore --nologo --verbosity "${{ inputs.verbosity }}"
