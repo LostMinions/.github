@@ -16,6 +16,9 @@ ACTIONS_LIMIT=2000        # minutes
 BANDWIDTH_LIMIT=1.0       # GB
 MARGIN=5                  # %
 
+API="https://api.github.com/organizations/${ORG}/settings/billing/usage/summary"
+FAIL=0
+
 # --- Parse CLI args ---------------------------------------------------------
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -30,9 +33,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-API="https://api.github.com/organizations/${ORG}/settings/billing/usage/summary"
-FAIL=0
-
 # --- Function: Check Actions minutes ---------------------------------------
 check_actions() {
   echo "Checking Actions usage for $ORG..."
@@ -41,7 +41,7 @@ check_actions() {
 
   if [[ -z "$USED" || "$USED" == "null" ]]; then
     echo "Could not determine Actions usage (missing data)."
-    FAIL=1
+    $CHECK_ACTIONS && FAIL=1
     return
   fi
 
@@ -53,7 +53,7 @@ check_actions() {
 
   if (( $(echo "$USED >= $THRESHOLD" | bc -l) )); then
     echo "Actions usage near or over limit."
-    FAIL=1
+    $CHECK_ACTIONS && FAIL=1
   else
     echo "Actions usage OK."
   fi
@@ -73,15 +73,15 @@ check_packages_bandwidth() {
 
   if (( $(echo "$bandwidth_used > $limit_adj" | bc -l) )); then
     echo "Packages bandwidth near or over limit."
-    FAIL=1
+    $CHECK_BANDWIDTH && FAIL=1
   else
     echo "Packages bandwidth OK."
   fi
 }
 
-# --- Execute checks --------------------------------------------------------
-$CHECK_ACTIONS && check_actions
-$CHECK_BANDWIDTH && check_packages_bandwidth
+# --- Always run both checks ------------------------------------------------
+check_actions
+check_packages_bandwidth
 
 # --- Final status ----------------------------------------------------------
 if [[ "$FAIL" -eq 1 ]]; then
