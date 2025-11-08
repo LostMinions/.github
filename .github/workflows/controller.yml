@@ -126,6 +126,8 @@ jobs:
     needs: analyze
     uses: ./.github/workflows/compile.yml
     secrets: inherit
+    with:
+      project_filter: "*.sln"
 
   publish:
     name: 🚀 Publish Package
