@@ -63,6 +63,7 @@ check_actions() {
   else
     echo "Actions usage OK."
   fi
+  echo ""
 }
 
 # --- Function: Check Packages bandwidth ------------------------------------
@@ -86,11 +87,11 @@ check_packages_bandwidth() {
   else
     echo "Packages bandwidth OK."
   fi
+  echo ""
 }
 
 # --- Always run both checks ------------------------------------------------
 check_actions
-echo ""
 check_packages_bandwidth
 
 # --- Final status ----------------------------------------------------------
