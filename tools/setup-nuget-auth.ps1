@@ -1,19 +1,13 @@
 <#
 .SYNOPSIS
   Syncs all available LostMinions.Packages releases for local development.
-  - Downloads any missing bundle releases (in chronological order).
-  - Extracts all directly into local-packages/ (overwriting existing versions).
-  - Tracks downloaded versions in .local-packages-version.
-  - Adds NuGet sources automatically.
-
-.EXAMPLE
-  .\setup-nuget-auth.ps1 -Token "ghp_xxxxxxxxxxxxxxxxx"
+  - Uses GH_TOKEN / GITHUB_TOKEN automatically if set.
+  - Prompts once if not found.
+  - Configures NuGet sources and downloads missing packages.
 #>
 
 param(
-    [Parameter(Mandatory = $true)]
     [string]$Token,
-
     [string]$User = "TheKrush",
     [string]$Owner = "LostMinions"
 )
@@ -22,6 +16,25 @@ Write-Host ""
 Write-Host "Setting up NuGet for LostMinions development..."
 Write-Host ""
 
+# --- Prefer environment tokens if not provided -------------------------
+if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
+    $Token = $env:GH_TOKEN ?? $env:GITHUB_TOKEN
+}
+
+if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
+    Write-Host " No GitHub token found in environment variables."
+    $Token = Read-Host "Please paste a valid GitHub Personal Access Token"
+}
+
+if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
+    Write-Host "Cannot continue without a valid GitHub token."
+    exit 1
+}
+
+Write-Host "Token acquired. Proceeding..."
+Write-Host ""
+
+# --- Paths --------------------------------------------------------------
 $repoRoot      = (Get-Location).Path
 $nugetDir      = Join-Path $env:APPDATA "NuGet"
 $nugetConfig   = Join-Path $nugetDir "NuGet.Config"
@@ -29,11 +42,11 @@ $localPackages = Join-Path $repoRoot "local-packages"
 $bundleZip     = Join-Path $repoRoot "LostMinions.Packages.zip"
 $versionFile   = Join-Path $repoRoot ".local-packages-version"
 
-if (-not (Test-Path $nugetDir)) {
-    New-Item -ItemType Directory -Path $nugetDir | Out-Null
-}
-if (-not (Test-Path $localPackages)) {
-    New-Item -ItemType Directory -Path $localPackages | Out-Null
+# Ensure directories exist
+foreach ($dir in @($nugetDir, $localPackages)) {
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    }
 }
 
 Write-Host "Fetching LostMinions.Packages releases..."
@@ -54,11 +67,11 @@ catch {
 }
 
 if (-not $releases -or $releases.Count -eq 0) {
-    Write-Host "No releases found."
+    Write-Host "No releases found for LostMinions.Packages."
     exit 0
 }
 
-# Read locally downloaded versions
+# --- Determine which releases to download -------------------------------
 $downloadedVersions = @()
 if (Test-Path $versionFile) {
     $downloadedVersions = Get-Content $versionFile | ForEach-Object { ($_ -replace '^v', '').Trim() } | Where-Object { $_ -ne '' }
@@ -73,7 +86,7 @@ foreach ($release in $releases) {
 }
 
 if ($newReleases.Count -eq 0) {
-    Write-Host "All releases already downloaded. No updates needed."
+    Write-Host "All LostMinions.Packages releases already downloaded."
 } else {
     $ordered = $newReleases | Sort-Object {[version]($_.tag_name -replace '^v','')}
     Write-Host "Found $($ordered.Count) new release(s) to download."
@@ -86,24 +99,22 @@ if ($newReleases.Count -eq 0) {
             continue
         }
 
-        Write-Host "Downloading LostMinions.Packages $tag..."
+        Write-Host " Downloading LostMinions.Packages $tag..."
         if (Test-Path $bundleZip) { Remove-Item $bundleZip -Force }
         Invoke-WebRequest -Uri $asset.url `
             -Headers @{ "Authorization" = "token $Token"; "Accept" = "application/octet-stream" } `
             -OutFile $bundleZip
         Write-Host "Download complete."
 
-        Write-Host "Extracting into local-packages (will overwrite existing)..."
+        Write-Host "Extracting into local-packages..."
         Expand-Archive -Force -Path $bundleZip -DestinationPath $localPackages
         Remove-Item $bundleZip -Force
         Add-Content -Path $versionFile -Value $tag
         Write-Host "Recorded version: $tag"
     }
-
-    Write-Host "All new releases downloaded and extracted successfully."
 }
 
-# --- Configure NuGet sources ---------------------------------------
+# --- Configure NuGet sources -------------------------------------------
 $xml = @"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
@@ -121,13 +132,10 @@ $xml = @"
 </configuration>
 "@
 
-if (-not (Test-Path $nugetDir)) {
-    New-Item -ItemType Directory -Path $nugetDir | Out-Null
-}
 $xml | Out-File -FilePath $nugetConfig -Encoding utf8 -Force
 Write-Host "NuGet configuration written to: $nugetConfig"
 
-# --- Register globally ---------------------------------------------
+# --- Register globally -----------------------------------------------
 Write-Host ""
 Write-Host "Registering NuGet sources globally..."
 dotnet nuget remove source local-packages -v q -f 2>$null | Out-Null
