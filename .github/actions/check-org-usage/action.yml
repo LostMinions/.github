@@ -23,7 +23,7 @@ inputs:
     default: "1.0"
   margin:
     description: "Margin percentage before stopping job"
-    default: "1"
+    default: "0.5"
 
 outputs:
   over_limit:
