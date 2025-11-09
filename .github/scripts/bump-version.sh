@@ -7,7 +7,12 @@ echo "Tags in repo:"
 git tag --sort=-creatordate || echo "(none)"
 echo
 
-LATEST=$(git describe --tags --abbrev=0 2>/dev/null || git tag --sort=-creatordate | head -n1 || echo "")
+# Fetch all tags quietly
+git fetch --tags --quiet || true
+
+# Find the latest tag numerically (vX.Y.Z format)
+LATEST=$(git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || echo "")
+
 echo "LATEST detected tag: '${LATEST}'"
 
 if [[ -z "$LATEST" ]]; then
