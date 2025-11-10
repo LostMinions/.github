@@ -18,17 +18,30 @@ Write-Host ""
 
 # --- Prefer environment tokens if not provided -------------------------
 if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
-    $Token = $env:GH_TOKEN ?? $env:GITHUB_TOKEN
+    if (-not $env:GH_TOKEN -and -not $env:GITHUB_TOKEN) {
+        Write-Host " No GitHub token found in environment variables."
+        $Token = Read-Host "Please paste a valid GitHub Personal Access Token"
+    }
+    else {
+        # Pick whichever is available
+        $Token = if ($env:GH_TOKEN) { $env:GH_TOKEN } else { $env:GITHUB_TOKEN }
+    }
 }
 
-if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
-    Write-Host " No GitHub token found in environment variables."
-    $Token = Read-Host "Please paste a valid GitHub Personal Access Token"
-}
-
+# --- Validate token -----------------------------------------------------
 if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
     Write-Host "Cannot continue without a valid GitHub token."
     exit 1
+}
+
+# --- Persist token for this session ------------------------------------
+if (-not $env:GH_TOKEN -or $env:GH_TOKEN -ne $Token) {
+    $env:GH_TOKEN = $Token
+    Write-Host "GH_TOKEN set for this session."
+}
+if (-not $env:GITHUB_TOKEN -or $env:GITHUB_TOKEN -ne $Token) {
+    $env:GITHUB_TOKEN = $Token
+    Write-Host "GITHUB_TOKEN set for this session."
 }
 
 Write-Host "Token acquired. Proceeding..."

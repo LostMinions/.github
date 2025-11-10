@@ -1,0 +1,156 @@
+name: 🔄 Sync Libraries
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/sync-library.yml"
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Auto-commit updates if new library tags are found"
+        required: false
+        default: "true"
+
+permissions:
+  contents: write
+
+jobs:
+  # ----------------------------------------
+  # 🧩 Precheck
+  # ----------------------------------------
+  precheck:
+    name: 🧮 Precheck
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    runs-on: self-hosted
+    timeout-minutes: 3
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit }}
+
+    steps:
+      - name: 🏁 Identify Runner
+        run: |
+          echo "Running Org Sync on $(hostname) (${RUNNER_OS})"
+
+      - name: 🧾 Minimal Checkout for Local Actions
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions
+            .github/scripts
+          fetch-depth: 1
+
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧮 Check GitHub Usage
+        id: usage
+        uses: ./.github/actions/check-org-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          check-actions: "true"
+          check-packages-bandwidth: "false"
+
+      - name: 📊 Summary
+        run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
+  sync:
+    name: ${{ format('🔄 Sync Libraries {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
+    needs: precheck
+    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
+    timeout-minutes: 5
+
+    steps:
+      - name: ⚙️ Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🔄 Sync Submodule Metadata
+        run: |
+          git submodule sync --recursive --quiet
+          git submodule update --init --recursive --quiet
+
+      - name: 🧰 Initialize & Pin Submodules
+        run: |
+          bash .github/scripts/init-library-submodules.sh
+
+      - name: 🔖 Sync to Latest Library Tags
+        run: |
+          bash .github/scripts/sync-library-tags.sh
+
+      - name: 🧹 Cleanup Untracked Files
+        run: git clean -fdx libs
+
+      - name: 💾 Commit & Push Updated Submodules
+        if: ${{ github.event.inputs.commit != 'false' }}
+        run: |
+          if ! git diff --quiet --submodule; then
+            echo "🔄 Changes detected — committing and pushing..."
+            git add .gitmodules libs
+            summary=$(git submodule status --recursive | awk '{print $2 "@" substr($1,2,7)}' | paste -sd ", " -)
+            git commit -m "🔄 Sync library submodules to latest tagged releases [skip ci]\n\n$summary"
+            git push
+          else
+            echo "✅ No submodule updates found."
+          fi
+
+      - name: 🧾 Verify Pinned Submodule State
+        run: |
+          echo
+          echo "📋 Final pinned library versions:"
+          git submodule status --recursive
+          echo
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
+  publish:
+    name: ${{ format('📦 Bundle & Publish Libraries {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
+    needs: [precheck, sync]
+    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
+    timeout-minutes: 10
+
+    steps:
+      - name: ⚙️ Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+
+      - name: ⚙️ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 📦 Bundle and Publish
+        uses: ./.github/actions/publish-bundled-libraries
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          bump: "patch"
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner

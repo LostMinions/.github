@@ -1,0 +1,27 @@
+name: "Cleanup Runner Workspace"
+description: "Removes job checkout and transient files after a workflow step."
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🧹 Cleanup workspace
+      if: always()
+      shell: bash
+      run: |
+        echo "🧹 Cleaning up workspace on $(hostname) (${RUNNER_OS})"
+
+        # Remove the current job's checkout
+        rm -rf "${{ github.workspace }}" || true
+
+        # Extra safety for self-hosted runners
+        if [[ "${{ runner.environment }}" == "self-hosted" ]]; then
+          echo "Clearing stale _work directories..."
+          find /home/runner/actions-runners -type d -path "*/_work/*" \
+            -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
+
+          echo "Pruning old diagnostics (>7 days)..."
+          find /home/runner/actions-runners -type d -name "_diag" \
+            -mtime +7 -exec rm -rf {} + 2>/dev/null || true
+        fi
+
+        echo "Cleanup complete ✔️"

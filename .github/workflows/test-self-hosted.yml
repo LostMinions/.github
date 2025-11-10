@@ -62,3 +62,7 @@ jobs:
         with:
           name: self-hosted-test
           path: output/test.txt
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner

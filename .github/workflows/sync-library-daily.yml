@@ -1,0 +1,19 @@
+name: 🔄 Sync Libraries - Daily
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/sync-library-daily.yml"
+  schedule:
+    - cron: "0 9 * * *"   # Daily 09:00 UTC
+
+permissions:
+  contents: write
+
+jobs:
+  trigger:
+    name: ⏰
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    uses: ./.github/workflows/sync-library.yml
+    secrets: inherit

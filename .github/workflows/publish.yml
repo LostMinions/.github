@@ -66,6 +66,10 @@ jobs:
       - name: 📊 Summary
         run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
   # ----------------------------------------
   # 🚀 Publish Package
   # ----------------------------------------
@@ -96,3 +100,7 @@ jobs:
         with:
           bump: ${{ github.event.inputs.bump }}
           gh-token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner

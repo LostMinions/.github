@@ -62,6 +62,10 @@ jobs:
       - name: 📊 Summary
         run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
   # ----------------------------------------
   # 🏗️ Compile
   # ----------------------------------------
@@ -102,3 +106,7 @@ jobs:
       - name: ✅ Verify Build Success
         shell: bash
         run: echo "✅ Build completed successfully."
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner

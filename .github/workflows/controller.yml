@@ -52,6 +52,10 @@ jobs:
       - name: 📊 Summary
         run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
   analyze:
     name: ${{ format('🔍 Analyze {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     if: ${{ !endsWith(github.repository, '/.github') }}

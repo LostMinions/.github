@@ -54,6 +54,10 @@ jobs:
       - name: 📊 Summary
         run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
   # ----------------------------------------
   # 🔄 Update Submodules
   # ----------------------------------------
@@ -103,6 +107,10 @@ jobs:
             git push origin HEAD:"${{ github.ref_name }}"
             echo "updated=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
 
   # ----------------------------------------
   # 🚀 Trigger Compile Workflow (if updated)

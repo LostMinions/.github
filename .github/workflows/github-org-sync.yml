@@ -81,6 +81,10 @@ jobs:
       - name: 📊 Summary
         run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
   # ----------------------------------------
   # 🧠 Org Sync
   # ----------------------------------------
@@ -169,3 +173,7 @@ jobs:
             fi
           done
           shopt -u nullglob
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner

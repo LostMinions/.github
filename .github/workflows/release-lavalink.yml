@@ -1,24 +1,8 @@
-name: 🤖 Publish Discord Bot Build
+name: 🧩 Attach Lavalink Runtime to Release
 
 on:
-  push:
-    branches: [ main, master ]
-    paths:
-      - ".github/workflows/publish-bot.yml"
-  workflow_call:
-    inputs:
-      bump:
-        description: "Version bump type (major, minor, patch)"
-        required: false
-        default: "patch"
-        type: string
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: "Version bump type (major, minor, patch)"
-        required: false
-        default: "patch"
-        type: string
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -30,11 +14,10 @@ jobs:
   precheck:
     name: 🧮 Precheck
     if: ${{ !endsWith(github.repository, '/.github') }}
-    runs-on: self-hosted
-    timeout-minutes: 1
-    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
     outputs:
-      over_limit: ${{ steps.usage.outputs.over_limit || 'false' }}
+      over_limit: ${{ steps.usage.outputs.over_limit }}
 
     steps:
       - name: 🏁 Identify Runner
@@ -70,18 +53,16 @@ jobs:
         uses: ./.github/actions/cleanup-runner
 
   # ----------------------------------------
-  # 🚀 Publish Bot
+  # 🧩 Lavalink Attachment
   # ----------------------------------------
-  publish:
-    name: ${{ format('🚀 Publish Bot {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
+  attach-lavalink:
+    name: ${{ format('🧩 Attach Lavalink {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: precheck
-    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
     runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
-    timeout-minutes: 5
+    timeout-minutes: 3
 
     steps:
       - name: ⚙️ Configure Git
-        shell: bash
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -95,13 +76,34 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🤖 Publish Discord Bot Release
-        uses: ./.github/actions/publish-dotnet-release
-        with:
-          project_filter: "*Bot.csproj"
-          bump: ${{ github.event.inputs.bump }}
-          runtime: "win-x64"
-          gh-token: ${{ secrets.GH_TOKEN }}
+      - name: 📦 Zip Lavalink runtime
+        if: ${{ hashFiles('Lavalink/Lavalink.jar') != '' }}
+        shell: pwsh
+        run: |
+          Write-Host "Creating Lavalink.zip..."
+          Compress-Archive -Path 'Lavalink/*' -DestinationPath 'Lavalink.zip' -Force
+
+      - name: 🔍 Check if Lavalink.zip already exists in release
+        id: check_asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh release view "${{ github.event.release.tag_name }}" --repo ${{ github.repository }} --json assets --jq ".assets[].name" | grep -Fx "Lavalink.zip" || true)
+          if [ -n "$existing" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Lavalink.zip already attached to release. Skipping upload."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Lavalink.zip not found, proceeding with upload."
+          fi
+
+      - name: 📤 Attach Lavalink.zip to existing release
+        if: steps.check_asset.outputs.exists == 'false' && ${{ hashFiles('Lavalink/Lavalink.jar') != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" Lavalink.zip --repo ${{ github.repository }} --clobber
+          echo "✅ Lavalink.zip successfully uploaded."
 
       - name: 🧹 Cleanup Runner
         if: always()

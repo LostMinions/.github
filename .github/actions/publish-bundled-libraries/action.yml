@@ -1,0 +1,93 @@
+name: 📦 Publish Bundled Libraries
+description: Bundles latest .nupkg assets from submodules, zips them, and publishes a release only if bundle contents changed.
+
+inputs:
+  bump:
+    description: "Version bump type (major, minor, patch)"
+    default: "patch"
+  gh-token:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # ------------------------------------------------------------
+    # ♻️ Restore cached hash from previous run
+    # ------------------------------------------------------------
+    - name: ♻️ Restore bundle hash
+      id: restore-hash
+      uses: actions/cache@v4
+      with:
+        path: .bundle-hash
+        key: bundle-hash
+
+    # ------------------------------------------------------------
+    # 📦 Bundle library releases
+    # ------------------------------------------------------------
+    - name: 📦 Bundle Library Releases
+      id: bundle
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        bash .github/scripts/bundle-library-releases.sh
+        mkdir -p artifacts
+
+        # Compute new deterministic hash of all artifact files
+        NEW_HASH=$(find artifacts -type f -exec sha256sum {} + | sort | sha256sum | awk '{print $1}')
+        echo "hash=$NEW_HASH" >> "$GITHUB_OUTPUT"
+
+        # Compare to previous hash (if cached)
+        HASH_FILE=".bundle-hash"
+        OLD_HASH=""
+        if [ -f "$HASH_FILE" ]; then
+          OLD_HASH=$(cat "$HASH_FILE")
+          echo "Previous hash: $OLD_HASH"
+        fi
+
+        if [ "$NEW_HASH" == "$OLD_HASH" ]; then
+          echo "No changes detected in bundled artifacts — skipping release."
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        echo "$NEW_HASH" > "$HASH_FILE"
+        echo "changed=true" >> "$GITHUB_OUTPUT"
+
+        ZIP_PATH="LostMinions.Packages.zip"
+        echo "Zipping to $ZIP_PATH"
+        (cd artifacts && zip -r "../$ZIP_PATH" .)
+        echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
+
+    # ------------------------------------------------------------
+    # 💾 Save updated hash to cache (only when changed)
+    # ------------------------------------------------------------
+    - name: 💾 Save new bundle hash
+      if: steps.bundle.outputs.changed == 'true'
+      uses: actions/cache@v4
+      with:
+        path: .bundle-hash
+        key: bundle-hash
+
+    # ------------------------------------------------------------
+    # 🔢 Determine version (only when changed)
+    # ------------------------------------------------------------
+    - name: 🔢 Determine Version
+      id: version
+      if: steps.bundle.outputs.changed == 'true'
+      uses: ./.github/actions/bump-version
+      with:
+        bump: ${{ inputs.bump }}
+
+    # ------------------------------------------------------------
+    # 🏷️ Tag & Publish Release (only when changed)
+    # ------------------------------------------------------------
+    - name: 🏷️ Tag & Publish Release
+      if: steps.bundle.outputs.changed == 'true'
+      uses: ./.github/actions/publish-github-release
+      with:
+        version: ${{ steps.version.outputs.version }}
+        gh-token: ${{ inputs.gh-token }}
+        files: ${{ steps.bundle.outputs.zip_path }}
+        title: "📦 LostMinions.Packages"
+        keep-latest: 10
