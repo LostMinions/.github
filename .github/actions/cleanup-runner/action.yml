@@ -8,27 +8,17 @@ runs:
       if: always()
       shell: bash
       run: |
-        echo "🧹 Cleaning up workspace on $(hostname) (${RUNNER_OS})"
+        echo "🧹 Cleaning up current job workspace: ${{ github.workspace }}"
 
-        # -------------------------------------------------------------------
-        # Clean contents (not directory) to preserve GitHub internal structure
-        # -------------------------------------------------------------------
+        # Only delete contents of the current job's workspace, not parent directories
         if [ -d "${{ github.workspace }}" ]; then
-          echo "Clearing contents of ${{ github.workspace }} ..."
-          find "${{ github.workspace }}" -mindepth 1 -exec rm -rf {} + 2>/dev/null || true
+          find "${{ github.workspace }}" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
         fi
 
-        # -------------------------------------------------------------------
-        # Extra cleanup for self-hosted runners only
-        # -------------------------------------------------------------------
+        # Optional: prune old diagnostics safely (outside the workspace)
         if [[ "$RUNNER_NAME" != "" && "$RUNNER_NAME" != "GitHub Actions" ]]; then
-          echo "Clearing stale _work directories..."
-          find /home/runner/actions-runner -type d -path "*/_work/*" \
-            -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
-
           echo "Pruning old diagnostics (>7 days)..."
-          find /home/runner/actions-runner -type d -name "_diag" \
-            -mtime +7 -exec rm -rf {} + 2>/dev/null || true
+          find /home/runner/actions-runner/_diag -type f -mtime +7 -delete 2>/dev/null || true
 
           echo ""
           echo "📊 Post-cleanup disk usage summary:"
