@@ -4,19 +4,19 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      # --- Workflow files
-      - ".github/workflows/org-sync.yml"
+      # # --- Workflow files
+      # - ".github/workflows/org-sync.yml"
 
-      # --- Source sync files
-      - "admin/*.sh"
-      - "admin/*.json"
+      # # --- Source sync files
+      # - "admin/*.sh"
+      # - "admin/*.json"
 
-      # --- Template folders to watch
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      - ".github/actions/**"
-      - ".github/scripts/**"
-      - ".github/workflows/**"
+      # # --- Template folders to watch
+      # - ".github/ISSUE_TEMPLATE/**"
+      # - ".github/PULL_REQUEST_TEMPLATE/**"
+      # - ".github/actions/**"
+      # - ".github/scripts/**"
+      # - ".github/workflows/**"
 
       # --- Governance documents
       - "CONTRIBUTING.md"
