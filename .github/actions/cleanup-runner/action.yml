@@ -20,16 +20,18 @@ runs:
             -exec rm -rf {} + 2>/dev/null || true
         fi
 
-        # ---------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # 🧩 Detect correct runner base (actions-runner-01, -02, etc.)
-        # ---------------------------------------------------------------
+        # ---------------------------------------------------------------------
         BASE_DIR="$GITHUB_WORKSPACE"
-        while [[ "$BASE_DIR" != "/" && ! "$BASE_DIR" =~ _work ]]; do
+        # climb until we find a folder literally named "_work"
+        while [[ "$BASE_DIR" != "/" && "$(basename "$BASE_DIR")" != "_work" ]]; do
           BASE_DIR="$(dirname "$BASE_DIR")"
         done
-        # Go up one level from _work to runner root
+        
+        # one level up = runner root
         BASE_DIR="$(dirname "$BASE_DIR")"
-
+        
         if [[ -d "$BASE_DIR/_diag" ]]; then
           echo "Detected runner base: $BASE_DIR"
         else
