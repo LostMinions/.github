@@ -14,7 +14,7 @@ jobs:
   precheck:
     name: 🧮 Precheck
     if: ${{ !endsWith(github.repository, '/.github') }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3
     outputs:
       over_limit: ${{ steps.usage.outputs.over_limit }}
