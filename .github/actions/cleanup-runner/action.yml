@@ -11,18 +11,17 @@ runs:
         echo "🧹 Cleaning up workspace on $(hostname) (${RUNNER_OS})"
 
         # -------------------------------------------------------------------
-        # Clean only workspace contents, not the directory itself.
-        #    Deleting the folder can break GitHub’s internal post-job Node calls.
+        # Clean contents (not directory) to preserve GitHub internal structure
         # -------------------------------------------------------------------
         if [ -d "${{ github.workspace }}" ]; then
           echo "Clearing contents of ${{ github.workspace }} ..."
-          rm -rf "${{ github.workspace }}"/* "${{ github.workspace }}"/.[!.]* 2>/dev/null || true
+          find "${{ github.workspace }}" -mindepth 1 -exec rm -rf {} + 2>/dev/null || true
         fi
 
         # -------------------------------------------------------------------
-        # Extra safety for self-hosted runners only
+        # Extra cleanup for self-hosted runners only
         # -------------------------------------------------------------------
-        if [[ "${{ runner.environment }}" == "self-hosted" ]]; then
+        if [[ "${{ runner.labels }}" == *"self-hosted"* ]]; then
           echo "Clearing stale _work directories..."
           find /home/runner/actions-runners -type d -path "*/_work/*" \
             -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
