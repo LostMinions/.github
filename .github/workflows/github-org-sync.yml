@@ -52,6 +52,10 @@ jobs:
       over_limit: ${{ steps.usage.outputs.over_limit }}
 
     steps:
+      - name: 🏁 Identify Runner
+        run: |
+          echo "Running Org Sync on $(hostname) (${RUNNER_OS})"
+
       - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
