@@ -18,14 +18,31 @@ runs:
             -exec rm -rf {} + 2>/dev/null || true
         fi
 
-        # Optional: prune old diagnostics safely (outside the workspace)
+        # ---------------------------------------------------------------------
+        # 🧩 Detect correct runner base (actions-runner-01, -02, etc.)
+        # ---------------------------------------------------------------------
+        BASE_DIR="$(dirname "$(dirname "$GITHUB_WORKSPACE")")"
+        if [[ -d "$BASE_DIR/_diag" ]]; then
+          echo "Detected runner base: $BASE_DIR"
+        else
+          echo "⚠️ Could not detect runner base from $GITHUB_WORKSPACE"
+          BASE_DIR="/home/runner/actions-runner"
+        fi
+
+        # ---------------------------------------------------------------------
+        # 🧹 Optional: prune old diagnostics safely (outside the workspace)
+        # ---------------------------------------------------------------------
         if [[ "$RUNNER_NAME" != "" && "$RUNNER_NAME" != "GitHub Actions" ]]; then
           echo "Pruning old diagnostics (>7 days)..."
-          find /home/runner/actions-runner/_diag -type f -mtime +7 -delete 2>/dev/null || true
+          find "$BASE_DIR/_diag" -type f -mtime +7 -delete 2>/dev/null || true
 
           echo ""
           echo "📊 Post-cleanup disk usage summary:"
-          sudo du -h --max-depth=1 /home/runner/actions-runner/_work | sort -hr | head || true
+          if [[ -d "$BASE_DIR/_work" ]]; then
+            sudo du -h --max-depth=1 "$BASE_DIR/_work" | sort -hr | head || true
+          else
+            echo "⚠️ No _work directory found under $BASE_DIR"
+          fi
         fi
 
         echo "Cleanup complete ✔️"
