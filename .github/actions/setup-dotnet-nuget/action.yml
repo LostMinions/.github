@@ -24,15 +24,16 @@ runs:
         dotnet-version: ${{ inputs.dotnet-version }}
 
     # ------------------------------------------------------------
-    # 📦 Attempt to Download Latest LostMinions.Packages Bundle
+    # 📦 Download or Reuse Global LostMinions.Packages Bundle
     # ------------------------------------------------------------
-    - name: 📥 Download Latest LostMinions.Packages Bundle
+    - name: 📥 Prepare Global LostMinions.Packages Bundle
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
       run: |
         echo "📦 Checking for latest LostMinions.Packages bundle..."
-        mkdir -p local-packages
+        GLOBAL_DIR="/opt/lostminions/local-packages"
+        mkdir -p "$GLOBAL_DIR" || true
 
         # Fetch release metadata
         api_response=$(curl -fsSL \
@@ -40,30 +41,29 @@ runs:
           -H "Accept: application/vnd.github+json" \
           https://api.github.com/repos/LostMinions/LostMinions.Packages/releases/latest)
 
-        # Extract the asset API URL for the .zip file
         asset_api_url=$(echo "$api_response" | jq -r '.assets[] | select(.name | endswith(".zip")) | .url' | head -n 1)
+        latest_tag=$(echo "$api_response" | jq -r '.tag_name')
 
-        if [[ -n "$asset_api_url" && "$asset_api_url" != "null" ]]; then
-          echo "📎 Found bundle asset:"
-          echo "   $asset_api_url"
-          echo "⬇️ Downloading bundle via API..."
-
+        if [[ -d "$GLOBAL_DIR" && -f "$GLOBAL_DIR/.version" && "$(cat "$GLOBAL_DIR/.version")" == "$latest_tag" ]]; then
+          echo "✅ Global bundle already up-to-date ($latest_tag)."
+        else
+          echo "⬇️ Downloading bundle for version $latest_tag..."
           if curl -L \
             -H "Authorization: token $GH_TOKEN" \
             -H "Accept: application/octet-stream" \
-            -o local-packages/LostMinions.Packages.zip \
+            -o "$GLOBAL_DIR/LostMinions.Packages.zip" \
             "$asset_api_url"; then
-
-            echo "✅ Bundle downloaded successfully. Extracting..."
-            unzip -o local-packages/LostMinions.Packages.zip -d local-packages >/dev/null
-            echo "$(pwd)/local-packages" > .nuget-local-source
+            unzip -oq "$GLOBAL_DIR/LostMinions.Packages.zip" -d "$GLOBAL_DIR"
+            echo "$latest_tag" > "$GLOBAL_DIR/.version"
+            echo "✅ Extracted to $GLOBAL_DIR"
           else
-            echo "⚠️ Failed to download bundle asset via API. Falling back to GitHub Packages feed."
-            rm -f .nuget-local-source
+            echo "⚠️ Failed to download global bundle. Will fall back to GitHub feed."
           fi
-        else
-          echo "⚠️ No .zip asset found in latest release. Falling back to GitHub Packages feed."
-          rm -f .nuget-local-source
+        fi
+
+        # Record usable source
+        if [[ -d "$GLOBAL_DIR" ]]; then
+          echo "$GLOBAL_DIR" > .nuget-local-source
         fi
 
     # ------------------------------------------------------------
@@ -75,15 +75,29 @@ runs:
         echo "🔧 Configuring NuGet sources..."
         FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
 
-        # Clean up old feeds
+        # Clean up any stale feeds first
         dotnet nuget remove source github --force >/dev/null 2>&1 || true
         dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
 
-        # Local feed first if available
+        # Local bundle first if available
         if [ -f ".nuget-local-source" ] && [ -d "$(cat .nuget-local-source)" ]; then
           LOCAL_DIR="$(cat .nuget-local-source)"
           echo "📦 Using local package bundle: $LOCAL_DIR"
-          dotnet nuget add source "$LOCAL_DIR" --name "local-packages"
+
+          # Check existing source validity
+          EXISTING_PATH=$(dotnet nuget list source | grep -A1 "local-packages" | tail -n1 | awk '{print $2}' | tr -d '\r')
+
+          if [ -n "$EXISTING_PATH" ] && [ "$EXISTING_PATH" != "$LOCAL_DIR" ]; then
+            echo "⚠️ Existing 'local-packages' source points to: $EXISTING_PATH"
+            echo "🔁 Replacing it with correct path: $LOCAL_DIR"
+            dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
+            dotnet nuget add source "$LOCAL_DIR" --name "local-packages"
+          elif [ -z "$EXISTING_PATH" ]; then
+            echo "➕ Adding new local-packages source."
+            dotnet nuget add source "$LOCAL_DIR" --name "local-packages"
+          else
+            echo "✅ Local-packages source already correct."
+          fi
         else
           echo "⚠️ No local packages directory found."
         fi
