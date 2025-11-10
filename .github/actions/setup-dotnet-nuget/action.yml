@@ -75,7 +75,7 @@ runs:
         echo "🔧 Configuring NuGet sources..."
         FEED_URL="https://nuget.pkg.github.com/LostMinions/index.json"
 
-        # Clean up any stale feeds first
+        # Always nuke stale entries (safe + fast)
         dotnet nuget remove source github --force >/dev/null 2>&1 || true
         dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
 
@@ -83,30 +83,8 @@ runs:
         if [ -f ".nuget-local-source" ] && [ -d "$(cat .nuget-local-source)" ]; then
           LOCAL_DIR="$(cat .nuget-local-source)"
           echo "📦 Using local package bundle: $LOCAL_DIR"
-
-          # Check existing source validity
-          EXISTING_PATH=$(dotnet nuget list source | grep -A1 "local-packages" | tail -n1 | awk '{print $2}' | tr -d '\r')
-
-          if [ -n "$EXISTING_PATH" ] && [ "$EXISTING_PATH" != "$LOCAL_DIR" ]; then
-            echo "⚠️ Existing 'local-packages' source points to: $EXISTING_PATH"
-            echo "🔁 Replacing it with correct path: $LOCAL_DIR"
-            dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
-            # --- safe add ---
-            if ! dotnet nuget add source "$LOCAL_DIR" --name "local-packages" 2>&1 | tee add.log; then
-              if grep -q "already been added" add.log; then
-                echo "⚠️ Source already existed, continuing."
-              else
-                echo "⚠️ Non-fatal add error; continuing anyway."
-              fi
-            fi
-            rm -f add.log
-          elif [ -z "$EXISTING_PATH" ]; then
-            echo "➕ Adding new local-packages source."
-            dotnet nuget add source "$LOCAL_DIR" --name "local-packages" 2>&1 | tee add.log || true
-            rm -f add.log
-          else
-            echo "✅ Local-packages source already correct."
-          fi
+          dotnet nuget add source "$LOCAL_DIR" --name "local-packages" >/dev/null 2>&1 || \
+            echo "⚠️ Failed to add local-packages source (non-fatal)."
         else
           echo "⚠️ No local packages directory found."
         fi
@@ -116,9 +94,10 @@ runs:
           --name "github" \
           --username "TheKrush" \
           --password "${{ inputs.gh-token }}" \
-          --store-password-in-clear-text
+          --store-password-in-clear-text >/dev/null 2>&1 || \
+          echo "⚠️ Failed to add GitHub source (non-fatal)."
 
-        echo "✅ NuGet sources configured."
+        echo "✅ NuGet sources refreshed cleanly."
 
     # ------------------------------------------------------------
     # 💾 Cache restored NuGet packages
