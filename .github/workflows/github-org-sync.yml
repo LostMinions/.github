@@ -82,8 +82,7 @@ jobs:
   org-sync:
     name: 🧠 Org Sync
     needs: precheck
-    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.precheck.outputs.use_self_hosted == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 10
 
     steps:
