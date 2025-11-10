@@ -37,8 +37,7 @@ jobs:
     needs: discover
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.discover.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
     runs-on: [self-hosted, ${{ matrix.runner }}]
     timeout-minutes: 5
 
