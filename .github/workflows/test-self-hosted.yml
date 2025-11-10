@@ -24,10 +24,11 @@ jobs:
         run: |
           echo "Fetching self-hosted runners for this repository..."
           # Get all runners registered to this repository that have the self-hosted label
+          # Make each runner its own object inside an array
           runners=$(gh api repos/${{ github.repository }}/actions/runners \
-            --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | .name]')
+            --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | {runner: .name}]')
           echo "Discovered runners: $runners"
-          echo "matrix={\"runner\":$runners}" >> $GITHUB_OUTPUT
+          echo "matrix={\"include\":$runners}" >> $GITHUB_OUTPUT
 
 # ---------------------------------------------------------------------
 # 🧩  Run diagnostics once per runner
@@ -38,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
-    runs-on: [self-hosted, ${{ matrix.runner }}]
+    runs-on: ["self-hosted", "${{ matrix.runner }}"]
     timeout-minutes: 5
 
     steps:
