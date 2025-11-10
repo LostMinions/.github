@@ -13,21 +13,35 @@ on:
 jobs:
   discover:
     name: 🔍 Discover Self-Hosted Runners
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.get.outputs.matrix }}
     steps:
-      - name: ⚙️ Fetch Runner List
-        id: get
+      - id: get
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          echo "Fetching self-hosted runners for this repository..."
-          # Get all runners registered to this repository that have the self-hosted label
-          # Make each runner its own object inside an array
-          runners=$(gh api repos/${{ github.repository }}/actions/runners \
-            --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | {runner: .name}]')
+          echo "Fetching self-hosted runners..."
+
+          org="${{ github.repository_owner }}"
+          repo="${{ github.repository }}"
+
+          # Try repo-level first
+          runners=$(gh api repos/$repo/actions/runners --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | {runner: .name}]')
+          count=$(echo "$runners" | jq 'length')
+
+          if [ "$count" -eq 0 ]; then
+            echo "⚠️ No repo-level runners found. Checking org-level..."
+            runners=$(gh api orgs/$org/actions/runners --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | {runner: .name}]')
+          fi
+
           echo "Discovered runners: $runners"
+
+          if [ "$(echo "$runners" | jq 'length')" -eq 0 ]; then
+            echo "❌ No self-hosted runners found at all!"
+            runners='[{"runner":"none"}]'
+          fi
+
           echo "matrix={\"include\":$runners}" >> $GITHUB_OUTPUT
 
 # ---------------------------------------------------------------------
