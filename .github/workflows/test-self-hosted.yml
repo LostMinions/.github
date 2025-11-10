@@ -4,6 +4,11 @@ on:
   workflow_dispatch:  # run manually from the Actions tab
 
 jobs:
+  ping:
+    runs-on: self-hosted
+    steps:
+      - run: echo "✅ Hello from $(hostname)"
+
   test:
     name: 🧩 Runner Diagnostics
     runs-on: self-hosted
