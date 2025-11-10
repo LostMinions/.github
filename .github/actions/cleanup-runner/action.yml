@@ -13,22 +13,22 @@ runs:
         # -------------------------------------------------------------------
         # Clean contents (not directory) to preserve GitHub internal structure
         # -------------------------------------------------------------------
-        # if [ -d "${{ github.workspace }}" ]; then
-        #   echo "Clearing contents of ${{ github.workspace }} ..."
-        #   find "${{ github.workspace }}" -mindepth 1 -exec rm -rf {} + 2>/dev/null || true
-        # fi
+        if [ -d "${{ github.workspace }}" ]; then
+          echo "Clearing contents of ${{ github.workspace }} ..."
+          find "${{ github.workspace }}" -mindepth 1 -exec rm -rf {} + 2>/dev/null || true
+        fi
 
         # -------------------------------------------------------------------
         # Extra cleanup for self-hosted runners only
         # -------------------------------------------------------------------
         if [[ "$RUNNER_NAME" != "" && "$RUNNER_NAME" != "GitHub Actions" ]]; then
-          # echo "Clearing stale _work directories..."
-          # find /home/runner/actions-runner -type d -path "*/_work/*" \
-          #   -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
+          echo "Clearing stale _work directories..."
+          find /home/runner/actions-runner -type d -path "*/_work/*" \
+            -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
 
-          # echo "Pruning old diagnostics (>7 days)..."
-          # find /home/runner/actions-runner -type d -name "_diag" \
-          #   -mtime +7 -exec rm -rf {} + 2>/dev/null || true
+          echo "Pruning old diagnostics (>7 days)..."
+          find /home/runner/actions-runner -type d -name "_diag" \
+            -mtime +7 -exec rm -rf {} + 2>/dev/null || true
 
           echo ""
           echo "📊 Post-cleanup disk usage summary:"
