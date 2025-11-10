@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
     paths:
       # --- Workflow files
-      #- ".github/workflows/org-sync.yml"
+      - ".github/workflows/org-sync.yml"
 
       # --- Source sync files
       - "admin/*.sh"
@@ -14,9 +14,9 @@ on:
       # --- Template folders to watch
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
-      #- ".github/actions/**"
+      - ".github/actions/**"
       - ".github/scripts/**"
-      #- ".github/workflows/**"
+      - ".github/workflows/**"
 
       # --- Governance documents
       - "CONTRIBUTING.md"
