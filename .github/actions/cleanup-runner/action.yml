@@ -21,7 +21,7 @@ runs:
         # -------------------------------------------------------------------
         # Extra cleanup for self-hosted runners only
         # -------------------------------------------------------------------
-        if [[ "${{ runner.labels }}" == *"self-hosted"* ]]; then
+        if [[ "$RUNNER_NAME" != "" && "$RUNNER_NAME" != "GitHub Actions" ]]; then
           echo "Clearing stale _work directories..."
           find /home/runner/actions-runners -type d -path "*/_work/*" \
             -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
@@ -30,9 +30,6 @@ runs:
           find /home/runner/actions-runners -type d -name "_diag" \
             -mtime +7 -exec rm -rf {} + 2>/dev/null || true
 
-          # -------------------------------------------------------------------
-          # Report post-cleanup disk usage
-          # -------------------------------------------------------------------
           echo ""
           echo "📊 Post-cleanup disk usage summary:"
           sudo du -h --max-depth=1 /home/runner/actions-runners | sort -hr | head || true
