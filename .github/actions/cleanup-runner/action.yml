@@ -47,13 +47,12 @@ runs:
           find "$BASE_DIR/_diag" -type f -mtime +7 -delete 2>/dev/null || true
 
           echo ""
-          echo "📊 Post-cleanup disk usage summary:"
+          echo "📊 Post-cleanup disk usage summary (as of $(date)):"
           if [[ -d "$BASE_DIR/_work" ]]; then
-            sudo du -h --max-depth=1 "$BASE_DIR/_work" | sort -hr | head || true
-
+            sudo du -h --max-depth=1 "$BASE_DIR/_work" | sort -hr | grep -v "/_work$" | head || true
             echo ""
             echo "🪶 Top 5 largest directories under _work:"
-            sudo du -h --max-depth=2 "$BASE_DIR/_work" | sort -hr | head -n 5 || true
+            sudo du -h --max-depth=2 "$BASE_DIR/_work" | sort -hr | grep -v "/_work$" | head -n 5 || true
           else
             echo "⚠️ No _work directory found under $BASE_DIR"
           fi
