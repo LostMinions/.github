@@ -91,10 +91,19 @@ runs:
             echo "⚠️ Existing 'local-packages' source points to: $EXISTING_PATH"
             echo "🔁 Replacing it with correct path: $LOCAL_DIR"
             dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
-            dotnet nuget add source "$LOCAL_DIR" --name "local-packages"
+            # --- safe add ---
+            if ! dotnet nuget add source "$LOCAL_DIR" --name "local-packages" 2>&1 | tee add.log; then
+              if grep -q "already been added" add.log; then
+                echo "⚠️ Source already existed, continuing."
+              else
+                echo "⚠️ Non-fatal add error; continuing anyway."
+              fi
+            fi
+            rm -f add.log
           elif [ -z "$EXISTING_PATH" ]; then
             echo "➕ Adding new local-packages source."
-            dotnet nuget add source "$LOCAL_DIR" --name "local-packages"
+            dotnet nuget add source "$LOCAL_DIR" --name "local-packages" 2>&1 | tee add.log || true
+            rm -f add.log
           else
             echo "✅ Local-packages source already correct."
           fi
