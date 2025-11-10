@@ -4,20 +4,42 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      # --- Workflow files
       - ".github/workflows/test-self-hosted.yml"
-  workflow_dispatch:  # run manually from the Actions tab
+  workflow_dispatch:
 
+# ---------------------------------------------------------------------
+# 🕵️  Discover all self-hosted runners
+# ---------------------------------------------------------------------
 jobs:
-  ping:
+  discover:
+    name: 🔍 Discover Self-Hosted Runners
     runs-on: self-hosted
+    outputs:
+      matrix: ${{ steps.get.outputs.matrix }}
     steps:
-      - run: echo "Hello from $(hostname)"
+      - name: ⚙️ Fetch Runner List
+        id: get
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "Fetching self-hosted runners for this repository..."
+          # Get all runners registered to this repository that have the self-hosted label
+          runners=$(gh api repos/${{ github.repository }}/actions/runners \
+            --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | .name]')
+          echo "Discovered runners: $runners"
+          echo "matrix={\"runner\":$runners}" >> $GITHUB_OUTPUT
 
+# ---------------------------------------------------------------------
+# 🧩  Run diagnostics once per runner
+# ---------------------------------------------------------------------
   test:
     name: 🧩 Runner Diagnostics
-    runs-on: self-hosted
-    timeout-minutes: 2
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    runs-on: [self-hosted, ${{ matrix.runner }}]
+    timeout-minutes: 5
 
     steps:
       - name: 🏁 Identify Runner
@@ -25,18 +47,75 @@ jobs:
           echo "✅ Running on self-hosted runner"
           echo "Runner name: $RUNNER_NAME"
           echo "Runner labels: $RUNNER_TRACKING_ID"
-          echo "OS: $(uname -a)"
+          echo "OS Info: $(uname -a)"
+          echo "Disk space:"
+          df -h /
 
-      - name: 🧰 Check Installed Tools
+      # -----------------------------------------------------------------
+      # 🧰 Install / Verify Core Tools
+      # -----------------------------------------------------------------
+      - name: 🧰 Ensure Core Tooling
         run: |
-          echo "🔍 Checking common tool versions..."
-          which git && git --version
-          which jq && jq --version
-          which gh && gh --version || echo "⚠️ GitHub CLI not installed"
-          which dotnet && dotnet --info || echo "ℹ️ .NET not installed"
-          which node && node -v || echo "ℹ️ Node.js not installed"
-          which python3 && python3 --version || echo "ℹ️ Python not installed"
+          echo "🔧 Checking and installing base tools..."
 
+          if ! command -v git >/dev/null; then
+            sudo apt-get update && sudo apt-get install -y git
+          fi
+
+          if ! command -v jq >/dev/null; then
+            sudo apt-get install -y jq
+          fi
+
+          if ! command -v zip >/dev/null || ! command -v unzip >/dev/null; then
+            echo "⚙️ Installing zip utilities..."
+            sudo apt-get install -y zip unzip
+          fi
+
+          if ! command -v pwsh >/dev/null; then
+            echo "⚙️ Installing PowerShell..."
+            wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+            sudo dpkg -i packages-microsoft-prod.deb
+            sudo apt-get update && sudo apt-get install -y powershell
+          else
+            echo "✅ PowerShell already installed ($(pwsh --version))"
+          fi
+
+          if ! command -v dotnet >/dev/null; then
+            echo "⚙️ Installing .NET SDK..."
+            wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+            bash dotnet-install.sh --channel 8.0
+            export PATH=$PATH:$HOME/.dotnet
+          else
+            echo "✅ .NET SDK already installed ($(dotnet --version))"
+          fi
+
+          if ! command -v node >/dev/null; then
+            echo "⚙️ Installing Node.js..."
+            sudo apt-get install -y nodejs npm
+          fi
+
+          if ! command -v python3 >/dev/null; then
+            echo "⚙️ Installing Python..."
+            sudo apt-get install -y python3 python3-pip
+          fi
+
+          echo "✅ Core tool check complete"
+
+      # -----------------------------------------------------------------
+      # 🔍 Diagnostics: Versions
+      # -----------------------------------------------------------------
+      - name: 🔍 Show Installed Versions
+        run: |
+          echo "Git:        $(git --version)"
+          echo "JQ:         $(jq --version)"
+          echo "PowerShell: $(pwsh --version)"
+          echo "Dotnet:     $(dotnet --version)"
+          echo "Node:       $(node -v)"
+          echo "Python:     $(python3 --version)"
+
+      # -----------------------------------------------------------------
+      # 🧾 Minimal Checkout for Local Actions
+      # -----------------------------------------------------------------
       - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
@@ -45,37 +124,37 @@ jobs:
             .github/scripts
           fetch-depth: 1
 
+      # -----------------------------------------------------------------
+      # 🧩 Test standard org actions
+      # -----------------------------------------------------------------
       - name: ⚙️ Validate GH_TOKEN
         uses: ./.github/actions/validate-gh-token
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Usage
-        id: usage
         uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
           check-actions: "false"
           check-packages-bandwidth: "false"
 
+      # -----------------------------------------------------------------
+      # 🧱 Test Build Script
+      # -----------------------------------------------------------------
       - name: 🧱 Test Build Script
         run: |
           echo "🧪 Simulating typical job..."
           mkdir -p output
           echo "Hello from $(hostname) at $(date)" > output/test.txt
+          pwsh -Command "Compress-Archive -Path output/* -DestinationPath output/test.zip -Force"
           ls -la output
-
-      - name: ⚙️ Setup .NET and NuGet
-        uses: ./.github/actions/setup-dotnet-nuget
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
-          owner: ${{ github.repository_owner }}
 
       - name: 📤 Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: self-hosted-test
-          path: output/test.txt
+          name: self-hosted-test-${{ matrix.runner }}
+          path: output/test.zip
 
       - name: 🧹 Cleanup Runner
         if: always()
