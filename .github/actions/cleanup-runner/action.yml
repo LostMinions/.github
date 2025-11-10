@@ -22,7 +22,7 @@ runs:
 
           echo ""
           echo "📊 Post-cleanup disk usage summary:"
-          sudo du -h --max-depth=1 /home/runner/actions-runner | sort -hr | head || true
+          sudo du -h --max-depth=1 /home/runner/actions-runner/_work | sort -hr | head || true
         fi
 
         echo "Cleanup complete ✔️"
