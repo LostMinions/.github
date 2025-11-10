@@ -164,6 +164,10 @@ jobs:
           echo "Publish-Bot:  ${{ steps.check.outputs.run_publishbot }} (exists: ${{ steps.check.outputs.has_publishbot }})"
           echo "------------------------------------------"
 
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
   compile:
     name: 🏗️ Compile
     if: ${{ !endsWith(github.repository, '/.github') &&
