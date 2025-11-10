@@ -12,7 +12,7 @@ jobs:
   ping:
     runs-on: self-hosted
     steps:
-      - run: echo "✅ Hello from $$(hostname)"
+      - run: echo "Hello from $(hostname)"
 
   test:
     name: 🧩 Runner Diagnostics
