@@ -1,0 +1,55 @@
+name: 🧪 Test Self-Hosted Runner
+
+on:
+  workflow_dispatch:  # run manually from the Actions tab
+
+jobs:
+  test:
+    name: 🧩 Runner Diagnostics
+    runs-on: self-hosted
+    timeout-minutes: 5
+
+    steps:
+      - name: 🏁 Identify Runner
+        run: |
+          echo "✅ Running on self-hosted runner"
+          echo "Runner name: $RUNNER_NAME"
+          echo "Runner labels: $RUNNER_TRACKING_ID"
+          echo "OS: $(uname -a)"
+
+      - name: 🧰 Check Installed Tools
+        run: |
+          echo "🔍 Checking common tool versions..."
+          which git && git --version
+          which jq && jq --version
+          which gh && gh --version || echo "⚠️ GitHub CLI not installed"
+          which dotnet && dotnet --info || echo "ℹ️ .NET not installed"
+          which node && node -v || echo "ℹ️ Node.js not installed"
+          which python3 && python3 --version || echo "ℹ️ Python not installed"
+
+      - name: 🧮 Validate Permissions
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "🔐 Checking API authentication..."
+          gh auth login --with-token <<< "$GH_TOKEN"
+          gh auth status -t
+          gh repo view $GITHUB_REPOSITORY --json name,owner,visibility
+
+      - name: 📦 Test Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🧱 Test Build Script
+        run: |
+          echo "🧪 Simulating typical job..."
+          mkdir -p output
+          echo "Hello from $(hostname) at $(date)" > output/test.txt
+          ls -la output
+
+      - name: 📤 Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-hosted-test
+          path: output/test.txt
