@@ -45,7 +45,7 @@ jobs:
   # 🧩 Precheck
   # ----------------------------------------
   precheck:
-    name: 🧮 Precheck (Usage & Token)
+    name: 🧮 Precheck
     runs-on: ubuntu-latest
     timeout-minutes: 3
     outputs:

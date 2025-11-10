@@ -28,7 +28,7 @@ jobs:
   # 🧩 Precheck
   # ----------------------------------------
   precheck:
-    name: 🧮 Precheck (Usage & Token)
+    name: 🧮 Precheck
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
