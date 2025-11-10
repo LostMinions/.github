@@ -23,16 +23,16 @@ runs:
         # -------------------------------------------------------------------
         if [[ "$RUNNER_NAME" != "" && "$RUNNER_NAME" != "GitHub Actions" ]]; then
           # echo "Clearing stale _work directories..."
-          # find /home/runner/actions-runners -type d -path "*/_work/*" \
+          # find /home/runner/actions-runner -type d -path "*/_work/*" \
           #   -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
 
           # echo "Pruning old diagnostics (>7 days)..."
-          # find /home/runner/actions-runners -type d -name "_diag" \
+          # find /home/runner/actions-runner -type d -name "_diag" \
           #   -mtime +7 -exec rm -rf {} + 2>/dev/null || true
 
           echo ""
           echo "📊 Post-cleanup disk usage summary:"
-          sudo du -h --max-depth=1 /home/runner/actions-runners | sort -hr | head || true
+          sudo du -h --max-depth=1 /home/runner/actions-runner | sort -hr | head || true
         fi
 
         echo "Cleanup complete ✔️"
