@@ -10,7 +10,9 @@ runs:
       run: |
         echo "🧹 Cleaning up current job workspace: ${{ github.workspace }}"
 
-        # Only delete contents of the current job's workspace, not parent directories
+        # ---------------------------------------------------------------
+        # 🧽 Remove contents of the current workspace (safe delete only)
+        # ---------------------------------------------------------------
         if [ -d "${{ github.workspace }}" ]; then
           echo "Cleaning non-action files only..."
           find "${{ github.workspace }}" -mindepth 1 -maxdepth 1 \
@@ -18,10 +20,16 @@ runs:
             -exec rm -rf {} + 2>/dev/null || true
         fi
 
-        # ---------------------------------------------------------------------
+        # ---------------------------------------------------------------
         # 🧩 Detect correct runner base (actions-runner-01, -02, etc.)
-        # ---------------------------------------------------------------------
-        BASE_DIR="$(dirname "$(dirname "$GITHUB_WORKSPACE")")"
+        # ---------------------------------------------------------------
+        BASE_DIR="$GITHUB_WORKSPACE"
+        while [[ "$BASE_DIR" != "/" && ! "$BASE_DIR" =~ _work ]]; do
+          BASE_DIR="$(dirname "$BASE_DIR")"
+        done
+        # Go up one level from _work to runner root
+        BASE_DIR="$(dirname "$BASE_DIR")"
+
         if [[ -d "$BASE_DIR/_diag" ]]; then
           echo "Detected runner base: $BASE_DIR"
         else
@@ -29,9 +37,9 @@ runs:
           BASE_DIR="/home/runner/actions-runner"
         fi
 
-        # ---------------------------------------------------------------------
-        # 🧹 Optional: prune old diagnostics safely (outside the workspace)
-        # ---------------------------------------------------------------------
+        # ---------------------------------------------------------------
+        # 🧹 Prune old diagnostics safely (outside the workspace)
+        # ---------------------------------------------------------------
         if [[ "$RUNNER_NAME" != "" && "$RUNNER_NAME" != "GitHub Actions" ]]; then
           echo "Pruning old diagnostics (>7 days)..."
           find "$BASE_DIR/_diag" -type f -mtime +7 -delete 2>/dev/null || true
@@ -40,6 +48,10 @@ runs:
           echo "📊 Post-cleanup disk usage summary:"
           if [[ -d "$BASE_DIR/_work" ]]; then
             sudo du -h --max-depth=1 "$BASE_DIR/_work" | sort -hr | head || true
+
+            echo ""
+            echo "🪶 Top 5 largest directories under _work:"
+            sudo du -h --max-depth=2 "$BASE_DIR/_work" | sort -hr | head -n 5 || true
           else
             echo "⚠️ No _work directory found under $BASE_DIR"
           fi
