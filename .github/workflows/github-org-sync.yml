@@ -87,7 +87,7 @@ jobs:
 
     steps:
       - name: 🏁 Identify Runner
-        run: echo "Running Org Sync on $RUNNER_NAME (${{ runner.os }})"
+        run: echo "Running Org Sync on $RUNNER_NAME (${{ runner.os }}) | Self Hosted: ${{ needs.precheck.outputs.use_self_hosted }}"
 
       - name: 🧰 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
