@@ -42,9 +42,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           echo "🔐 Checking API authentication..."
-          gh auth login --with-token <<< "$GH_TOKEN"
-          gh auth status -t
-          gh repo view $GITHUB_REPOSITORY --json name,owner,visibility
+          gh auth status -t || echo "⚠️ Authentication check failed"
+          gh repo view "$GITHUB_REPOSITORY" --json name,owner,visibility
 
       - name: 📦 Test Checkout
         uses: actions/checkout@v4
