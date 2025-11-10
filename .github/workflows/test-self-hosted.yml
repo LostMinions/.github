@@ -37,18 +37,26 @@ jobs:
           which node && node -v || echo "ℹ️ Node.js not installed"
           which python3 && python3 --version || echo "ℹ️ Python not installed"
 
-      - name: 🧮 Validate Permissions
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          echo "🔐 Checking API authentication..."
-          gh auth status -t || echo "⚠️ Authentication check failed"
-          gh repo view "$GITHUB_REPOSITORY" --json name,owner,visibility
-
-      - name: 📦 Test Checkout
+      - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
+          sparse-checkout: |
+            .github/actions
+            .github/scripts
           fetch-depth: 1
+
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧮 Check GitHub Usage
+        id: usage
+        uses: ./.github/actions/check-org-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          check-actions: "false"
+          check-packages-bandwidth: "false"
 
       - name: 🧱 Test Build Script
         run: |
