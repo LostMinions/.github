@@ -11,7 +11,7 @@ inputs:
     default: "LostMinions"
   check-actions:
     description: "Run the Actions usage check"
-    default: "false"
+    default: "true"
   check-packages-bandwidth:
     description: "Run the Packages bandwidth check"
     default: "false"
