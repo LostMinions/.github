@@ -1,5 +1,5 @@
 name: "Cleanup Runner Workspace"
-description: "Removes job checkout and transient files after a workflow step."
+description: "Safely removes job checkouts and stale self-hosted data without breaking GitHub's post-job cleanup."
 
 runs:
   using: "composite"
@@ -10,10 +10,18 @@ runs:
       run: |
         echo "🧹 Cleaning up workspace on $(hostname) (${RUNNER_OS})"
 
-        # Remove the current job's checkout
-        rm -rf "${{ github.workspace }}" || true
+        # -------------------------------------------------------------------
+        # Clean only workspace contents, not the directory itself.
+        #    Deleting the folder can break GitHub’s internal post-job Node calls.
+        # -------------------------------------------------------------------
+        if [ -d "${{ github.workspace }}" ]; then
+          echo "Clearing contents of ${{ github.workspace }} ..."
+          rm -rf "${{ github.workspace }}"/* "${{ github.workspace }}"/.[!.]* 2>/dev/null || true
+        fi
 
-        # Extra safety for self-hosted runners
+        # -------------------------------------------------------------------
+        # Extra safety for self-hosted runners only
+        # -------------------------------------------------------------------
         if [[ "${{ runner.environment }}" == "self-hosted" ]]; then
           echo "Clearing stale _work directories..."
           find /home/runner/actions-runners -type d -path "*/_work/*" \
