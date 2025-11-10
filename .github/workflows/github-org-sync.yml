@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     outputs:
-      over_limit: ${{ steps.usage.outputs.over_limit }}
+      over_limit: ${{ steps.usage.outputs.use_self_hosted }}
 
     steps:
       - name: 🧾 Minimal Checkout for Local Actions
@@ -74,7 +74,7 @@ jobs:
           check-packages-bandwidth: "false"
 
       - name: 📊 Summary
-        run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
+        run: echo "✅ Precheck complete (use_self_hosted=${{ steps.usage.outputs.use_self_hosted }})"
 
   # ----------------------------------------
   # 🧠 Org Sync
