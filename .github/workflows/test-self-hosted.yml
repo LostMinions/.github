@@ -6,54 +6,16 @@ on:
     paths:
       - ".github/workflows/test-self-hosted.yml"
   workflow_dispatch:
+    inputs:
+      runner_label:
+        description: "Optional: Specific self-hosted runner label to target"
+        required: false
+        default: "self-hosted"
 
-# ---------------------------------------------------------------------
-# 🕵️  Discover all self-hosted runners
-# ---------------------------------------------------------------------
 jobs:
-  discover:
-    name: 🔍 Discover Self-Hosted Runners
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.get.outputs.matrix }}
-    steps:
-      - id: get
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          echo "Fetching self-hosted runners..."
-
-          org="${{ github.repository_owner }}"
-          repo="${{ github.repository }}"
-
-          # Try repo-level first
-          runners=$(gh api repos/$repo/actions/runners --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | {runner: .name}]')
-          count=$(echo "$runners" | jq 'length')
-
-          if [ "$count" -eq 0 ]; then
-            echo "⚠️ No repo-level runners found. Checking org-level..."
-            runners=$(gh api orgs/$org/actions/runners --jq '[.runners[] | select(.labels[]?.name=="self-hosted") | {runner: .name}]')
-          fi
-
-          echo "Discovered runners: $runners"
-
-          if [ "$(echo "$runners" | jq 'length')" -eq 0 ]; then
-            echo "❌ No self-hosted runners found at all!"
-            runners='[{"runner":"none"}]'
-          fi
-
-          echo "matrix={\"include\":$runners}" >> $GITHUB_OUTPUT
-
-# ---------------------------------------------------------------------
-# 🧩  Run diagnostics once per runner
-# ---------------------------------------------------------------------
   test:
     name: 🧩 Runner Diagnostics
-    needs: discover
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
-    runs-on: ["self-hosted", "${{ matrix.runner }}"]
+    runs-on: ${{ fromJson(format('["{0}"]', github.event.inputs.runner_label || 'self-hosted')) }}
     timeout-minutes: 5
 
     steps:
@@ -168,7 +130,7 @@ jobs:
       - name: 📤 Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: self-hosted-test-${{ matrix.runner }}
+          name: self-hosted-test
           path: output/test.zip
 
       - name: 🧹 Cleanup Runner
