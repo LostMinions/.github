@@ -50,14 +50,16 @@ runs:
         [[ "${{ inputs.check-actions }}" == "true" ]] && args+=(--actions --actions-limit "$ACTIONS_LIMIT")
         [[ "${{ inputs.check-packages-bandwidth }}" == "true" ]] && args+=(--packages-bandwidth --packages-bandwidth-limit "$PKG_BANDWIDTH_LIMIT")
 
-        # --- run script safely (never fail step) ---
+        # --- run script safely, capture output ---
         set +e
-        bash .github/scripts/check-org-usage.sh "${args[@]}"
+        output="$(bash .github/scripts/check-org-usage.sh "${args[@]}" 2>&1)"
         result_code=$?
         set -e
 
-        # --- detect result and emit output ---
-        if [[ $result_code -ne 0 ]]; then
+        echo "$output"
+
+        # --- detect over-limit from text or exit code ---
+        if [[ $result_code -ne 0 ]] || echo "$output" | grep -qi "over limit" || echo "$output" | grep -qi "exceeded safe limits"; then
           echo "⚠️ One or more usage limits exceeded (requested checks)."
           echo "over_limit=true" >> "$GITHUB_OUTPUT"
         else
@@ -65,5 +67,4 @@ runs:
           echo "over_limit=false" >> "$GITHUB_OUTPUT"
         fi
 
-        # always exit 0 so the workflow continues cleanly
         exit 0
