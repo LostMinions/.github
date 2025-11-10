@@ -116,11 +116,12 @@ jobs:
   # 🚀 Trigger Compile Workflow (if updated)
   # ----------------------------------------
   trigger-compile:
+    name: ${{ format('🚀 Trigger Compile {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: submodule-update
     if: ${{ needs.submodule-update.outputs.updated == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     steps:
-      - name: 🚀 Trigger Compile Workflow
+      - name: 🚀 Trigger Compile
         uses: peter-evans/workflow-dispatch@v3
         with:
           token: ${{ secrets.GH_TOKEN }}
