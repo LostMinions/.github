@@ -57,6 +57,12 @@ jobs:
           echo "Hello from $(hostname) at $(date)" > output/test.txt
           ls -la output
 
+      - name: ⚙️ Setup .NET and NuGet
+        uses: ./.github/actions/setup-dotnet-nuget
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          owner: ${{ github.repository_owner }}
+
       - name: 📤 Upload Artifact
         uses: actions/upload-artifact@v4
         with:
