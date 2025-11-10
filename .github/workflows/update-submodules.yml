@@ -25,6 +25,10 @@ jobs:
       over_limit: ${{ steps.usage.outputs.over_limit }}
 
     steps:
+      - name: 🏁 Identify Runner
+        run: |
+          echo "Running Org Sync on $(hostname) (${RUNNER_OS})"
+
       - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
@@ -47,16 +51,15 @@ jobs:
           check-packages-bandwidth: "false"
 
       - name: 📊 Summary
-        run: echo "✅ Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
+        run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
 
   # ----------------------------------------
   # 🔄 Update Submodules
   # ----------------------------------------
   submodule-update:
-    name: 🔄 Update Submodules
+    name: ${{ format('🔄 Update Submodules {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: precheck
-    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 5
     outputs:
       updated: ${{ steps.update_submodules.outputs.updated }}
@@ -115,14 +118,3 @@ jobs:
           repository: ${{ github.repository }}
           workflow: "compile.yml"
           ref: ${{ github.ref_name }}
-
-  # ----------------------------------------
-  # 🚫 Skipped (if over usage limit)
-  # ----------------------------------------
-  skipped:
-    name: 🚫 Skipped (Usage Limit)
-    needs: precheck
-    if: ${{ needs.precheck.outputs.over_limit == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "⚠️ Skipped submodule update — org usage near or over limit."

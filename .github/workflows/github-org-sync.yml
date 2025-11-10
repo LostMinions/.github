@@ -84,7 +84,7 @@ jobs:
   # 🧠 Org Sync
   # ----------------------------------------
   org-sync:
-    name: ${{ needs.precheck.outputs.over_limit == 'true' && '🧠 Org Sync (Self-Hosted)' || '☁️ Org Sync (GitHub)' }}
+    name: ${{ format('🧠 Org Sync {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: precheck
     runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 10
