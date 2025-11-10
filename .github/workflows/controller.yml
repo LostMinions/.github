@@ -11,10 +11,52 @@ permissions:
   id-token: write
 
 jobs:
-  analyze:
-    name: 🔍 Analyze
+  # ----------------------------------------
+  # 🧩 Precheck
+  # ----------------------------------------
+  precheck:
+    name: 🧮 Precheck
     if: ${{ !endsWith(github.repository, '/.github') }}
     runs-on: self-hosted
+    timeout-minutes: 1
+    continue-on-error: true
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit || 'false' }}
+
+    steps:
+      - name: 🏁 Identify Runner
+        run: |
+          echo "Running Org Sync on $(hostname) (${RUNNER_OS})"
+
+      - name: 🧾 Minimal Checkout for Local Actions
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions
+            .github/scripts
+          fetch-depth: 1
+
+      - name: ⚙️ Validate GH_TOKEN
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧮 Check GitHub Usage
+        id: usage
+        uses: ./.github/actions/check-org-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          check-actions: "true"
+          check-packages-bandwidth: "false"
+
+      - name: 📊 Summary
+        run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
+
+  analyze:
+    name: ${{ format('🔍 Analyze {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    needs: precheck
+    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 5
 
     outputs:

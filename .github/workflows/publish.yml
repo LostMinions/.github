@@ -31,10 +31,11 @@ jobs:
   precheck:
     name: 🧮 Precheck
     if: ${{ !endsWith(github.repository, '/.github') }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
+    runs-on: self-hosted
+    timeout-minutes: 1
+    continue-on-error: true
     outputs:
-      over_limit: ${{ steps.usage.outputs.over_limit }}
+      over_limit: ${{ steps.usage.outputs.over_limit || 'false' }}
 
     steps:
       - name: 🏁 Identify Runner
