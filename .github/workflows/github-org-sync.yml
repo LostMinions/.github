@@ -86,6 +86,9 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: 🏁 Identify Runner
+        run: echo "Running Org Sync on $RUNNER_NAME (${{ runner.os }})"
+
       - name: 🧰 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
@@ -157,14 +160,3 @@ jobs:
             fi
           done
           shopt -u nullglob
-
-  # ----------------------------------------
-  # 🚫 Skipped (if over usage limit)
-  # ----------------------------------------
-  skipped:
-    name: 🚫 Skipped (Usage Limit)
-    needs: precheck
-    if: ${{ needs.precheck.outputs.over_limit == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "⚠️ Skipped org sync — org usage near or over limit."
