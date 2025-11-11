@@ -110,10 +110,12 @@ jobs:
           gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: 🧮 Check GitHub Usage
+        id: usage
         uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
-          check-actions: "false"
+          org-name: ${{ github.repository_owner }}
+          check-actions: "true"
           check-packages-bandwidth: "false"
 
       # -----------------------------------------------------------------

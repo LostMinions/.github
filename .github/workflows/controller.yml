@@ -46,6 +46,7 @@ jobs:
         uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
           check-actions: "true"
           check-packages-bandwidth: "false"
 
