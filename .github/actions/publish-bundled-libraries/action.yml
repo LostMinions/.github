@@ -9,9 +9,9 @@ inputs:
     required: true
 
 outputs:
-  version: ${{ steps.version.outputs.version }}
-  changed: ${{ steps.bundle.outputs.changed }}
-  zip_path: ${{ steps.bundle.outputs.zip_path }}
+  version: ${{ steps.export.outputs.version }}
+  changed: ${{ steps.export.outputs.changed }}
+  zip_path: ${{ steps.export.outputs.zip_path }}
 
 runs:
   using: "composite"
@@ -20,7 +20,6 @@ runs:
     # ♻️ Restore cached hash from previous run
     # ------------------------------------------------------------
     - name: ♻️ Restore bundle hash
-      id: restore-hash
       uses: actions/cache@v4
       with:
         path: .bundle-hash
@@ -38,11 +37,10 @@ runs:
         bash .github/scripts/bundle-library-releases.sh
         mkdir -p artifacts
 
-        # Compute new deterministic hash of all artifact files
+        # Compute deterministic hash
         NEW_HASH=$(find artifacts -type f -exec sha256sum {} + | sort | sha256sum | awk '{print $1}')
         echo "hash=$NEW_HASH" >> "$GITHUB_OUTPUT"
 
-        # Compare to previous hash (if cached)
         HASH_FILE=".bundle-hash"
         OLD_HASH=""
         if [ -f "$HASH_FILE" ]; then
@@ -53,22 +51,25 @@ runs:
         if [ "$NEW_HASH" == "$OLD_HASH" ]; then
           echo "No changes detected in bundled artifacts — skipping release."
           echo "changed=false" >> "$GITHUB_OUTPUT"
+          echo "CHANGED=false" >> $GITHUB_ENV
           exit 0
         fi
 
         echo "$NEW_HASH" > "$HASH_FILE"
         echo "changed=true" >> "$GITHUB_OUTPUT"
+        echo "CHANGED=true" >> $GITHUB_ENV
 
         ZIP_PATH="LostMinions.Packages.zip"
         echo "Zipping to $ZIP_PATH"
         (cd artifacts && zip -r "../$ZIP_PATH" .)
         echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
+        echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
 
     # ------------------------------------------------------------
     # 💾 Save updated hash to cache (only when changed)
     # ------------------------------------------------------------
     - name: 💾 Save new bundle hash
-      if: steps.bundle.outputs.changed == 'true'
+      if: env.CHANGED == 'true'
       uses: actions/cache@v4
       with:
         path: .bundle-hash
@@ -78,21 +79,32 @@ runs:
     # 🔢 Determine version (only when changed)
     # ------------------------------------------------------------
     - name: 🔢 Determine Version
-      id: version
-      if: steps.bundle.outputs.changed == 'true'
-      uses: ./.github/actions/bump-version
-      with:
-        bump: ${{ inputs.bump }}
+      if: env.CHANGED == 'true'
+      shell: bash
+      run: |
+        VERSION=$(bash .github/scripts/bump-version.sh)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
 
     # ------------------------------------------------------------
     # 🏷️ Tag & Publish Release (only when changed)
     # ------------------------------------------------------------
     - name: 🏷️ Tag & Publish Release
-      if: steps.bundle.outputs.changed == 'true'
+      if: env.CHANGED == 'true'
       uses: ./.github/actions/publish-github-release
       with:
-        version: ${{ steps.version.outputs.version }}
+        version: ${{ env.VERSION }}
         gh-token: ${{ inputs.gh-token }}
-        files: ${{ steps.bundle.outputs.zip_path }}
+        files: ${{ env.ZIP_PATH }}
         title: "📦 LostMinions.Packages"
         keep-latest: 10
+
+    # ------------------------------------------------------------
+    # 📤 Export outputs for workflows using this action
+    # ------------------------------------------------------------
+    - name: 📤 Export outputs
+      id: export
+      shell: bash
+      run: |
+        echo "version=${VERSION:-unknown}" >> "$GITHUB_OUTPUT"
+        echo "changed=${CHANGED:-false}" >> "$GITHUB_OUTPUT"
+        echo "zip_path=${ZIP_PATH:-}" >> "$GITHUB_OUTPUT"
