@@ -76,7 +76,6 @@ jobs:
   publish:
     name: ${{ format('🚀 Publish Bot {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: precheck
-    if: ${{ needs.precheck.outputs.over_limit != 'true' }}
     runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 5
 
