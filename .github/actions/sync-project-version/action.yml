@@ -1,7 +1,10 @@
-name: "🧩 Sync & Commit Project Versions"
-description: "Updates <Version> and <PackageVersion> across all .csproj files and optionally commits the changes."
+name: "🧩 Sync & Commit Project Version"
+description: "Updates <Version> and <PackageVersion> in the primary .csproj being built and optionally commits the change."
 
 inputs:
+  project:
+    description: "Path to the .csproj file to update."
+    required: true
   version:
     description: "Version string to apply (usually from bump-version output)."
     required: true
@@ -15,54 +18,53 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: 🧩 Sync Project Versions
+    - name: 🧩 Update Project Version
       shell: bash
       run: |
         VERSION="${{ inputs.version }}"
-        echo "📦 Updating all .csproj files to version ${VERSION}"
+        PROJECT="${{ inputs.project }}"
+        echo "📦 Updating $PROJECT → v${VERSION}"
 
-        for file in $(find . -name "*.csproj"); do
-          echo "  → Updating $file"
+        if [ ! -f "$PROJECT" ]; then
+          echo "❌ Project file not found: $PROJECT"
+          exit 1
+        fi
 
-          if ! grep -q "<PropertyGroup>" "$file"; then
-            echo "⚠️  No <PropertyGroup> found — skipping $file"
-            continue
-          fi
+        # Update or insert <PackageVersion> and <Version>
+        if grep -q "<PackageVersion>" "$PROJECT"; then
+          sed -i "s|<PackageVersion>.*</PackageVersion>|<PackageVersion>${VERSION}</PackageVersion>|" "$PROJECT"
+        else
+          sed -i "0,/<\/PropertyGroup>/s//  <PackageVersion>${VERSION}<\/PackageVersion>\n&/" "$PROJECT"
+        fi
 
-          if grep -q "<PackageVersion>" "$file"; then
-            sed -i "s|<PackageVersion>.*</PackageVersion>|<PackageVersion>${VERSION}</PackageVersion>|" "$file"
-          else
-            sed -i "0,/<\/PropertyGroup>/s//  <PackageVersion>${VERSION}<\/PackageVersion>\n&/" "$file"
-          fi
+        if grep -q "<Version>" "$PROJECT"; then
+          sed -i "s|<Version>.*</Version>|<Version>${VERSION}</Version>|" "$PROJECT"
+        else
+          sed -i "0,/<\/PropertyGroup>/s//  <Version>${VERSION}<\/Version>\n&/" "$PROJECT"
+        fi
 
-          if grep -q "<Version>" "$file"; then
-            sed -i "s|<Version>.*</Version>|<Version>${VERSION}</Version>|" "$file"
-          else
-            sed -i "0,/<\/PropertyGroup>/s//  <Version>${VERSION}<\/Version>\n&/" "$file"
-          fi
-        done
+        echo "✅ Updated $PROJECT to version ${VERSION}"
 
-        echo "✅ All .csproj files updated to ${VERSION}"
-
-    - name: 💾 Commit & Push Updated Versions
+    - name: 💾 Commit & Push Version
       if: ${{ inputs.push == 'true' && inputs.gh-token != '' }}
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.gh-token }}
       run: |
         VERSION="${{ inputs.version }}"
-        echo "📤 Preparing to commit version ${VERSION} changes..."
+        PROJECT="${{ inputs.project }}"
+        echo "📤 Committing version ${VERSION} changes for ${PROJECT}..."
 
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --global credential.helper store
         echo "https://x-access-token:${GH_TOKEN}@github.com" > ~/.git-credentials
 
-        if ! git diff --quiet; then
-          git add **/*.csproj
-          git commit -m "🔢 Sync project versions to ${VERSION} [skip ci]"
+        if ! git diff --quiet "$PROJECT"; then
+          git add "$PROJECT"
+          git commit -m "🔢 Sync ${PROJECT} version to ${VERSION} [skip ci]"
           git push
-          echo "✅ Version ${VERSION} changes committed and pushed."
+          echo "✅ Committed and pushed updated version ${VERSION}"
         else
-          echo "✅ No version changes detected; skipping commit."
+          echo "✅ No changes to commit for ${PROJECT}"
         fi
