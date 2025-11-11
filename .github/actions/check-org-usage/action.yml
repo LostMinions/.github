@@ -128,9 +128,9 @@ runs:
 
         # --- Run checks and aggregate exit codes ----------------------------------
         FAIL=0
-        if $CHECK_ACTIONS; then check_actions || FAIL=1; fi
+        check_actions || FAIL=1
         echo ""
-        if $CHECK_BANDWIDTH; then check_packages_bandwidth || FAIL=1; fi
+        check_packages_bandwidth || FAIL=1
         echo ""
 
         # --- Final status ----------------------------------------------------------
