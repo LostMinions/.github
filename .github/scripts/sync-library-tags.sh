@@ -74,7 +74,14 @@ done
 if ! git diff --quiet --submodule; then
   echo "Committing updated submodule references..."
   git add .gitmodules $(git config --file .gitmodules --get-regexp path | awk '{ print $2 }')
-  git commit -m "Update submodules to latest tagged releases" || true
+
+  if [[ -n "${VERSION:-}" ]]; then
+    msg="Update submodules to latest tagged releases (v${VERSION})"
+  else
+    msg="Update submodules to latest tagged releases"
+  fi
+
+  git commit -m "$msg [skip ci]" || true
   echo "Submodule references updated and committed."
 else
   echo "All submodules already up to date."

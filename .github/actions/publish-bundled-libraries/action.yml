@@ -8,6 +8,11 @@ inputs:
   gh-token:
     required: true
 
+outputs:
+  version: ${{ steps.version.outputs.version }}
+  changed: ${{ steps.bundle.outputs.changed }}
+  zip_path: ${{ steps.bundle.outputs.zip_path }}
+
 runs:
   using: "composite"
   steps:

@@ -83,18 +83,26 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
+      - name: 🔢 Determine Bundle Version
+        id: version
+        uses: ./.github/actions/bump-version
+        with:
+          bump: "patch"
+
       - name: 🔄 Sync Submodule Metadata
         run: |
           git submodule sync --recursive --quiet
           git submodule update --init --recursive --quiet
 
       - name: 🧰 Initialize & Pin Submodules
-        run: |
-          bash .github/scripts/init-library-submodules.sh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: bash .github/scripts/init-library-submodules.sh
 
       - name: 🔖 Sync to Latest Library Tags
-        run: |
-          bash .github/scripts/sync-library-tags.sh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: bash .github/scripts/sync-library-tags.sh
 
       - name: 🧹 Cleanup Untracked Files
         run: git clean -fdx libs
