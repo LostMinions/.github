@@ -46,7 +46,7 @@ clean_json_file() {
   local src="$1"
   local dest="${2:-}"
   local cleaned
-  cleaned=$(perl -CS -Mutf8 -0777 -pe '
+  cleaned=$(perl -CSD -Mutf8 -0777 -pe '
     s{/\*.*?\*/}{}gs;          # remove /* ... */ blocks
     s{//[^\r\n]*}{}g;          # remove // comments
     s/,\s*([}\]])/\1/g;        # remove trailing commas
