@@ -86,6 +86,7 @@ runs:
 
         # --- Function: Check Actions minutes ---------------------------------------
         check_actions() {
+          set -o pipefail
           local mode_tag
           if $CHECK_ACTIONS; then mode_tag="(enforced)"; else mode_tag="(info-only)"; fi
 
@@ -95,8 +96,7 @@ runs:
 
           if [[ -z "$USED" || "$USED" == "null" ]]; then
             echo "Could not determine Actions usage (missing data)."
-            $CHECK_ACTIONS && declare -g FAIL=1
-            return
+            $CHECK_ACTIONS && return 1 || return 0
           fi
 
           PCT=$(awk -v u="$USED" -v l="$ACTIONS_LIMIT" 'BEGIN { if (l<=0) print 0; else printf "%.1f", (u/l)*100 }')
@@ -107,15 +107,16 @@ runs:
 
           if [[ "$(safe_cmp "$USED >= $THRESHOLD")" == "1" ]]; then
             echo "Actions usage near or over limit."
-            $CHECK_ACTIONS && declare -g FAIL=1
+            $CHECK_ACTIONS && return 1 || return 0
           else
             echo "Actions usage OK."
+            return 0
           fi
-          echo ""
         }
 
         # --- Function: Check Packages bandwidth ------------------------------------
         check_packages_bandwidth() {
+          set -o pipefail
           local mode_tag
           if $CHECK_BANDWIDTH; then mode_tag="(enforced)"; else mode_tag="(info-only)"; fi
 
@@ -131,22 +132,25 @@ runs:
 
           if [[ "$(safe_cmp "$bandwidth_used > $limit_adj")" == "1" ]]; then
             echo "Packages bandwidth near or over limit."
-            $CHECK_BANDWIDTH && declare -g FAIL=1
+            $CHECK_BANDWIDTH && return 1 || return 0
           else
             echo "Packages bandwidth OK."
+            return 0
           fi
-          echo ""
         }
 
-        # --- Always run both checks ------------------------------------------------
-        check_actions
-        check_packages_bandwidth
+        # --- Run checks and aggregate exit codes ----------------------------------
+        FAIL=0
+        check_actions || FAIL=1
+        echo ""
+        check_packages_bandwidth || FAIL=1
+        echo ""
 
         # --- Final status ----------------------------------------------------------
         if [[ "$FAIL" -eq 1 ]]; then
-          echo "One or more usage checks exceeded safe limits."
+          echo "⚠️ One or more usage checks exceeded safe limits."
           echo "over_limit=true" >> "$GITHUB_OUTPUT"
         else
-          echo "All usage within safe limits."
+          echo "✅ All usage within safe limits."
           echo "over_limit=false" >> "$GITHUB_OUTPUT"
         fi
