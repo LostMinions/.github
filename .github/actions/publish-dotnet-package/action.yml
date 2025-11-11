@@ -29,6 +29,12 @@ runs:
       with:
         bump: ${{ inputs.bump }}
 
+    - name: 🧩 Sync & Commit Project Versions
+      uses: ./.github/actions/sync-project-version
+      with:
+        version: ${{ steps.version.outputs.version }}
+        gh-token: ${{ inputs.gh-token }}
+
     - name: 📦 Pack NuGet Package
       shell: bash
       run: |

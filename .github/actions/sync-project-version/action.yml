@@ -1,0 +1,68 @@
+name: "🧩 Sync & Commit Project Versions"
+description: "Updates <Version> and <PackageVersion> across all .csproj files and optionally commits the changes."
+
+inputs:
+  version:
+    description: "Version string to apply (usually from bump-version output)."
+    required: true
+  gh-token:
+    description: "GitHub token for committing back to the repo."
+    required: false
+  push:
+    description: "Whether to commit and push version changes (true/false)."
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🧩 Sync Project Versions
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        echo "📦 Updating all .csproj files to version ${VERSION}"
+
+        for file in $(find . -name "*.csproj"); do
+          echo "  → Updating $file"
+
+          if ! grep -q "<PropertyGroup>" "$file"; then
+            echo "⚠️  No <PropertyGroup> found — skipping $file"
+            continue
+          fi
+
+          if grep -q "<PackageVersion>" "$file"; then
+            sed -i "s|<PackageVersion>.*</PackageVersion>|<PackageVersion>${VERSION}</PackageVersion>|" "$file"
+          else
+            sed -i "0,/<\/PropertyGroup>/s//  <PackageVersion>${VERSION}<\/PackageVersion>\n&/" "$file"
+          fi
+
+          if grep -q "<Version>" "$file"; then
+            sed -i "s|<Version>.*</Version>|<Version>${VERSION}</Version>|" "$file"
+          else
+            sed -i "0,/<\/PropertyGroup>/s//  <Version>${VERSION}<\/Version>\n&/" "$file"
+          fi
+        done
+
+        echo "✅ All .csproj files updated to ${VERSION}"
+
+    - name: 💾 Commit & Push Updated Versions
+      if: ${{ inputs.push == 'true' && inputs.gh-token != '' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+      run: |
+        VERSION="${{ inputs.version }}"
+        echo "📤 Preparing to commit version ${VERSION} changes..."
+
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --global credential.helper store
+        echo "https://x-access-token:${GH_TOKEN}@github.com" > ~/.git-credentials
+
+        if ! git diff --quiet; then
+          git add **/*.csproj
+          git commit -m "🔢 Sync project versions to ${VERSION} [skip ci]"
+          git push
+          echo "✅ Version ${VERSION} changes committed and pushed."
+        else
+          echo "✅ No version changes detected; skipping commit."
+        fi
