@@ -9,9 +9,8 @@ inputs:
     required: true
 
 outputs:
-  version: ${{ steps.export.outputs.version }}
-  changed: ${{ steps.export.outputs.changed }}
-  zip_path: ${{ steps.export.outputs.zip_path }}
+  version:
+    value: ${{ steps.bump.outputs.version }}
 
 runs:
   using: "composite"
@@ -79,6 +78,7 @@ runs:
     # 🔢 Determine version (only when changed)
     # ------------------------------------------------------------
     - name: 🔢 Determine Version
+      id: bump
       if: env.CHANGED == 'true'
       shell: bash
       run: |
