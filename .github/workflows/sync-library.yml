@@ -101,13 +101,14 @@ jobs:
 
       - name: 💾 Commit & Push Updated Submodules
         if: ${{ github.event.inputs.commit != 'false' }}
+        shell: bash
         run: |
-          if ! git diff --quiet --submodule; then
-            echo "🔄 Changes detected — committing and pushing..."
-            git add .gitmodules libs
-            summary=$(git submodule status --recursive | awk '{print $2 "@" substr($1,2,7)}' | paste -sd ", " -)
-            git commit -m "🔄 Sync library submodules to latest tagged releases [skip ci]\n\n$summary"
-            git push
+          git fetch origin master
+
+          # Check if HEAD has unpushed commits or submodule changes
+          if ! git diff --quiet --submodule || [ -n "$(git log origin/master..HEAD)" ]; then
+            echo "🔄 Changes detected or new commits — pushing..."
+            git push origin HEAD:master
           else
             echo "✅ No submodule updates found."
           fi
