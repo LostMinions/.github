@@ -47,7 +47,7 @@ runs:
       run: |
         #!/usr/bin/env bash
         # ------------------------------------------------------------
-        # LostMinions --- GitHub Org Usage Check
+        # LostMinions --- GitHub Org Usage Check (Composite Action)
         # ------------------------------------------------------------
 
         set -euo pipefail
@@ -55,34 +55,18 @@ runs:
         ORG="${ORG_NAME:-LostMinions}"
         TOKEN="${GH_TOKEN:?Missing GH_TOKEN}"
 
+        ACTIONS_LIMIT="${ACTIONS_LIMIT:-2000}"       # minutes
+        BANDWIDTH_LIMIT="${PKG_BANDWIDTH_LIMIT:-1.0}" # GB
+        MARGIN="${MARGIN:-5}"                        # %
+
         CHECK_ACTIONS=false
         CHECK_BANDWIDTH=false
-
-        ACTIONS_LIMIT=2000        # minutes
-        BANDWIDTH_LIMIT=1.0       # GB
-        MARGIN=5                  # %
+        [[ "${RUN_ACTIONS,,}" == "true" ]] && CHECK_ACTIONS=true
+        [[ "${RUN_BANDWIDTH,,}" == "true" ]] && CHECK_BANDWIDTH=true
 
         API="https://api.github.com/organizations/${ORG}/settings/billing/usage/summary"
-        FAIL=0
-        declare -g FAIL=0
 
-        # --- Parse CLI args ---------------------------------------------------------
-        while [[ $# -gt 0 ]]; do
-          case "$1" in
-            --org) ORG="$2"; shift 2 ;;
-            --token) TOKEN="$2"; shift 2 ;;
-            --actions) CHECK_ACTIONS=true; shift ;;
-            --packages-bandwidth) CHECK_BANDWIDTH=true; shift ;;
-            --actions-limit) ACTIONS_LIMIT="$2"; shift 2 ;;
-            --packages-bandwidth-limit) BANDWIDTH_LIMIT="$2"; shift 2 ;;
-            --margin) MARGIN="$2"; shift 2 ;;
-            *) echo "Usage: $0 [--actions] [--packages-bandwidth]" ; exit 0 ;;
-          esac
-        done
-
-        safe_cmp() { # usage: safe_cmp "1 > 0"
-          awk "BEGIN {print ($1) ? 1 : 0}" 2>/dev/null || echo 0
-        }
+        safe_cmp() { awk "BEGIN {print ($1) ? 1 : 0}" 2>/dev/null || echo 0; }
 
         # --- Function: Check Actions minutes ---------------------------------------
         check_actions() {
@@ -91,7 +75,8 @@ runs:
           if $CHECK_ACTIONS; then mode_tag="(enforced)"; else mode_tag="(info-only)"; fi
 
           echo "Checking Actions usage for $ORG $mode_tag"
-          resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" "$API" || true)
+          resp=$(curl -s -L -H "Accept: application/vnd.github+json" \
+                             -H "Authorization: Bearer ${TOKEN}" "$API" || true)
           USED=$(echo "$resp" | jq '[.usageItems[] | select(.sku | test("^actions_(linux|windows|macos)$")) | .grossQuantity] | add // 0')
 
           if [[ -z "$USED" || "$USED" == "null" ]]; then
@@ -106,10 +91,10 @@ runs:
           echo "* Threshold for stop: ${THRESHOLD} minutes (${MARGIN}% margin)"
 
           if [[ "$(safe_cmp "$USED >= $THRESHOLD")" == "1" ]]; then
-            echo "Actions usage near or over limit."
+            echo "⚠️ Actions usage near or over limit."
             $CHECK_ACTIONS && return 1 || return 0
           else
-            echo "Actions usage OK."
+            echo "✅ Actions usage OK."
             return 0
           fi
         }
@@ -121,7 +106,9 @@ runs:
           if $CHECK_BANDWIDTH; then mode_tag="(enforced)"; else mode_tag="(info-only)"; fi
 
           echo "Checking Packages bandwidth for $ORG $mode_tag"
-          resp=$(curl -s -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$API" || true)
+          resp=$(curl -s -L -H "Accept: application/vnd.github+json" \
+                             -H "Authorization: Bearer ${TOKEN}" \
+                             -H "X-GitHub-Api-Version: 2022-11-28" "$API" || true)
           bandwidth_used=$(echo "$resp" | jq -r '.usageItems[] | select(.sku=="packages_bandwidth") | .grossQuantity')
           [[ -z "$bandwidth_used" || "$bandwidth_used" == "null" ]] && bandwidth_used=0
 
@@ -131,19 +118,19 @@ runs:
           printf "* Threshold for stop: %.3f GB (%s%% margin)\n" "$limit_adj" "$MARGIN"
 
           if [[ "$(safe_cmp "$bandwidth_used > $limit_adj")" == "1" ]]; then
-            echo "Packages bandwidth near or over limit."
+            echo "⚠️ Packages bandwidth near or over limit."
             $CHECK_BANDWIDTH && return 1 || return 0
           else
-            echo "Packages bandwidth OK."
+            echo "✅ Packages bandwidth OK."
             return 0
           fi
         }
 
         # --- Run checks and aggregate exit codes ----------------------------------
         FAIL=0
-        check_actions || FAIL=1
+        if $CHECK_ACTIONS; then check_actions || FAIL=1; fi
         echo ""
-        check_packages_bandwidth || FAIL=1
+        if $CHECK_BANDWIDTH; then check_packages_bandwidth || FAIL=1; fi
         echo ""
 
         # --- Final status ----------------------------------------------------------
