@@ -76,9 +76,9 @@ if ! git diff --quiet --submodule; then
   git add .gitmodules $(git config --file .gitmodules --get-regexp path | awk '{ print $2 }')
 
   if [[ -n "${VERSION:-}" ]]; then
-    msg="Update submodules to latest tagged releases (v${VERSION})"
+    msg="Latest tag release (v${VERSION})"
   else
-    msg="Update submodules to latest tagged releases"
+    msg="Latest tag release"
   fi
 
   git commit -m "$msg [skip ci]" || true

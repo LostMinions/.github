@@ -73,9 +73,9 @@ echo "Committing pinned submodule states..."
 git add .gitmodules libs
 
 if [[ -n "${VERSION:-}" ]]; then
-  msg="Add and pin all library submodules to latest tagged releases (v${VERSION})"
+  msg="Latest tag release (v${VERSION})"
 else
-  msg="Add and pin all library submodules to latest tagged releases"
+  msg="Latest tag release"
 fi
 
 git commit -m "$msg [skip ci]" || true
