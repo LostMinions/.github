@@ -4,6 +4,10 @@
 # ============================================================
 set -euo pipefail
 
+# Force UTF-8 locale (prevents emoji loss when cleaning JSON)
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
 # --- discover_dirs ------------------------------------------------------------
 # Lists top-level subdirectories (sorted)
 discover_dirs() {
@@ -42,7 +46,7 @@ clean_json_file() {
   local src="$1"
   local dest="${2:-}"
   local cleaned
-  cleaned=$(perl -0777 -pe '
+  cleaned=$(perl -CS -Mutf8 -0777 -pe '
     s{/\*.*?\*/}{}gs;          # remove /* ... */ blocks
     s{//[^\r\n]*}{}g;          # remove // comments
     s/,\s*([}\]])/\1/g;        # remove trailing commas
