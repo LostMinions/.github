@@ -34,6 +34,7 @@
     "scripts": [
       "bump-version.sh",
       "bundle-library-releases.sh",
+      "check-org-usage.sh",
       "init-library-submodules.sh",
       "sync-library-tags.sh",
     ],
