@@ -7,11 +7,6 @@ on:
       - ".github/workflows/sync-library.yml"
   workflow_call:
   workflow_dispatch:
-    inputs:
-      commit:
-        description: "Auto-commit updates if new library tags are found"
-        required: false
-        default: "true"
 
 permissions:
   contents: write
@@ -165,7 +160,6 @@ jobs:
 
       - name: 💾 Commit & Push Updated Submodules
         id: push
-        if: ${{ github.event.inputs.commit != 'false' }}
         shell: bash
         run: |
           git fetch origin master
