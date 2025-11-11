@@ -1,7 +1,7 @@
 {
   // Global definitions affecting all repos
   "defaults": {
-    "dummy_prefix": "💤 ~ Dummy - ",
+    "dummy_prefix": "💤 ~ ",
     "actions": [],
     "files": [
       "CONTRIBUTING.md",
