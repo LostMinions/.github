@@ -64,6 +64,7 @@ runs:
 
         API="https://api.github.com/organizations/${ORG}/settings/billing/usage/summary"
         FAIL=0
+        declare -g FAIL=0
 
         # --- Parse CLI args ---------------------------------------------------------
         while [[ $# -gt 0 ]]; do
@@ -94,7 +95,7 @@ runs:
 
           if [[ -z "$USED" || "$USED" == "null" ]]; then
             echo "Could not determine Actions usage (missing data)."
-            $CHECK_ACTIONS && FAIL=1
+            $CHECK_ACTIONS && declare -g FAIL=1
             return
           fi
 
@@ -106,7 +107,7 @@ runs:
 
           if [[ "$(safe_cmp "$USED >= $THRESHOLD")" == "1" ]]; then
             echo "Actions usage near or over limit."
-            $CHECK_ACTIONS && FAIL=1
+            $CHECK_ACTIONS && declare -g FAIL=1
           else
             echo "Actions usage OK."
           fi
@@ -130,7 +131,7 @@ runs:
 
           if [[ "$(safe_cmp "$bandwidth_used > $limit_adj")" == "1" ]]; then
             echo "Packages bandwidth near or over limit."
-            $CHECK_BANDWIDTH && FAIL=1
+            $CHECK_BANDWIDTH && declare -g FAIL=1
           else
             echo "Packages bandwidth OK."
           fi
