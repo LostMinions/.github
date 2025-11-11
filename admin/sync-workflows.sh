@@ -68,6 +68,11 @@ if [ -f "$MANIFEST_FILE" ]; then
   clean_json_file "$MANIFEST_FILE" "$CLEAN_MANIFEST"
 
   # Defaults
+  DUMMY_PREFIX="Dummy - "
+  if jq -e '.defaults.dummy_prefix' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    DUMMY_PREFIX=$(jq -r '.defaults.dummy_prefix' "$CLEAN_MANIFEST")
+  fi
+
   if jq -e '.defaults.workflows' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
     mapfile -t DEFAULT_WORKFLOWS < <(jq -r '.defaults.workflows[]?' "$CLEAN_MANIFEST")
   fi
@@ -122,11 +127,6 @@ printf -- '- %s\n' "${ALL_WORKFLOWS[@]}"
 echo ""
 
 # --- Copy or dummy depending on repo config ----------------------------------
-DUMMY_PREFIX="Dummy - "
-if jq -e '.defaults.dummy_prefix' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-  DUMMY_PREFIX=$(jq -r '.defaults.dummy_prefix' "$CLEAN_MANIFEST")
-fi
-
 for wf in "${ALL_WORKFLOWS[@]}"; do
   SRC="$SOURCE_DIR/$wf"
   DEST=".github/workflows/$wf"
