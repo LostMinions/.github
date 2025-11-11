@@ -62,11 +62,16 @@ jobs:
         if: always()
         uses: ./.github/actions/cleanup-runner
 
+  # ----------------------------------------
+  # 🔄 Sync
+  # ----------------------------------------
   sync:
     name: ${{ format('🔄 Sync Libraries {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: precheck
     runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 5
+    outputs:
+      changed: ${{ steps.push.outputs.changed }}
 
     steps:
       - name: ⚙️ Configure Git
@@ -127,9 +132,7 @@ jobs:
             fi
 
             pushd "$path" >/dev/null
-
               git fetch --unshallow 2>/dev/null || git fetch --all --tags --force --quiet
-
               latest_tag=$(git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags | head -n 1)
               if [[ -z "$latest_tag" ]]; then
                 echo "⚠️  No tags found for $name — leaving on current commit."
@@ -139,7 +142,6 @@ jobs:
                 git checkout --detach "tags/$latest_tag" --quiet
                 echo "✅  Pinned $name to $latest_tag"
               fi
-
             popd >/dev/null
             echo
           done
@@ -162,6 +164,7 @@ jobs:
         run: git clean -fdx libs
 
       - name: 💾 Commit & Push Updated Submodules
+        id: push
         if: ${{ github.event.inputs.commit != 'false' }}
         shell: bash
         run: |
@@ -171,8 +174,10 @@ jobs:
           if ! git diff --quiet --submodule || [ -n "$(git log origin/master..HEAD)" ]; then
             echo "🔄 Changes detected or new commits — pushing..."
             git push origin HEAD:master
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "✅ No submodule updates found."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 🧾 Verify Pinned Submodule State
@@ -186,9 +191,13 @@ jobs:
         if: always()
         uses: ./.github/actions/cleanup-runner
 
+  # ----------------------------------------
+  # 📦 Publish (conditional)
+  # ----------------------------------------
   publish:
     name: ${{ format('📦 Bundle & Publish Libraries {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     needs: [precheck, sync]
+    if: needs.sync.outputs.changed == 'true'
     runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 10
 
