@@ -138,7 +138,7 @@ for wf in "${ALL_WORKFLOWS[@]}"; do
   else
     echo "- Creating dummy $wf"
     {
-      echo "name: Dummy - $wf"
+      echo "name: ${DUMMY_PREFIX}${wf}"
       echo "on:"
       echo "  workflow_call:"
       echo "jobs:"
