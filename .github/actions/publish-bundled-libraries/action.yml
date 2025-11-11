@@ -82,8 +82,11 @@ runs:
       if: env.CHANGED == 'true'
       shell: bash
       run: |
-        VERSION=$(bash .github/scripts/bump-version.sh)
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        {
+          echo "VERSION<<EOF"
+          echo "$VERSION"
+          echo "EOF"
+        } >> $GITHUB_ENV
 
     # ------------------------------------------------------------
     # 🏷️ Tag & Publish Release (only when changed)
