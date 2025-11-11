@@ -20,6 +20,13 @@ runs:
         gh-token: ${{ inputs.gh-token }}
         owner: ${{ github.repository_owner }}
 
+    - name: 🔑 Export GitHub Token
+      shell: bash
+      run: |
+        echo "Setting GH_TOKEN and GITHUB_TOKEN for Lavalink download..."
+        echo "GH_TOKEN=${{ inputs.gh-token }}" >> $GITHUB_ENV
+        echo "GITHUB_TOKEN=${{ inputs.gh-token }}" >> $GITHUB_ENV
+
     - name: 🧱 Build Project
       id: build
       uses: ./.github/actions/build-dotnet
