@@ -177,6 +177,8 @@ run_sync_for_repo() {
         commit_msg+=" (.github assets and metadata)"
       fi
 
+      commit_msg+=" [skip ci]"
+
       git commit -m "$commit_msg" >/dev/null || true
       git push origin HEAD >/dev/null 2>&1 && echo "Pushed updates: $commit_msg" || echo "Push failed"
     else
