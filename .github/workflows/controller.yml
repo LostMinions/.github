@@ -169,7 +169,7 @@ jobs:
         uses: ./.github/actions/cleanup-runner
 
   compile:
-    name: 🏗️ Compile
+    name: 🏗️
     if: ${{ !endsWith(github.repository, '/.github') &&
             needs.analyze.outputs.run_compile == 'true' &&
             needs.analyze.outputs.has_compile == 'true' }}
@@ -180,7 +180,7 @@ jobs:
       project_filter: "*.sln"
 
   publish:
-    name: 🚀 Publish Package
+    name: 📦
     if: ${{ !endsWith(github.repository, '/.github') &&
             needs.analyze.outputs.run_publish == 'true' &&
             needs.analyze.outputs.has_publish == 'true' }}
@@ -189,7 +189,7 @@ jobs:
     secrets: inherit
 
   publish-bot:
-    name: 🚀 Publish Bot
+    name: 🤖
     if: ${{ !endsWith(github.repository, '/.github') &&
             needs.analyze.outputs.run_publishbot == 'true' &&
             needs.analyze.outputs.has_publishbot == 'true' }}
