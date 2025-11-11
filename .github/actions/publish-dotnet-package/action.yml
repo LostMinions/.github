@@ -19,6 +19,7 @@ runs:
         owner: ${{ github.repository_owner }}
 
     - name: 🧱 Build Project
+      id: build
       uses: ./.github/actions/build-dotnet
       with:
         project_filter: ${{ inputs.project_filter }}
@@ -29,9 +30,10 @@ runs:
       with:
         bump: ${{ inputs.bump }}
 
-    - name: 🧩 Sync & Commit Project Versions
+    - name: 🧩 Sync & Commit Project Version
       uses: ./.github/actions/sync-project-version
       with:
+        project: ${{ steps.build.outputs.project }}
         version: ${{ steps.version.outputs.version }}
         gh-token: ${{ inputs.gh-token }}
 

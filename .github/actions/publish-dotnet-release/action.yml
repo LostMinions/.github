@@ -32,9 +32,10 @@ runs:
       with:
         bump: ${{ inputs.bump }}
 
-    - name: 🧩 Sync & Commit Project Versions
+    - name: 🧩 Sync & Commit Project Version
       uses: ./.github/actions/sync-project-version
       with:
+        project: ${{ steps.build.outputs.project }}
         version: ${{ steps.version.outputs.version }}
         gh-token: ${{ inputs.gh-token }}
 
@@ -44,7 +45,7 @@ runs:
       run: |
         OUTPUT="$(pwd)/publish"
         echo "🚀 Publishing build to: $OUTPUT"
-        dotnet publish "${{ steps.build-dotnet.outputs.project }}" \
+        dotnet publish "${{ steps.build.outputs.project }}" \
           -c Release \
           -r "${{ inputs.runtime }}" \
           --self-contained true \
