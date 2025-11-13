@@ -2,11 +2,6 @@ name: 📚 Documentation Update
 description: Suggest an update or addition to documentation, guides, or README files.
 labels: [documentation]
 body:
-  - type: input
-    id: repo
-    attributes:
-      label: Repository
-      placeholder: e.g. LostMinions.org
   - type: textarea
     id: content
     attributes:
