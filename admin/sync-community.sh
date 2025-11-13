@@ -56,14 +56,14 @@ if [ -f "$MANIFEST_FILE" ]; then
   clean_json_file "$MANIFEST_FILE" "$CLEAN_MANIFEST"
 
   # Load default community files
-  if jq -e '.defaults.files' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-    mapfile -t COMMUNITY_FILES < <(jq -r '.defaults.files[]?' "$CLEAN_MANIFEST")
+  if jq -e '.defaults.community' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t COMMUNITY_FILES < <(jq -r '.defaults.community[]?' "$CLEAN_MANIFEST")
     COMMUNITY_FILES=("${COMMUNITY_FILES[@]/#/$ROOT_DIR/}")
   fi
 
   # Load deprecated community files
-  if jq -e '.deprecated.files' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-    mapfile -t DEPRECATED_FILES < <(jq -r '.deprecated.files[]?' "$CLEAN_MANIFEST")
+  if jq -e '.deprecated.community' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t DEPRECATED_FILES < <(jq -r '.deprecated.community[]?' "$CLEAN_MANIFEST")
   fi
 
   rm -f "$CLEAN_MANIFEST"

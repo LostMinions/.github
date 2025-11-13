@@ -3,7 +3,7 @@
   "defaults": {
     "dummy_prefix": "💤 ~ ",
     "actions": [],
-    "files": [
+    "community": [
       "CONTRIBUTING.md",
       "SECURITY.md",
       "CODE_OF_CONDUCT.md"
@@ -15,6 +15,10 @@
     ],
     "workflows": [
       "update-submodules.yml"
+    ],
+    "tools": [
+      "setup-nuget-auth.ps1",
+      "validate-github-token.ps1"
     ]
   },
 
@@ -28,7 +32,7 @@
       "check-usage",
       "setup-git"
     ],
-    "files": [
+    "community": [
       "README-template.md",
       "OLD_CONTRIBUTING.md"
     ],
@@ -37,7 +41,7 @@
       "bundle-library-releases.sh",
       "check-org-usage.sh",
       "init-library-submodules.sh",
-      "sync-library-tags.sh",
+      "sync-library-tags.sh"
     ],
     "templates": [
       "OLD_ISSUE_TEMPLATE"
@@ -45,6 +49,8 @@
     "workflows": [
       "weekly-submodule-update.yml",
       "test-compile.yml"
+    ],
+    "tools": [
     ]
   }
 }

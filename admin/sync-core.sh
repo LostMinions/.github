@@ -127,6 +127,7 @@ run_sync_for_repo() {
       ["5"]="sync-actions.sh|Actions"
       ["6"]="sync-scripts.sh|Scripts"
       ["7"]="sync-workflows.sh|Workflows"
+      ["8"]="sync-tools.sh|Tools"
     )
 
     # --- Run steps in numeric order ----------------------------------------------
