@@ -16,10 +16,7 @@
     "workflows": [
       "update-submodules.yml"
     ],
-    "tools": [
-      "setup-nuget-auth.ps1",
-      "validate-github-token.ps1"
-    ]
+    "tools": []
   },
 
   // Items here are deleted if they still exist in target repos
@@ -50,7 +47,6 @@
       "weekly-submodule-update.yml",
       "test-compile.yml"
     ],
-    "tools": [
-    ]
+    "tools": []
   }
 }
