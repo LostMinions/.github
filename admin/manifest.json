@@ -16,7 +16,9 @@
     "workflows": [
       "update-submodules.yml"
     ],
-    "tools": []
+    "tools": [
+      "validate-github-token.ps1"
+    ]
   },
 
   // Items here are deleted if they still exist in target repos
