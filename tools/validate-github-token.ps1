@@ -2,7 +2,7 @@ param(
     [string]$Token,
     [switch]$Force,
     [string]$EnvVar = "GH_TOKEN",
-    [switch]$PersistUser  # add this if you want system-level persistence
+    [switch]$PersistUser = $true
 )
 
 Write-Host ""
