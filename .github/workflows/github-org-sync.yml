@@ -7,16 +7,17 @@ on:
       # --- Workflow files
       - ".github/workflows/org-sync.yml"
 
-      # --- Source sync files
-      - "admin/*.sh"
-      - "admin/*.json"
-
       # --- Template folders to watch
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       - ".github/actions/**"
       - ".github/scripts/**"
       - ".github/workflows/**"
+
+      # --- Source sync files
+      - "admin/*.sh"
+      - "admin/*.json"
+      - "tools/*"
 
       # --- Governance documents
       - "CONTRIBUTING.md"
