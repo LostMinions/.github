@@ -32,6 +32,7 @@ runs:
       uses: ./.github/actions/build-dotnet
       with:
         project_filter: ${{ inputs.project_filter }}
+        gh-token: ${{ inputs.gh-token }}
 
     - name: 🔢 Determine Version
       id: version
