@@ -16,33 +16,37 @@ Write-Host ""
 Write-Host "Setting up NuGet for LostMinions development..."
 Write-Host ""
 
-# --- Prefer environment tokens if not provided -------------------------
+# --- Resolve GitHub token ------------------------------------------------
 if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
-    if (-not $env:GH_TOKEN -and -not $env:GITHUB_TOKEN) {
-        Write-Host " No GitHub token found in environment variables."
-        $Token = Read-Host "Please paste a valid GitHub Personal Access Token"
+    # Prefer env vars
+    if ($env:GH_TOKEN) {
+        $Token = $env:GH_TOKEN
+        Write-Host "Using token from GH_TOKEN."
     }
-    else {
-        # Pick whichever is available
-        $Token = if ($env:GH_TOKEN) { $env:GH_TOKEN } else { $env:GITHUB_TOKEN }
+    elseif ($env:GITHUB_TOKEN) {
+        $Token = $env:GITHUB_TOKEN
+        Write-Host "Using token from GITHUB_TOKEN."
     }
 }
 
-# --- Validate token -----------------------------------------------------
 if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
-    Write-Host "Cannot continue without a valid GitHub token."
+    # Only try to prompt if we're interactive and not in CI
+    $isInteractive = ($Host.Name -eq 'ConsoleHost' -and -not $env:CI)
+
+    if ($isInteractive) {
+        Write-Host "No GitHub token found in environment variables."
+        $Token = Read-Host "Please paste a valid GitHub Personal Access Token"
+    }
+}
+
+if (-not $Token -or [string]::IsNullOrWhiteSpace($Token)) {
+    Write-Host "Cannot continue without a valid GitHub token." -ForegroundColor Red
     exit 1
 }
 
-# --- Persist token for this session ------------------------------------
-if (-not $env:GH_TOKEN -or $env:GH_TOKEN -ne $Token) {
-    $env:GH_TOKEN = $Token
-    Write-Host "GH_TOKEN set for this session."
-}
-if (-not $env:GITHUB_TOKEN -or $env:GITHUB_TOKEN -ne $Token) {
-    $env:GITHUB_TOKEN = $Token
-    Write-Host "GITHUB_TOKEN set for this session."
-}
+# Optionally populate env vars for anything else in this process
+$env:GH_TOKEN      = $Token
+$env:GITHUB_TOKEN  = $Token
 
 Write-Host "Token acquired. Proceeding..."
 Write-Host ""
