@@ -17,6 +17,13 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: 🔑 Export GitHub Token
+      shell: bash
+      run: |
+        echo "Setting GH_TOKEN and GITHUB_TOKEN..."
+        echo "GH_TOKEN=${{ inputs.gh-token }}" >> $GITHUB_ENV
+        echo "GITHUB_TOKEN=${{ inputs.gh-token }}" >> $GITHUB_ENV
+
     - id: detect
       shell: bash
       run: |
