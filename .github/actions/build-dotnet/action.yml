@@ -9,6 +9,8 @@ inputs:
     default: "Release"
   verbosity:
     default: "minimal"
+  gh-token:
+    required: true
 
 outputs:
   project:

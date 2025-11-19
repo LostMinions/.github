@@ -103,6 +103,7 @@ jobs:
         uses: ./.github/actions/build-dotnet
         with:
           project_filter: ${{ inputs.project_filter }}
+          gh-token: ${{ secrets.GH_TOKEN }}
 
       - name: ✅ Verify Build Success
         shell: bash
