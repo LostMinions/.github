@@ -22,9 +22,13 @@ runs:
     - name: 🔑 Export GitHub Token
       shell: bash
       run: |
-        echo "Setting GH_TOKEN and GITHUB_TOKEN..."
-        echo "GH_TOKEN=${{ inputs.gh-token }}" >> $GITHUB_ENV
-        echo "GITHUB_TOKEN=${{ inputs.gh-token }}" >> $GITHUB_ENV
+        if [ -n "${{ inputs.gh-token }}" ]; then
+          echo "Setting GH_TOKEN and GITHUB_TOKEN from input..."
+          echo "GH_TOKEN=${{ inputs.gh-token }}" >> "$GITHUB_ENV"
+          echo "GITHUB_TOKEN=${{ inputs.gh-token }}" >> "$GITHUB_ENV"
+        else
+          echo "No gh-token input provided, leaving existing GH_TOKEN/GITHUB_TOKEN unchanged."
+        fi
 
     - id: detect
       shell: bash

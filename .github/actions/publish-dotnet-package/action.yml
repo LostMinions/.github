@@ -18,11 +18,23 @@ runs:
         gh-token: ${{ inputs.gh-token }}
         owner: ${{ github.repository_owner }}
 
+    - name: 🔑 Export GitHub Token
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.gh-token }}" ]; then
+          echo "Setting GH_TOKEN and GITHUB_TOKEN from input..."
+          echo "GH_TOKEN=${{ inputs.gh-token }}" >> "$GITHUB_ENV"
+          echo "GITHUB_TOKEN=${{ inputs.gh-token }}" >> "$GITHUB_ENV"
+        else
+          echo "No gh-token input provided, leaving existing GH_TOKEN/GITHUB_TOKEN unchanged."
+        fi
+
     - name: 🧱 Build Project
       id: build
       uses: ./.github/actions/build-dotnet
       with:
         project_filter: ${{ inputs.project_filter }}
+        gh-token: ${{ inputs.gh-token }}
 
     - name: 🔢 Determine Version
       id: version
