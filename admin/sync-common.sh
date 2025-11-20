@@ -24,6 +24,14 @@ discover_files() {
   find "$base" -type f -name "$pattern" -printf "%f\n" | sort
 }
 
+# --- discover_all ------------------------------------------------------------
+# Lists all files under base (recursive), as paths relative to base, sorted
+discover_all() {
+  local base="$1"
+  [ -d "$base" ] || return
+  find "$base" -type f -printf "%P\n" | sort
+}
+
 # --- remove_deprecated --------------------------------------------------------
 # Deletes deprecated files or directories by name
 remove_deprecated() {
