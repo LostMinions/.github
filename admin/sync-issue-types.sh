@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  The Portal Realm --- Org Issue Type Sync Utility (bash)
+#  Lost Minions --- Org Issue Type Sync Utility (bash)
 # ------------------------------------------------------------
 #  Creates or updates organization-level issue types via GraphQL API.
 #  Requires: gh CLI authenticated with full repo/org scope.
