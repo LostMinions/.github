@@ -44,8 +44,32 @@ for cmd in git jq; do
   fi
 done
 
-echo "Syncing community and license files for $FULL_REPO"
-echo ""
+# --- Parse repo configuration from repos.json --------------------------------
+CLEAN_JSON=$(mktemp)
+clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
+
+REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
+  '.repos[] | select((.org + "/" + .name) == $full)' "$CLEAN_JSON")
+
+rm -f "$CLEAN_JSON"
+
+if [ -z "$REPO_CONFIG" ]; then
+  echo "Repo not found or not enabled in repos.json: $FULL_REPO"
+  exit 1
+fi
+
+if [ "$(echo "$REPO_CONFIG" | jq -r '.enabled')" != "true" ]; then
+  echo "Repo disabled in repos.json: $FULL_REPO"
+  exit 0
+fi
+
+LICENSE_TYPE=$(echo "$REPO_CONFIG" | jq -r '.license // "private"')
+REPO_NAME=$(echo "$REPO_CONFIG" | jq -r '.name')
+
+IS_DOTGITHUB=false
+if [[ "$REPO_NAME" == ".github" ]]; then
+  IS_DOTGITHUB=true
+fi
 
 # --- Load defaults and deprecations from manifest ----------------------------
 COMMUNITY_FILES=()
@@ -69,23 +93,30 @@ if [ -f "$MANIFEST_FILE" ]; then
   rm -f "$CLEAN_MANIFEST"
 fi
 
+EXCLUDE_COMMUNITY_FILE=()
+if jq -e '.EXCLUDE_COMMUNITY_FILE' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+  mapfile -t EXCLUDE_COMMUNITY_FILE < <(echo "$REPO_CONFIG" | jq -r '.EXCLUDE_COMMUNITY_FILE[]?' 2>/dev/null || true)
+fi
+
 # --- Fallback if no manifest defaults ----------------------------------------
 if ((${#COMMUNITY_FILES[@]} == 0)); then
   echo "Warning: No default community files found in manifest; skipping community file sync."
 fi
 
-# --- Determine license type via repos.json -----------------------------------
-CLEAN_JSON=$(mktemp)
-clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
+echo "Syncing community and license files for $FULL_REPO"
+echo ""
 
-LICENSE_TYPE=$(jq -r --arg repo "$FULL_REPO" '
-  .repos[] | select((.org + "/" + .name) == $repo) | .license // "private"
-' "$CLEAN_JSON")
-
-if [[ "$LICENSE_TYPE" == "mit" ]]; then
+# --- Add license/notice files -------------------------------------------------
+if [[ "$IS_DOTGITHUB" == true ]]; then
+  # For org-level .github repos, keep both around.
   COMMUNITY_FILES+=("$ROOT_DIR/LICENSE")
-else
   COMMUNITY_FILES+=("$ROOT_DIR/NOTICE_PRIVATE.md")
+else
+  if [[ "$LICENSE_TYPE" == "mit" ]]; then
+    COMMUNITY_FILES+=("$ROOT_DIR/LICENSE")
+  else
+    COMMUNITY_FILES+=("$ROOT_DIR/NOTICE_PRIVATE.md")
+  fi
 fi
 
 # --- Remove deprecated community files ---------------------------------------
@@ -99,19 +130,37 @@ if ((${#DEPRECATED_FILES[@]} > 0)); then
   done
 fi
 
-# --- Copy community and license files ----------------------------------------
+# --- Copy community and license files (with per-repo excludes) ---------------
 for f in "${COMMUNITY_FILES[@]}"; do
   if [ -f "$f" ]; then
+    base="$(basename "$f")"
+
+    # Skip excluded community files for this repo
+    skip=false
+    for ex in "${EXCLUDE_COMMUNITY_FILE[@]}"; do
+      if [[ "$base" == "$ex" ]]; then
+        skip=true
+        break
+      fi
+    done
+
+    if [[ "$skip" == true ]]; then
+      echo "- Skipping $base (excluded for $FULL_REPO)"
+      continue
+    fi
+
     cp "$f" ./ || true
-    echo "- Copied $(basename "$f")"
+    echo "- Copied $base"
   fi
 done
 
-# --- Prevent dual-license duplication ----------------------------------------
-if [[ "$LICENSE_TYPE" == "mit" ]]; then
-  [ -f "NOTICE_PRIVATE.md" ] && rm -f "NOTICE_PRIVATE.md"
-else
-  [ -f "LICENSE" ] && rm -f "LICENSE"
+# --- Prevent dual-license duplication (non-.github only) ----------------------
+if [[ "$IS_DOTGITHUB" != true ]]; then
+  if [[ "$LICENSE_TYPE" == "mit" ]]; then
+    [ -f "NOTICE_PRIVATE.md" ] && rm -f "NOTICE_PRIVATE.md"
+  else
+    [ -f "LICENSE" ] && rm -f "LICENSE"
+  fi
 fi
 
 # --- Stage all managed community files ---------------------------------------
