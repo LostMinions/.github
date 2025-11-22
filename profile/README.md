@@ -6,8 +6,8 @@
 ---
 
 ### 🧠 What We Do
-Lost Minions is a collective of builders turning imagination into code, prints, and pixels.  
-We host everything from gaming tools and web apps to D&D resources and 3D-print designs —  
+Lost Minions is a collective of builders turning imagination into code, prints, and pixels. 
+We host everything from gaming tools and web apps to D&D resources and 3D-print designs — 
 each project is an experiment in curiosity and controlled chaos.
 
 ---
@@ -15,7 +15,7 @@ each project is an experiment in curiosity and controlled chaos.
 ### 🌐 Community Links
 
 #### 💬 Discord
-Join the lab and scheme with other minions:  
+Join the lab and scheme with other minions: 
 🔗 https://lostminions.org/discord
 
 #### 📱 Social Media
@@ -34,13 +34,13 @@ Join the lab and scheme with other minions:
 ---
 
 ### 💎 Support the Lab
-Help keep the experiments running and the minions building:  
+Help keep the experiments running and the minions building: 
 ❤️ [Patreon.com/LostMinions](https://www.patreon.com/LostMinions)
 
 ---
 
 ### 💬 About the Organization
-This GitHub organization hosts all official **Lost Minions** codebases —  
+This GitHub organization hosts all official **Lost Minions** codebases — 
 websites, bots, tools, and creative assets powering the Lost Minions network.
 
 You’ll find:
@@ -51,14 +51,14 @@ You’ll find:
 - 🧱 3D-printable designs and utilities  
 - 🧪 Odd experiments that went a little too far (on purpose)
 
-Whether it’s PHP, C#, or pure chaos, every repo here shares one mission:  
+Whether it’s PHP, C#, or pure chaos, every repo here shares one mission: 
 **build something weird, make it work, and have fun doing it.**
 
 ---
 
 ### 🔗 Related Organizations
 
-<!-- - 🧩 **Lost Minions (main org):** brand, bots, tools, and 3D designs  
+<!-- - 🧩 **Lost Minions (main org):** brand, bots, tools, and 3D designs 
   - https://github.com/LostMinions -->
 - 🎮 **Lost Minions Games:** indie prototypes, Unreal experiments, and shared gameplay systems  
   - https://github.com/LostMinionsGames
