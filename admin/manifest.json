@@ -3,6 +3,7 @@
   "defaults": {
     "dummy_prefix": "💤 ~ ",
     "actions": [],
+    "admin": [],
     "community": [
       "CONTRIBUTING.md",
       "SECURITY.md",
@@ -31,6 +32,9 @@
       "check-usage",
       "setup-git"
     ],
+    "admin": [
+      "old-sync-something.sh"
+    ],
     "community": [
       "README-template.md",
       "OLD_CONTRIBUTING.md"
@@ -50,5 +54,11 @@
       "test-compile.yml"
     ],
     "tools": []
+  },
+  "exclude": {
+    "admin": [
+      "logs",
+      "local-notes.md"
+    ]
   }
 }
