@@ -2,15 +2,15 @@
 
 # Lost Minions — Organization Hub
 
-Welcome to **Lost Minions**, a collective of makers, gamers, and coders turning imagination into code, prints, and pixels.  
+Welcome to **Lost Minions**, a collective of makers, gamers, and coders turning imagination into code, prints, and pixels.
 This repository serves as the **central configuration and community home** for all Lost Minions projects.
 
 ---
 
 ## About the Project
 
-Lost Minions is a creative network spanning 3D printing, automation, and gaming.  
-What began as a small group of builders has grown into a workshop of digital and physical experiments —  
+Lost Minions is a creative network spanning 3D printing, automation, and gaming.
+What began as a small group of builders has grown into a workshop of digital and physical experiments —
 each repo a different kind of creation:
 
 > _Automation scripts that keep our worlds running._  
@@ -78,14 +78,23 @@ This shared vocabulary keeps creative and technical work organized across code, 
 
 ## Maintainers & Contributors
 
-Lost Minions is maintained by **The Lost Minions Team** —  
-a circle of creators, programmers, and makers who believe in open collaboration and the joy of building things that shouldn’t exist but do anyway.
-
-> “Lost but not forgotten.”
+LostMinionsGames is maintained by the broader **Lost Minions** team —
+builders, programmers, and players who enjoy pushing weird ideas far enough to become real.
 
 ---
 
 ### Internal Docs
 
-Maintainers can find admin scripts, label/issue-type sync tools, and automation documentation inside  
+Maintainers can find admin scripts, label/issue-type sync tools, and automation documentation inside
 [`/admin/`](./admin) — not needed for public use but preserved for consistency.
+
+---
+
+## 🔒 Access & Licensing
+
+All original lore, writing, and custom assets are © **Lost Minions**.
+External or 3rd-party content (e.g., SRD, rulebooks, PDFs) is included for **private gameplay use** under their respective licenses.
+
+---
+
+> 👾 *“Lost but not forgotten.”*
