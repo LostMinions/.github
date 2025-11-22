@@ -27,7 +27,9 @@ Join the lab and scheme with other minions:
 | 📸 **Instagram** | [instagram.com/lostminions](https://www.instagram.com/lostminions/) |
 | 👾 **Reddit** | [reddit.com/r/LostMinions](https://www.reddit.com/r/LostMinions) |
 | 🎥 **TikTok** | [tiktok.com/@lostminions](https://www.tiktok.com/@lostminions) |
+| 🧪 **Twitch**  | [twitch.tv/lostminions](https://www.twitch.tv/lostminions) |
 | 🐦 **Twitter / X** | [twitter.com/LostMinions](https://twitter.com/LostMinions) |
+| ▶️ **YouTube** | [youtube.com/@LostMinions](https://www.youtube.com/@LostMinions) |
 
 ---
 
