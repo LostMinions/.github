@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  The Portal Realm --- Repo Secret Sync (single repo)
+#  Lost Minions --- Repo Secret Sync (single repo)
 # ------------------------------------------------------------
 #  Usage: bash sync-secrets.sh <org/repo>
 #  Pushes selected secrets into the given repository so that
