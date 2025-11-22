@@ -15,7 +15,7 @@
 If you discover a vulnerability, please **do not open a public issue**.
 
 Instead, report privately through **GitHub Security Advisories** or email: 
-**security@lostminions.com**
+**security@lostminions.org**
 
 We will:
 - Acknowledge your report within **72 hours** 
