@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Common discovery + cleanup utilities for sync scripts
+#  Lost Minions --- Common discovery + cleanup utilities for sync scripts
 # ============================================================
 set -euo pipefail
 
