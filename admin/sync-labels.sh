@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  The Portal Realm --- Label Sync Utility (single repo)
+#  Lost Minions --- Label Sync Utility (single repo)
 # ------------------------------------------------------------
 #  Usage: bash sync-labels.sh <org/repo> [workdir] [--clean]
 # ============================================================
