@@ -22,4 +22,4 @@ We will:
 - Provide a status update or request for clarification within **7 days** 
 - Credit responsible disclosures in release notes (if desired)
 
-Thank you for helping keep The Portal Realm safe for everyone.
+Thank you for helping keep Lost Minions safe for everyone.
