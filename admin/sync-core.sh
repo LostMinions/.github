@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  The Portal Realm --- Unified GitHub Sync Controller
+#  Lost Minions --- Unified GitHub Sync Controller
 # ------------------------------------------------------------
 #  Runs all sync scripts for each enabled repo concurrently,
 #  captures logs separately, and merges them in order.
