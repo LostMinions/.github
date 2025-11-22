@@ -56,4 +56,15 @@ Whether it’s PHP, C#, or pure chaos, every repo here shares one mission:
 
 ---
 
+### 🔗 Related Organizations
+
+<!-- - 🧩 **Lost Minions (main org):** brand, bots, tools, and 3D designs  
+  - https://github.com/LostMinions -->
+- 🎮 **Lost Minions Games:** indie prototypes, Unreal experiments, and shared gameplay systems  
+  - https://github.com/LostMinionsGames
+- 🌌 **The Portal Realm:** multiversal D&D campaigns, lore, and tooling  
+  - https://github.com/ThePortalRealm  
+
+---
+
 > 👾 *“Lost but not forgotten.”*
