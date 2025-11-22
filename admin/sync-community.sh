@@ -95,7 +95,7 @@ fi
 
 EXCLUDE_COMMUNITY_FILE=()
 if jq -e '.EXCLUDE_COMMUNITY_FILE' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
-  mapfile -t EXCLUDE_COMMUNITY_FILE < <(echo "$REPO_CONFIG" | jq -r '.EXCLUDE_COMMUNITY_FILE[]?' 2>/dev/null || true)
+  mapfile -t EXCLUDE_COMMUNITY_FILE < <(echo "$REPO_CONFIG" | jq -r '.exclude_community_file[]?' 2>/dev/null || true)
 fi
 
 # --- Fallback if no manifest defaults ----------------------------------------
