@@ -60,6 +60,12 @@ if [ "$(echo "$REPO_CONFIG" | jq -r '.enabled')" != "true" ]; then
   exit 0
 fi
 
+REPO_NAME=$(echo "$REPO_CONFIG" | jq -r '.name')
+IS_DOTGITHUB=false
+if [[ "$REPO_NAME" == ".github" ]]; then
+  IS_DOTGITHUB=true
+fi
+
 # --- Read defaults & deprecations from manifest.json --------------------------
 DEFAULT_WORKFLOWS=()
 DEPRECATED_WORKFLOWS=()
@@ -132,7 +138,9 @@ for wf in "${ALL_WORKFLOWS[@]}"; do
   DEST=".github/workflows/$wf"
   mkdir -p "$(dirname "$DEST")"
 
-  if printf '%s\n' "${WORKFLOWS[@]}" | grep -qx "$wf"; then
+  # For .github repos: ALWAYS copy real workflows (no dummies, no deletes here)
+  # For normal repos: copy if enabled, otherwise create a dummy
+  if [[ "$IS_DOTGITHUB" == true ]] || printf '%s\n' "${WORKFLOWS[@]}" | grep -qx "$wf"; then
     cp -f "$SRC" "$DEST"
     echo "- Copied $wf"
   else
