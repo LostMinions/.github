@@ -16,7 +16,7 @@ each project is an experiment in curiosity and controlled chaos.
 
 #### 💬 Discord
 Join the lab and scheme with other minions:  
-🔗 https://lostminions.com/discord
+🔗 https://lostminions.org/discord
 
 #### 📱 Social Media
 
