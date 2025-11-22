@@ -25,6 +25,12 @@ each project is an experiment in curiosity and controlled chaos.
 
 ---
 
+### 💎 Support the Lab
+Help keep the experiments running and the minions building:  
+❤️ [Patreon.com/LostMinions](https://www.patreon.com/LostMinions)
+
+---
+
 ### 💬 About the Organization
 This GitHub organization hosts all official **Lost Minions** codebases —  
 websites, bots, tools, and creative assets powering the Lost Minions network.
