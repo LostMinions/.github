@@ -97,12 +97,19 @@ fi
 # --- Helper: per-repo sync sequence ------------------------------------------
 run_sync_for_repo() {
   local repo_json="$1"
-  local ORG NAME FULL LOG_PATH TMPDIR
+  local ORG NAME FULL LOG_PATH TMPDIR IS_DOTGITHUB
+
   ORG=$(echo "$repo_json" | jq -r '.org')
   NAME=$(echo "$repo_json" | jq -r '.name')
   FULL="$ORG/$NAME"
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
   TMPDIR=$(mktemp -d)
+
+  # Special handling for org-level .github repos
+  IS_DOTGITHUB=false
+  if [[ "$NAME" == ".github" ]]; then
+    IS_DOTGITHUB=true
+  fi
 
   {
     echo "------------------------------------------------------------"
@@ -118,19 +125,40 @@ run_sync_for_repo() {
 
     cd "$TMPDIR"
 
-    declare -A steps=(
-      ["0"]="sync-secrets.sh|Secrets"
-      ["1"]="sync-community.sh|Community and License Files"
-      ["2"]="sync-templates.sh|Templates"
-      ["3"]="sync-issue-types.sh|Issue Types"
-      ["4"]="sync-labels.sh|Labels"
-      ["5"]="sync-actions.sh|Actions"
-      ["6"]="sync-scripts.sh|Scripts"
-      ["7"]="sync-workflows.sh|Workflows"
-      ["8"]="sync-tools.sh|Tools"
-    )
+    # ----------------------------------------------------------
+    # Step map: different for .github vs normal repos
+    # ----------------------------------------------------------
+    declare -A steps
 
-    # --- Run steps in numeric order ----------------------------------------------
+    if [[ "$IS_DOTGITHUB" == true ]]; then
+      # For org-level .github repos:
+      # - no templates / issue-types / labels
+      # - add admin sync
+      steps=(
+        ["0"]="sync-secrets.sh|Secrets"
+        ["1"]="sync-community.sh|Community and License Files"
+        ["2"]="sync-actions.sh|Actions"
+        ["3"]="sync-scripts.sh|Scripts"
+        ["4"]="sync-workflows.sh|Workflows"
+        ["5"]="sync-tools.sh|Tools"
+        ["6"]="sync-admin.sh|Admin"
+      )
+    else
+      # Normal repos (existing behavior)
+      steps=(
+        ["0"]="sync-secrets.sh|Secrets"
+        ["1"]="sync-community.sh|Community and License Files"
+        ["2"]="sync-templates.sh|Templates"
+        ["3"]="sync-issue-types.sh|Issue Types"
+        ["4"]="sync-labels.sh|Labels"
+        ["5"]="sync-actions.sh|Actions"
+        ["6"]="sync-scripts.sh|Scripts"
+        ["7"]="sync-workflows.sh|Workflows"
+        ["8"]="sync-tools.sh|Tools"
+      )
+    fi
+
+    # --- Run steps in numeric order --------------------------------------
     for i in $(printf "%s\n" "${!steps[@]}" | sort -n); do
       IFS='|' read -r script title <<< "${steps[$i]}"
       echo "-> Step $((i+1)): $title"
@@ -168,6 +196,7 @@ run_sync_for_repo() {
       [[ "$changed_summary" == *"labels"* ]]    && commit_msg+=" labels"
       [[ "$changed_summary" == *"community"* ]] && commit_msg+=" community"
       [[ "$changed_summary" == *"secrets"* ]]   && commit_msg+=" secrets"
+      [[ "$changed_summary" == *"admin"* ]]     && commit_msg+=" admin"
 
       commit_msg=$(echo "$commit_msg" | sed 's/:- /: /')  # normalize dashes
 
@@ -189,6 +218,7 @@ run_sync_for_repo() {
     cd "$SCRIPT_DIR"
     rm -rf "$TMPDIR"
     echo ""
+
   } > "$LOG_PATH" 2>&1
 }
 
