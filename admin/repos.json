@@ -4,8 +4,8 @@
        ORG-LEVEL .github ADMIN REPOS
        ============================================================ */
     { "org": "LostMinions",      "name": ".github", "enabled": false, "description": "Super admin repo for shared templates, actions, automation" },
-    { "org": "LostMinionsGames", "name": ".github", "enabled": true, "description": "Admin repo for LostMinionsGames" },
-    { "org": "ThePortalRealm",   "name": ".github", "enabled": true, "description": "Admin repo for ThePortalRealm" },
+    { "org": "LostMinionsGames", "name": ".github", "enabled": true, "description": "Admin repo for LostMinionsGames", "exclude_community": ["CONTRIBUTING.md", "SECURITY.md"] },
+    { "org": "ThePortalRealm",   "name": ".github", "enabled": true, "description": "Admin repo for ThePortalRealm", "exclude_community": ["CONTRIBUTING.md", "SECURITY.md"] },
 
     /* ============================================================
        CORE ADMIN & ACTIVE PROJECTS
