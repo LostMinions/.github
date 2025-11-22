@@ -60,6 +60,12 @@ if [ "$(echo "$REPO_CONFIG" | jq -r '.enabled')" != "true" ]; then
   exit 0
 fi
 
+REPO_NAME=$(echo "$REPO_CONFIG" | jq -r '.name')
+IS_DOTGITHUB=false
+if [[ "$REPO_NAME" == ".github" ]]; then
+  IS_DOTGITHUB=true
+fi
+
 # --- Read defaults & deprecations from manifest.json --------------------------
 DEFAULT_WORKFLOWS=()
 DEPRECATED_WORKFLOWS=()
@@ -133,20 +139,33 @@ for wf in "${ALL_WORKFLOWS[@]}"; do
   mkdir -p "$(dirname "$DEST")"
 
   if printf '%s\n' "${WORKFLOWS[@]}" | grep -qx "$wf"; then
+    # Workflow enabled for this repo: copy real file
     cp -f "$SRC" "$DEST"
     echo "- Copied $wf"
   else
-    echo "- Creating dummy $wf"
-    {
-      echo "name: ${DUMMY_PREFIX}${wf}"
-      echo "on:"
-      echo "  workflow_call:"
-      echo "jobs:"
-      echo "  none:"
-      echo "    runs-on: ubuntu-latest"
-      echo "    steps:"
-      echo "      - run: echo \"Placeholder for $wf - not used by this repo.\""
-    } > "$DEST"
+    if [[ "$IS_DOTGITHUB" == true ]]; then
+      # For org-level .github repos: do NOT create dummy workflows.
+      # Either leave it absent or clean up if an old dummy exists.
+      if [[ -f "$DEST" ]]; then
+        rm -f "$DEST"
+        echo "- Removed unused $wf from .github repo"
+      else
+        echo "- Skipping unused $wf for .github repo"
+      fi
+    else
+      # Normal repos: create dummy workflow so it can be safely referenced
+      echo "- Creating dummy $wf"
+      {
+        echo "name: ${DUMMY_PREFIX}${wf}"
+        echo "on:"
+        echo "  workflow_call:"
+        echo "jobs:"
+        echo "  none:"
+        echo "    runs-on: ubuntu-latest"
+        echo "    steps:"
+        echo "      - run: echo \"Placeholder for $wf - not used by this repo.\""
+      } > "$DEST"
+    fi
   fi
 done
 
