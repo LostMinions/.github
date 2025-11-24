@@ -20,6 +20,8 @@ Join the lab and scheme with other minions:
 
 #### 📱 Social Media
 
+- 🌲 [linktr.ee](https://linktr.ee/lostminions)
+
 | Platform | Link |
 |---------|------|
 | 🧵 **Etsy** | [etsy.com/shop/LostMinions](https://www.etsy.com/shop/LostMinions) |
