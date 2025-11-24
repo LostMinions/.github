@@ -6,6 +6,7 @@
 ---
 
 ### 🧠 What We Do
+
 Lost Minions is a collective of builders turning imagination into code, prints, and pixels. 
 We host everything from gaming tools and web apps to D&D resources and 3D-print designs — 
 each project is an experiment in curiosity and controlled chaos.
@@ -36,12 +37,14 @@ Join the lab and scheme with other minions:
 ---
 
 ### 💎 Support the Lab
+
 Help keep the experiments running and the minions building: 
 ❤️ [Patreon.com/LostMinions](https://www.patreon.com/LostMinions)
 
 ---
 
 ### 💬 About the Organization
+
 This GitHub organization hosts all official **Lost Minions** codebases — 
 websites, bots, tools, and creative assets powering the Lost Minions network.
 
