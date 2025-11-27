@@ -46,7 +46,6 @@ jobs:  # ----------------------------------------
   # ----------------------------------------
   precheck:
     name: 🧮 Precheck
-    if: ${{ !endsWith(github.repository, '/.github') }}
     # Org repos → self-hosted, user repos → github-hosted
     runs-on: ${{ github.event.repository.owner.type == 'Organization' && 'self-hosted' || 'ubuntu-latest' }}
     timeout-minutes: 3
