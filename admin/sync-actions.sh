@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Actions Sync (single-clone version)
+#  Lost Minions --- Actions Sync
 # ------------------------------------------------------------
 #  Auto-discovers and syncs composite actions from the
 #  template repository into an existing cloned repo.
@@ -15,7 +15,7 @@ set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-actions.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-actions.sh <owner/repo> <workdir>"
   exit 1
 fi
 

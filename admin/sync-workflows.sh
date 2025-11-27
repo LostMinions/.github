@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Workflow Sync (single-clone version)
+#  Lost Minions --- Workflow Sync
 # ------------------------------------------------------------
 #  Automatically syncs and maintains workflows inside an
 #  existing cloned repository, using:
@@ -9,14 +9,14 @@
 #    * repos.json for per-repo workflow activation
 #
 #  Usage:
-#    bash sync-workflows.sh <org/repo> <workdir>
+#    bash sync-workflows.sh <owner/repo> <workdir>
 # ============================================================
 
 set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-workflows.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-workflows.sh <owner/repo> <workdir>"
   exit 1
 fi
 
@@ -48,7 +48,7 @@ CLEAN_JSON=$(mktemp)
 clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
 
 REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
-  '.repos[] | select((.org + "/" + .name) == $full)' "$CLEAN_JSON")
+  '.repos[] | select((.owner + "/" + .name) == $full)' "$CLEAN_JSON")
 
 if [ -z "$REPO_CONFIG" ]; then
   echo "Repo not found or not enabled in repos.json: $FULL_REPO"

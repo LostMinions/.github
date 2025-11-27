@@ -1,69 +1,69 @@
 {
   "repos": [
-    /* ============================================================
-       ORG-LEVEL .github ADMIN REPOS
-       ============================================================ */
-    { "org": "LostMinions",      "name": ".github", "enabled": false, "description": "Super admin repo for shared templates, actions, automation" },
-    { "org": "LostMinionsGames", "name": ".github", "enabled": true, "description": "Admin repo for LostMinionsGames", "exclude_community_file": ["CONTRIBUTING.md", "SECURITY.md"] },
-    { "org": "ThePortalRealm",   "name": ".github", "enabled": true, "description": "Admin repo for ThePortalRealm", "exclude_community_file": ["CONTRIBUTING.md", "SECURITY.md"] },
+      /* ============================================================
+         ORG-LEVEL .github ADMIN REPOS
+         ============================================================ */
+      { "owner": "LostMinions",      "name": ".github", "enabled": false, "description": "Super admin repo for shared templates, actions, automation" },
+      { "owner": "LostMinionsGames", "name": ".github", "enabled": true, "description": "Admin repo for LostMinionsGames", "exclude_community_file": ["CONTRIBUTING.md", "SECURITY.md"] },
+      { "owner": "ThePortalRealm",   "name": ".github", "enabled": true, "description": "Admin repo for ThePortalRealm", "exclude_community_file": ["CONTRIBUTING.md", "SECURITY.md"] },
 
-    /* ============================================================
-       CORE ADMIN & ACTIVE PROJECTS
-       ============================================================ */
-    { "org": "LostMinions", "name": ".github", "enabled": false, "description": "Admin repo for templates, actions, and automation" },
-    { "org": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": false, "description": "3D print designs and model sources", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-DnD", "enabled": true, "description": "D&D campaign and resources", "workflows": ["update-submodules-weekly.yml"] },
+      /* ============================================================
+         CORE ADMIN & ACTIVE PROJECTS
+         ============================================================ */
+      { "owner": "LostMinions", "name": ".github", "enabled": false, "description": "Admin repo for templates, actions, and automation" },
+      { "owner": "LostMinions", "name": "LostMinions.org", "enabled": true, "description": "Main website & network hub", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-3DPrint", "enabled": false, "description": "3D print designs and model sources", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-DnD", "enabled": true, "description": "D&D campaign and resources", "workflows": ["update-submodules-weekly.yml"] },
 
-    /* ============================================================
-       AUTOMATION & TOOLS
-       ============================================================ */
-    { "org": "LostMinions", "name": "LostMinions.CSharpTemplate", "enabled": true, "description": "Standardized .NET 8 template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation", "workflows": ["controller.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] },
-    { "org": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, string helpers)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup)", "workflows": ["controller.yml", "publish.yml", "compile.yml", "release-lavalink.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
-    { "org": "LostMinions", "name": "LostMinions.Packages", "enabled": true, "description": "Meta-repository that aggregates all LostMinions library packages (Core, Discord, GoogleSheets, Logging) into unified build artifacts for offline or limited-bandwidth installs", "workflows": ["sync-library.yml", "sync-library-daily.yml"], "exclude_workflows": ["update-submodules.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
-    { "org": "LostMinions", "name": "KrushStock-DiscordBot", "enabled": true, "description": "Automated stock analysis and alerting Discord bot", "workflows": ["controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] },
+      /* ============================================================
+         AUTOMATION & TOOLS
+         ============================================================ */
+      { "owner": "LostMinions", "name": "LostMinions.CSharpTemplate", "enabled": true, "description": "Standardized .NET 8 template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation", "workflows": ["controller.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] },
+      { "owner": "LostMinions", "name": "LostMinions.Core", "enabled": true, "description": "Shared .NET 8 core utilities and extensions (IO, string helpers)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
+      { "owner": "LostMinions", "name": "LostMinions.Discord", "enabled": true, "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET 8 (graceful shutdown, DI setup)", "workflows": ["controller.yml", "publish.yml", "compile.yml", "release-lavalink.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
+      { "owner": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
+      { "owner": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
+      { "owner": "LostMinions", "name": "LostMinions.Packages", "enabled": true, "description": "Meta-repository that aggregates all LostMinions library packages (Core, Discord, GoogleSheets, Logging) into unified build artifacts for offline or limited-bandwidth installs", "workflows": ["sync-library.yml", "sync-library-daily.yml"], "exclude_workflows": ["update-submodules.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
+      { "owner": "LostMinions", "name": "KrushStock-DiscordBot", "enabled": true, "description": "Automated stock analysis and alerting Discord bot", "workflows": ["controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] },
 
-    /* ============================================================
-       ARCHIVED PROJECTS
-       ============================================================ */
-    { "org": "LostMinions", "name": "ActiveSocialSports.com", "enabled": false, "description": "Kickball league website", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-ArthasBot", "enabled": false, "description": "World of Warcraft bot project (archived)", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-Collections", "enabled": false, "description": "Archived minisite for item collections", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-DigiPen", "enabled": false, "description": "Archived student project from DigiPen", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-DnD-Moloch", "enabled": false, "description": "Archived journal site for Moloch the Warlock", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-Graphics", "enabled": false, "description": "Archived graphics and HTML experiments", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-II", "enabled": false, "description": "Wrapper for Improved Initiative host", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-IRC", "enabled": false, "description": "Old IRC web tools", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-Krush", "enabled": false, "description": "Early HTML prototype site (Krush project)", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-LilUrl", "enabled": false, "description": "Legacy URL shortener service", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions.org-Minisite", "enabled": false, "description": "Legacy minisite framework", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "LostMinions_Libraries", "enabled": false, "description": "C# shared libraries & automation" },
-    { "org": "LostMinions", "name": "MinionBot", "enabled": false, "description": "IRC / Discord automation bot (archived codebase)" },
+      /* ============================================================
+         ARCHIVED PROJECTS
+         ============================================================ */
+      { "owner": "LostMinions", "name": "ActiveSocialSports.com", "enabled": false, "description": "Kickball league website", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-ArthasBot", "enabled": false, "description": "World of Warcraft bot project (archived)", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-Collections", "enabled": false, "description": "Archived minisite for item collections", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-DigiPen", "enabled": false, "description": "Archived student project from DigiPen", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-DnD-Moloch", "enabled": false, "description": "Archived journal site for Moloch the Warlock", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-Graphics", "enabled": false, "description": "Archived graphics and HTML experiments", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-II", "enabled": false, "description": "Wrapper for Improved Initiative host", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-IRC", "enabled": false, "description": "Old IRC web tools", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-Krush", "enabled": false, "description": "Early HTML prototype site (Krush project)", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-LilUrl", "enabled": false, "description": "Legacy URL shortener service", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions.org-Minisite", "enabled": false, "description": "Legacy minisite framework", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "LostMinions_Libraries", "enabled": false, "description": "C# shared libraries & automation" },
+      { "owner": "LostMinions", "name": "MinionBot", "enabled": false, "description": "IRC / Discord automation bot (archived codebase)" },
 
-    /* ============================================================
-       DARKFALL LEGACY BRANCHES
-       ============================================================ */
-    { "org": "LostMinions", "name": "DarkfallInfo.com", "enabled": false, "description": "Legacy MMO utilities & data site", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "DarkfallInfo.com-Calendar", "enabled": false, "description": "Darkfall calendar project", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "DarkfallInfo.com-Crafting", "enabled": false, "description": "Darkfall crafting data site", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "DarkfallInfo.com-PMap2", "enabled": false, "description": "Darkfall: Unholy Wars Political Map project", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "Darkfall-ClientMod", "enabled": false, "description": "Darkfall Java client modification" },
-    { "org": "LostMinions", "name": "Darkfall_Programs", "enabled": false, "description": "Legacy C# tools related to Darkfall" },
-    { "org": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" },
+      /* ============================================================
+         DARKFALL LEGACY BRANCHES
+         ============================================================ */
+      { "owner": "LostMinions", "name": "DarkfallInfo.com", "enabled": false, "description": "Legacy MMO utilities & data site", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "DarkfallInfo.com-Calendar", "enabled": false, "description": "Darkfall calendar project", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "DarkfallInfo.com-Crafting", "enabled": false, "description": "Darkfall crafting data site", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "DarkfallInfo.com-PMap", "enabled": false, "description": "Darkfall (original) Political Map project", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "DarkfallInfo.com-PMap2", "enabled": false, "description": "Darkfall: Unholy Wars Political Map project", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "Darkfall-ClientMod", "enabled": false, "description": "Darkfall Java client modification" },
+      { "owner": "LostMinions", "name": "Darkfall_Programs", "enabled": false, "description": "Legacy C# tools related to Darkfall" },
+      { "owner": "LostMinions", "name": "DarkfallMinion-Android", "enabled": false, "description": "Android client for Darkfall utilities" },
 
-    /* ============================================================
-       H1Z1 LEGACY BRANCHES
-       ============================================================ */
-    { "org": "LostMinions", "name": "H1Z1Info.com", "enabled": false, "description": "Legacy MMO utilities & data site", "workflows": ["update-submodules-weekly.yml"] },
-    { "org": "LostMinions", "name": "H1Z1Info.com-Map", "enabled": false, "description": "Legacy MMO map site", "workflows": ["update-submodules-weekly.yml"] },
+      /* ============================================================
+         H1Z1 LEGACY BRANCHES
+         ============================================================ */
+      { "owner": "LostMinions", "name": "H1Z1Info.com", "enabled": false, "description": "Legacy MMO utilities & data site", "workflows": ["update-submodules-weekly.yml"] },
+      { "owner": "LostMinions", "name": "H1Z1Info.com-Map", "enabled": false, "description": "Legacy MMO map site", "workflows": ["update-submodules-weekly.yml"] },
 
-    /* ============================================================
-       PERSONAL REPOS
-       ============================================================ */
-   { "org": "TheKrush", "name": "Sanctuary", "enabled": true, "description": "Multi-gem AI sanctuary core and Discord orchestration for persistent companions", "workflows": ["controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] }
+      /* ============================================================
+         PERSONAL REPOS
+         ============================================================ */
+      { "owner": "TheKrush", "name": "Sanctuary", "enabled": true, "description": "Multi-gem AI sanctuary core and Discord orchestration for persistent companions", "workflows": ["controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] }
   ]
 }

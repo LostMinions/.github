@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Tools Folder Sync (single-clone)
+#  Lost Minions --- Tools Folder Sync
 # ------------------------------------------------------------
 #  Syncs ALL files + folders from the /tools directory in the
 #  template repository into an already-cloned target repo.
@@ -16,7 +16,7 @@ set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-tools.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-tools.sh <owner/repo> <workdir>"
   exit 1
 fi
 

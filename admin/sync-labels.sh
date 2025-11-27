@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Label Sync Utility (single repo)
+#  Lost Minions --- Label Sync Utility
 # ------------------------------------------------------------
-#  Usage: bash sync-labels.sh <org/repo> [workdir] [--clean]
+#  Usage: bash sync-labels.sh <owner/repo> [workdir] [--clean]
 # ============================================================
 
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-  echo "Usage: bash sync-labels.sh <org/repo> [workdir] [--clean]"
+  echo "Usage: bash sync-labels.sh <owner/repo> [workdir] [--clean]"
   exit 1
 fi
 

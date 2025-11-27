@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Script Sync (single-clone version)
+#  Lost Minions --- Script Sync
 # ------------------------------------------------------------
 #  Auto-discovers and syncs .github/scripts/*.sh files from
 #  the template repository into an existing cloned repo.
@@ -15,7 +15,7 @@ set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-scripts.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-scripts.sh <owner/repo> <workdir>"
   exit 1
 fi
 

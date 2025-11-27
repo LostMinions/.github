@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Repo Secret Sync (single repo)
+#  Lost Minions --- Repo Secret Sync
 # ------------------------------------------------------------
-#  Usage: bash sync-secrets.sh <org/repo>
+#  Usage: bash sync-secrets.sh <owner/repo>
 #  Pushes selected secrets into the given repository so that
 #  every private repo gets the same GH_TOKEN (and others later).
 # ============================================================
@@ -10,12 +10,12 @@
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-  echo "Usage: bash sync-secrets.sh <org/repo>"
+  echo "Usage: bash sync-secrets.sh <owner/repo>"
   exit 1
 fi
 
 FULL_REPO="$1"
-ORG="${FULL_REPO%%/*}"
+OWNER="${FULL_REPO%%/*}"
 REPO="${FULL_REPO##*/}"
 
 # --- secrets to replicate (add more as needed)

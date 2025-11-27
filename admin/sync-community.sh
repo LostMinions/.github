@@ -11,14 +11,14 @@
 #    * Cleans stale or swapped-out files
 #
 #  Usage:
-#    bash sync-community.sh <org/repo> <workdir>
+#    bash sync-community.sh <owner/repo> <workdir>
 # ============================================================
 
 set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-community.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-community.sh <owner/repo> <workdir>"
   exit 1
 fi
 
@@ -49,7 +49,7 @@ CLEAN_JSON=$(mktemp)
 clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
 
 REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
-  '.repos[] | select((.org + "/" + .name) == $full)' "$CLEAN_JSON")
+  '.repos[] | select((.owner + "/" + .name) == $full)' "$CLEAN_JSON")
 
 rm -f "$CLEAN_JSON"
 

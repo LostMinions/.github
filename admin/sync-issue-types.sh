@@ -4,20 +4,20 @@
 # ------------------------------------------------------------
 #  Creates or updates organization-level issue types via GraphQL API.
 #  Requires: gh CLI authenticated with full repo/org scope.
-#  Usage: bash sync-issue-types.sh <org/repo> [workdir]
+#  Usage: bash sync-issue-types.sh <owner/repo> [workdir]
 # ============================================================
 
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
-  echo "Usage: bash sync-issue-types.sh <org/repo> [workdir]"
+  echo "Usage: bash sync-issue-types.sh <owner/repo> [workdir]"
   exit 1
 fi
 
 FULL_REPO="$1"
 WORKDIR="${2:-}" # ignored; kept for consistent interface
 
-ORG="${FULL_REPO%%/*}"   # Extract org before first slash
+OWNER="${FULL_REPO%%/*}"   # first segment before slash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TYPES_FILE="$SCRIPT_DIR/issue-types.json"
 
@@ -44,13 +44,15 @@ clean_json_file "$TYPES_FILE" "$CLEAN_TYPES"
 # --- Retrieve organization ID -------------------------------------------------
 ORG_ID=$(gh api graphql -f query="
 {
-  organization(login: \"$ORG\") { id }
+  organization(login: \"$OWNER\") { id }
 }
-" --jq '.data.organization.id')
+" --jq '.data.organization.id' 2>/dev/null || echo "")
 
-if [[ -z "$ORG_ID" ]]; then
-  echo "Could not retrieve organization ID for $ORG"
-  exit 1
+if [[ -z "$ORG_ID" || "$ORG_ID" == "null" ]]; then
+  echo "Owner '$OWNER' is not an organization or cannot be resolved."
+  echo "Org-level issue types are skipped for $FULL_REPO."
+  # treat as a no-op success so the controller doesn't mark this step as failed
+  exit 0
 fi
 
 TYPE_COUNT=$(jq '. | length' "$CLEAN_TYPES")

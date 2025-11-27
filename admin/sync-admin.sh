@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Admin Folder Sync (single-clone)
+#  Lost Minions --- Admin Folder Sync
 # ------------------------------------------------------------
 #  Syncs ALL files + folders from the /admin directory in the
 #  template .github repo into an already-cloned target repo.
@@ -20,7 +20,7 @@ set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-admin.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-admin.sh <owner/repo> <workdir>"
   exit 1
 fi
 

@@ -31,7 +31,7 @@ if [ ! -f "$REPOS_FILE" ]; then
   exit 1
 fi
 
-# Determine org name (local fallback for GH Actions variable)
+# Determine owner name (local fallback for GH Actions variable)
 if [[ -z "${GITHUB_REPOSITORY:-}" ]]; then
   ORG_NAME="LostMinions"   # fallback when run locally
 else
@@ -59,9 +59,9 @@ echo ""
 
 ARCHIVED_LIST=()
 for repo in "${REPOS[@]}"; do
-  ORG=$(echo "$repo" | jq -r '.org')
+  OWNER=$(echo "$repo" | jq -r '.owner')
   NAME=$(echo "$repo" | jq -r '.name')
-  FULL="$ORG/$NAME"
+  FULL="$OWNER/$NAME"
   IS_ARCHIVED=$(gh repo view "$FULL" --json isArchived -q '.isArchived' 2>/dev/null || echo "false")
   if [[ "$IS_ARCHIVED" == "true" ]]; then
     ARCHIVED_LIST+=("$FULL")
@@ -97,17 +97,25 @@ fi
 # --- Helper: per-repo sync sequence ------------------------------------------
 run_sync_for_repo() {
   local repo_json="$1"
-  local ORG NAME FULL LOG_PATH TMPDIR IS_DOTGITHUB
+  local OWNER NAME FULL LOG_PATH TMPDIR IS_DOTGITHUB IS_USERREPO OWNER_TYPE
 
-  ORG=$(echo "$repo_json" | jq -r '.org')
+  OWNER=$(echo "$repo_json" | jq -r '.owner')
   NAME=$(echo "$repo_json" | jq -r '.name')
-  FULL="$ORG/$NAME"
+  FULL="$OWNER/$NAME"
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
   TMPDIR=$(mktemp -d)
 
-  # Special handling for org-level .github repos
+  # Detect if this is a user-owned repo via GitHub API
+  OWNER_TYPE=$(gh api "repos/$FULL" --jq '.owner.type' 2>/dev/null || echo "User")
+  if [[ "$OWNER_TYPE" == "User" ]]; then
+    IS_USERREPO=true
+  else
+    IS_USERREPO=false
+  fi
+
+  # Special handling for org-level .github repos only
   IS_DOTGITHUB=false
-  if [[ "$NAME" == ".github" ]]; then
+  if [[ "$NAME" == ".github" && "$IS_USERREPO" == false ]]; then
     IS_DOTGITHUB=true
   fi
 
@@ -131,7 +139,7 @@ run_sync_for_repo() {
     declare -A steps
 
     if [[ "$IS_DOTGITHUB" == true ]]; then
-      # For org-level .github repos:
+      # Org-level .github repos:
       # - no templates / issue-types / labels
       # - add admin sync
       steps=(
@@ -143,8 +151,20 @@ run_sync_for_repo() {
         ["5"]="sync-tools.sh|Tools"
         ["6"]="sync-admin.sh|Admin"
       )
+    elif [[ "$IS_USERREPO" == true ]]; then
+      # User-owned repos:
+      # - same as .github, but NO admin
+      steps=(
+        ["0"]="sync-secrets.sh|Secrets"
+        ["1"]="sync-community.sh|Community and License Files"
+        ["2"]="sync-actions.sh|Actions"
+        ["3"]="sync-scripts.sh|Scripts"
+        ["4"]="sync-workflows.sh|Workflows"
+        ["5"]="sync-tools.sh|Tools"
+      )
     else
-      # Normal repos (existing behavior)
+      # Normal org repos:
+      # - full behavior including templates / issue-types / labels
       steps=(
         ["0"]="sync-secrets.sh|Secrets"
         ["1"]="sync-community.sh|Community and License Files"
@@ -255,9 +275,9 @@ repo_names=()
 set +e
 
 for repo_json in "${REPOS[@]}"; do
-  ORG=$(echo "$repo_json" | jq -r '.org')
+  OWNER=$(echo "$repo_json" | jq -r '.owner')
   NAME=$(echo "$repo_json" | jq -r '.name')
-  FULL="$ORG/$NAME"
+  FULL="$OWNER/$NAME"
   LOG_PATH="$LOG_DIR/${FULL//\//-}.log"
 
   echo "Starting sync for $FULL (log: $LOG_PATH)"
@@ -302,9 +322,6 @@ for i in "${!repo_names[@]}"; do
   repo=${repo_names[$i]}
   LOG_PATH="$LOG_DIR/${repo//\//-}.log"
   if [ -f "$LOG_PATH" ]; then
-    # echo "------------------------------------------------------------"
-    # echo "Repository: $repo"
-    # echo "------------------------------------------------------------"
     cat "$LOG_PATH"
     echo ""
   fi

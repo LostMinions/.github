@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- .github Template Sync (single-clone)
+#  Lost Minions --- .github Template Sync
 # ------------------------------------------------------------
 #  Syncs .github template directories (ISSUE_TEMPLATE,
 #  PULL_REQUEST_TEMPLATE, etc.) from the template repository
@@ -13,14 +13,14 @@
 #    * Falls back to ISSUE_TEMPLATE + PULL_REQUEST_TEMPLATE
 #
 #  Usage:
-#    bash sync-templates.sh <org/repo> <workdir>
+#    bash sync-templates.sh <owner/repo> <workdir>
 # ============================================================
 
 set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-  echo "Usage: bash sync-templates.sh <org/repo> <workdir>"
+  echo "Usage: bash sync-templates.sh <owner/repo> <workdir>"
   exit 1
 fi
 
