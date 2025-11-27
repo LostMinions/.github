@@ -62,7 +62,7 @@ echo ""
 # --- Fetch existing types -----------------------------------------------------
 EXISTING_JSON=$(gh api graphql -f query="
 {
-  organization(login: \"$ORG\") {
+  organization(login: \"$OWNER\") {
     issueTypes(first: 100) {
       nodes { id name color description }
     }
