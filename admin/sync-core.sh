@@ -227,7 +227,7 @@ run_sync_for_repo() {
         commit_msg+=" (.github assets and metadata)"
       fi
 
-      commit_msg+=" [skip ci]"
+      # commit_msg+=" [skip ci]"
 
       git commit -m "$commit_msg" >/dev/null || true
       git push origin HEAD >/dev/null 2>&1 && echo "Pushed updates: $commit_msg" || echo "Push failed"
@@ -247,7 +247,7 @@ export SCRIPT_DIR LOG_DIR
 
 # --- Launch jobs --------------------------------------------------------------
 if [[ "$DEBUG_MODE" == true ]]; then
-  echo "Running in debug mode (single repo)..."
+  echo "Running in debug mode..."
   if ((${#REPOS[@]})); then
     run_sync_for_repo "${REPOS[0]}"
   else
