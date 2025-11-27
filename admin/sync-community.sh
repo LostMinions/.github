@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Lost Minions --- Community File Sync (single-clone)
+#  Lost Minions --- Community File Sync
 # ------------------------------------------------------------
 #  Syncs root-level community and license files from the
 #  template repository into an already-cloned target repo.

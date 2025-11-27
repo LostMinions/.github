@@ -24,23 +24,28 @@ permissions:
   contents: write
   packages: write
 
-jobs:
-  # ----------------------------------------
+jobs:  # ----------------------------------------
   # 🧩 Precheck
   # ----------------------------------------
   precheck:
     name: 🧮 Precheck
     if: ${{ !endsWith(github.repository, '/.github') }}
-    runs-on: self-hosted
-    timeout-minutes: 1
+    # Org repos → self-hosted, user repos → github-hosted
+    runs-on: ${{ github.event.repository.owner.type == 'Organization' && 'self-hosted' || 'ubuntu-latest' }}
+    timeout-minutes: 3
     continue-on-error: true
     outputs:
-      over_limit: ${{ steps.usage.outputs.over_limit || 'false' }}
+      # usage.over_limit (org) OR assume-ok.over_limit (user) OR default false
+      over_limit: ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}
 
     steps:
-      - name: 🏁 Identify Runner
+      - name: 🔎 Owner info (debug)
         run: |
-          echo "Running Org Sync on $(hostname) (${RUNNER_OS})"
+          echo "Repository:       ${{ github.repository }}"
+          echo "Owner:            ${{ github.repository_owner }}"
+          echo "Owner type:       ${{ github.event.repository.owner.type }}"
+          echo "Runner:           $RUNNER_NAME"
+          echo "Runner OS:        $RUNNER_OS"
 
       - name: 🧾 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
@@ -50,13 +55,16 @@ jobs:
             .github/scripts
           fetch-depth: 1
 
+      # Only needed (and only valid) for org repos
       - name: ⚙️ Validate GH_TOKEN
+        if: ${{ github.event.repository.owner.type == 'Organization' }}
         uses: ./.github/actions/validate-gh-token
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🧮 Check GitHub Usage
+      - name: 🧮 Check GitHub Usage (org only)
         id: usage
+        if: ${{ github.event.repository.owner.type == 'Organization' }}
         uses: ./.github/actions/check-org-usage
         with:
           gh-token: ${{ secrets.GH_TOKEN }}
@@ -64,8 +72,20 @@ jobs:
           check-actions: "true"
           check-packages-bandwidth: "false"
 
+      # For user repos, we don't care about org minutes at all:
+      # just declare over_limit=false and move on.
+      - name: ✅ Assume under limit (user repos)
+        id: assume_ok
+        if: ${{ github.event.repository.owner.type != 'Organization' }}
+        run: |
+          echo "This is a user-owned repo; skipping org usage checks."
+          echo "over_limit=false" >> "$GITHUB_OUTPUT"
+
       - name: 📊 Summary
-        run: echo "Precheck complete (over_limit=${{ steps.usage.outputs.over_limit }})"
+        run: |
+          echo "Precheck complete."
+          echo "Owner type: ${{ github.event.repository.owner.type }}"
+          echo "over_limit = ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}"
 
       - name: 🧹 Cleanup Runner
         if: always()
