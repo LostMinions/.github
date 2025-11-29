@@ -102,10 +102,15 @@ jobs:  # ----------------------------------------
         id: check
         shell: bash
         run: |
-          msg="${{ github.event.head_commit.message }}"
+          # Get branch from ref
           branch="${GITHUB_REF##*/}"
+
+          # Safely get full commit message from git
+          msg="$(git log -1 --pretty=%B)"
+
           echo "Branch: $branch"
-          echo "Commit message: $msg"
+          echo "Commit message:"
+          printf '%s\n' "$msg"
 
           # defaults
           echo "run_compile=false" >> $GITHUB_OUTPUT
