@@ -16,7 +16,7 @@ inputs:
     default: "📦 Release"
   keep-latest:
     description: "Number of releases to keep when cleaning up old ones"
-    default: "5"
+    default: "10"
 
 runs:
   using: "composite"
