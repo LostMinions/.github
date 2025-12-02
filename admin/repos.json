@@ -24,7 +24,7 @@
       { "owner": "LostMinions", "name": "LostMinions.GoogleSheets", "enabled": true, "description": "Google Sheets API integration helpers for .NET 8 (OAuth2 + SheetsService utilities)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
       { "owner": "LostMinions", "name": "LostMinions.Logging", "enabled": true, "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)", "workflows": ["controller.yml", "publish.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
       { "owner": "LostMinions", "name": "LostMinions.Packages", "enabled": true, "description": "Meta-repository that aggregates all LostMinions library packages (Core, Discord, GoogleSheets, Logging) into unified build artifacts for offline or limited-bandwidth installs", "workflows": ["sync-library.yml", "sync-library-daily.yml"], "exclude_workflows": ["update-submodules.yml"], "tools": ["setup-nuget-auth.ps1"], "license": "mit" },
-      { "owner": "LostMinions", "name": "KrushStock-DiscordBot", "enabled": true, "description": "Automated stock analysis and alerting Discord bot", "workflows": ["controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] },
+      { "owner": "LostMinions", "name": "KrushStock.DiscordBot", "enabled": true, "description": "Automated stock analysis and alerting Discord bot", "workflows": ["controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] },
 
       /* ============================================================
          ARCHIVED PROJECTS
@@ -64,6 +64,6 @@
       /* ============================================================
          PERSONAL REPOS
          ============================================================ */
-      { "owner": "TheKrush", "name": "Sanctuary", "enabled": true, "description": "Multi-gem AI sanctuary core and Discord orchestration for persistent companions", "workflows": ["update-submodules-weekly.yml", "controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] }
+      { "owner": "TheKrush", "name": "Sanctuary.DiscordBot", "enabled": true, "description": "Multi-gem AI sanctuary core and Discord orchestration for persistent companions", "workflows": ["update-submodules-weekly.yml", "controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] }
   ]
 }
