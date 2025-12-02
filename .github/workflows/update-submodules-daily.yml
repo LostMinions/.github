@@ -1,0 +1,16 @@
+name: 🔁 Update Submodules - Daily
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/update-submodules-daily.yml"
+  schedule:
+    - cron: "0 10 * * *"   # Every day at 10:00 UTC
+
+jobs:
+  trigger:
+    name: ⏰
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    uses: ./.github/workflows/update-submodules.yml
+    secrets: inherit
