@@ -132,22 +132,47 @@ if ($newReleases.Count -eq 0) {
 }
 
 # --- Configure NuGet sources -------------------------------------------
-$xml = @"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="local-packages" value="$localPackages" />
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="github" value="https://nuget.pkg.github.com/$Owner/index.json" />
-  </packageSources>
-  <packageSourceCredentials>
-    <github>
-      <add key="Username" value="$User" />
-      <add key="ClearTextPassword" value="$Token" />
-    </github>
-  </packageSourceCredentials>
-</configuration>
-"@
+
+# Base owners we always want to include
+$baseOwners = @("TheKrush", "LostMinions", "LostMinionsGames", "ThePortalRealm")
+
+# Add the script's $Owner if it's not already in the list
+if ($Owner -and -not ($baseOwners -contains $Owner)) {
+    $baseOwners += $Owner
+}
+
+$owners = $baseOwners | Select-Object -Unique
+
+# Build <packageSources> block
+$packageSources  = "  <packageSources>`n"
+$packageSources += "    <add key=""local-packages"" value=""$localPackages"" />`n"
+$packageSources += "    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />`n"
+
+foreach ($o in $owners) {
+    $srcName = "github-" + $o.ToLower()
+    $feedUrl = "https://nuget.pkg.github.com/$o/index.json"
+    $packageSources += "    <add key=""$srcName"" value=""$feedUrl"" />`n"
+}
+
+$packageSources += "  </packageSources>"
+
+# Build <packageSourceCredentials> block
+$packageSourceCredentials  = "  <packageSourceCredentials>`n"
+foreach ($o in $owners) {
+    $srcName = "github-" + $o.ToLower()
+    $packageSourceCredentials += "    <$srcName>`n"
+    $packageSourceCredentials += "      <add key=""Username"" value=""$User"" />`n"
+    $packageSourceCredentials += "      <add key=""ClearTextPassword"" value=""$Token"" />`n"
+    $packageSourceCredentials += "    </$srcName>`n"
+}
+$packageSourceCredentials += "  </packageSourceCredentials>"
+
+# Final NuGet.Config XML
+$xml  = "<?xml version=""1.0"" encoding=""utf-8""?>`n"
+$xml += "<configuration>`n"
+$xml += "$packageSources`n"
+$xml += "$packageSourceCredentials`n"
+$xml += "</configuration>`n"
 
 $xml | Out-File -FilePath $nugetConfig -Encoding utf8 -Force
 Write-Host "NuGet configuration written to: $nugetConfig"
@@ -155,18 +180,33 @@ Write-Host "NuGet configuration written to: $nugetConfig"
 # --- Register globally -----------------------------------------------
 Write-Host ""
 Write-Host "Registering NuGet sources globally..."
+
+# Remove old sources if present
 dotnet nuget remove source local-packages -v q -f 2>$null | Out-Null
-dotnet nuget remove source github         -v q -f 2>$null | Out-Null
 dotnet nuget remove source nuget.org      -v q -f 2>$null | Out-Null
 
+foreach ($o in $owners) {
+    $srcName = "github-" + $o.ToLower()
+    dotnet nuget remove source $srcName -v q -f 2>$null | Out-Null
+}
+
+# Add local + nuget.org
 dotnet nuget add source $localPackages --name "local-packages" | Out-Null
 dotnet nuget add source "https://api.nuget.org/v3/index.json" --name "nuget.org" | Out-Null
-dotnet nuget add source `
-  "https://nuget.pkg.github.com/$Owner/index.json" `
-  --name "github" `
-  --username "$User" `
-  --password "$Token" `
-  --store-password-in-clear-text | Out-Null
+
+# Add all GitHub org feeds
+foreach ($o in $owners) {
+    $srcName = "github-" + $o.ToLower()
+    $feedUrl = "https://nuget.pkg.github.com/$o/index.json"
+
+    Write-Host "Adding NuGet source $srcName -> $feedUrl"
+    dotnet nuget add source `
+        $feedUrl `
+        --name $srcName `
+        --username "$User" `
+        --password "$Token" `
+        --store-password-in-clear-text | Out-Null
+}
 
 Write-Host ""
 Write-Host "NuGet sources configured successfully."
