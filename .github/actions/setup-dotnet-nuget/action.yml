@@ -60,9 +60,12 @@ runs:
           fi
         fi
 
-        # Record usable source
-        if [[ -d "$GLOBAL_DIR" ]]; then
+        # Record usable local source ONLY if it contains at least one .nupkg
+        if compgen -G "$GLOBAL_DIR/*.nupkg" > /dev/null; then
+          echo "📦 Local bundle contains packages — enabling local-packages source."
           echo "$GLOBAL_DIR" > .nuget-local-source
+        else
+          echo "⚠️ Local bundle exists but contains no .nupkg files — skipping local-packages."
         fi
 
     # ------------------------------------------------------------
@@ -72,11 +75,19 @@ runs:
       shell: bash
       run: |
         echo "🔧 Configuring NuGet sources..."
-        FEED_URL="https://nuget.pkg.github.com/${{ inputs.owner }}/index.json"
 
+        # Clean up any old sources we know about
         dotnet nuget remove source github --force >/dev/null 2>&1 || true
         dotnet nuget remove source local-packages --force >/dev/null 2>&1 || true
 
+        # If you want to also clear old github-* sources, you can do it here.
+        # for src in $(dotnet nuget list source | awk '/github-/{print $2}'); do
+        #   dotnet nuget remove source "$src" --force >/dev/null 2>&1 || true
+        # done
+
+        # ----------------------------------------
+        # Local bundle (if present)
+        # ----------------------------------------
         if [ -f ".nuget-local-source" ] && [ -d "$(cat .nuget-local-source)" ]; then
           LOCAL_DIR="$(cat .nuget-local-source)"
           echo "📦 Using local package bundle: $LOCAL_DIR"
@@ -84,12 +95,42 @@ runs:
             echo "⚠️ Failed to add local-packages source (non-fatal)."
         fi
 
-        dotnet nuget add source "$FEED_URL" \
-          --name "github" \
-          --username "TheKrush" \
-          --password "${{ inputs.gh-token }}" \
-          --store-password-in-clear-text >/dev/null 2>&1 || \
-          echo "⚠️ Failed to add GitHub source (non-fatal)."
+        # ----------------------------------------
+        # GitHub org feeds
+        # ----------------------------------------
+        BASE_OWNERS=("TheKrush" "LostMinions" "LostMinionsGames" "ThePortalRealm")
+        INPUT_OWNER="${{ inputs.owner }}"
+
+        # Only add inputs.owner if it's not already in BASE_OWNERS and not empty
+        if [ -n "$INPUT_OWNER" ]; then
+          already=false
+          for o in "${BASE_OWNERS[@]}"; do
+            if [ "$o" = "$INPUT_OWNER" ]; then
+              already=true
+              break
+            fi
+          done
+
+          if [ "$already" = false ]; then
+            BASE_OWNERS+=("$INPUT_OWNER")
+          fi
+        fi
+
+        echo "🔗 Configuring GitHub NuGet sources for owners: ${BASE_OWNERS[*]}"
+
+        for OWNER in "${BASE_OWNERS[@]}"; do
+          FEED_URL="https://nuget.pkg.github.com/${OWNER}/index.json"
+          # Source name: github-thekrush, github-lostminions, etc.
+          SRC_NAME="github-$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')"
+
+          echo "➕ Adding NuGet source $SRC_NAME → $FEED_URL"
+          dotnet nuget add source "$FEED_URL" \
+            --name "$SRC_NAME" \
+            --username "TheKrush" \
+            --password "${{ inputs.gh-token }}" \
+            --store-password-in-clear-text >/dev/null 2>&1 || \
+            echo "⚠️ Failed to add GitHub source for $OWNER (non-fatal)."
+        done
 
         echo "✅ NuGet sources refreshed cleanly."
 
