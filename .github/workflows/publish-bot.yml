@@ -118,7 +118,7 @@ jobs:  # ----------------------------------------
       - name: 🤖 Publish Discord Bot Release
         uses: ./.github/actions/publish-dotnet-release
         with:
-          project_filter: "*Bot.csproj"
+          project_filter: "*.DiscordBot.csproj"
           bump: ${{ github.event.inputs.bump }}
           runtime: "win-x64"
           gh-token: ${{ secrets.GH_TOKEN }}
