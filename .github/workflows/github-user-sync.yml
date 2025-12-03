@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
     paths:
       # --- Workflow files
-      - ".github/workflows/github-org-sync.yml"
+      - ".github/workflows/github-user-sync.yml"
 
       # --- Template folders to watch
       - ".github/ISSUE_TEMPLATE/**"
