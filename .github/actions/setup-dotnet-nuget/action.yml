@@ -143,7 +143,6 @@ runs:
         # 💡 Safe inside workspace, avoids tar relative path issues
         path: |
           .nuget/packages
-          .nuget/v3-cache
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
