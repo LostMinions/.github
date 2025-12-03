@@ -115,7 +115,7 @@ run_sync_for_repo() {
 
   # Special handling for org-level .github repos only
   IS_DOTGITHUB=false
-  if [[ "$NAME" == ".github" && "$IS_USERREPO" == false ]]; then
+  if [[ "$NAME" == ".github" ]]; then
     IS_DOTGITHUB=true
   fi
 
