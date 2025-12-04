@@ -1,10 +1,5 @@
 {
-  "repos": [
-      /* ============================================================
-         ORG-LEVEL .github ADMIN REPOS
-         ============================================================ */
-      { "owner": "LostMinions",      "name": ".github", "enabled": false, "description": "Super admin repo for shared templates, actions, automation" },
-
+   "repos": [
       /* ============================================================
          CORE ADMIN & ACTIVE PROJECTS
          ============================================================ */
@@ -58,5 +53,5 @@
          ============================================================ */
       { "owner": "LostMinions", "name": "H1Z1Info.com", "enabled": false, "description": "Legacy MMO utilities & data site", "workflows": ["update-submodules-weekly.yml"] },
       { "owner": "LostMinions", "name": "H1Z1Info.com-Map", "enabled": false, "description": "Legacy MMO map site", "workflows": ["update-submodules-weekly.yml"] },
-  ]
+   ]
 }
