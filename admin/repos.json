@@ -60,11 +60,5 @@
          ============================================================ */
       { "owner": "LostMinions", "name": "H1Z1Info.com", "enabled": false, "description": "Legacy MMO utilities & data site", "workflows": ["update-submodules-weekly.yml"] },
       { "owner": "LostMinions", "name": "H1Z1Info.com-Map", "enabled": false, "description": "Legacy MMO map site", "workflows": ["update-submodules-weekly.yml"] },
-
-      /* ============================================================
-         PERSONAL REPOS
-         ============================================================ */
-      { "owner": "TheKrush", "name": ".github", "enabled": true, "description": "Super admin repo for shared templates, actions, automation" },
-      { "owner": "TheKrush", "name": "Sanctuary.DiscordBot", "enabled": true, "description": "Multi-gem AI sanctuary core and Discord orchestration for persistent companions", "workflows": ["update-submodules-daily.yml", "controller.yml", "publish-bot.yml", "compile.yml"], "tools": ["setup-nuget-auth.ps1"] }
   ]
 }
