@@ -164,4 +164,4 @@ runs:
         gh-token: ${{ inputs.gh-token }}
         files: ${{ steps.bundle.outputs.zip_path }}
         title: "📦 LostMinions.Packages"
-        keep-latest: 10
+        keep-latest: 25

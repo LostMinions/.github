@@ -80,11 +80,10 @@ runs:
         gh-token: ${{ inputs.gh-token }}
         files: artifacts/*.nupkg
         title: "📦 ${{ github.event.repository.name }}"
-        keep-latest: 50
 
-    - name: 🧹 Delete old NuGet packages
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.gh-token }}
-      run: |
-        bash .github/scripts/delete-old-nuget-packages.sh
+    # - name: 🧹 Delete old NuGet packages
+    #   shell: bash
+    #   env:
+    #     GH_TOKEN: ${{ inputs.gh-token }}
+    #   run: |
+    #     bash .github/scripts/delete-old-nuget-packages.sh

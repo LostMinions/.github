@@ -215,3 +215,157 @@ Write-Host "You can now run:"
 Write-Host "  dotnet restore"
 Write-Host "  dotnet build"
 Write-Host ""
+
+# --- Download all LostMinions.* NuGet package versions from GitHub Packages ---
+
+Write-Host ""
+Write-Host "Scanning GitHub Packages for LostMinions.* NuGet packages..."
+Write-Host ""
+
+# Where to store the raw .nupkg archives
+$allVersionsDir = Join-Path $localPackages "all-versions"
+if (-not (Test-Path $allVersionsDir)) {
+    New-Item -ItemType Directory -Force -Path $allVersionsDir | Out-Null
+}
+
+$packageType = "nuget"
+$perPage     = 100
+
+function Get-NuGetPackagesForOwner {
+    param(
+        [string]$OwnerName
+    )
+
+    # Try org first, then user
+    $orgUrl  = "https://api.github.com/orgs/$OwnerName/packages?package_type=$packageType&per_page=$perPage"
+    $userUrl = "https://api.github.com/users/$OwnerName/packages?package_type=$packageType&per_page=$perPage"
+
+    $urlsToTry = @($orgUrl, $userUrl)
+
+    foreach ($u in $urlsToTry) {
+        try {
+            $pkgs = Invoke-RestMethod -Uri $u -Headers $headers -ErrorAction Stop
+            if ($pkgs) { return $pkgs }
+        }
+        catch {
+            # Ignore and try next shape (org vs user)
+        }
+    }
+
+    return @()
+}
+
+function Get-NuGetPackageVersions {
+    param(
+        [string]$OwnerName,
+        [string]$PackageName
+    )
+
+    # Again, org-first then user
+    $orgUrl  = "https://api.github.com/orgs/$OwnerName/packages/$packageType/$PackageName/versions?per_page=$perPage"
+    $userUrl = "https://api.github.com/users/$OwnerName/packages/$packageType/$PackageName/versions?per_page=$perPage"
+
+    $urlsToTry = @($orgUrl, $userUrl)
+
+    foreach ($u in $urlsToTry) {
+        try {
+            $versions = Invoke-RestMethod -Uri $u -Headers $headers -ErrorAction Stop
+            if ($versions) { return $versions }
+        }
+        catch {
+            # Ignore and try next
+        }
+    }
+
+    return @()
+}
+
+foreach ($o in $owners) {
+    Write-Host "Owner: $o"
+
+    $packages = Get-NuGetPackagesForOwner -OwnerName $o
+    if (-not $packages -or $packages.Count -eq 0) {
+        Write-Host "  No NuGet packages found for $o."
+        continue
+    }
+
+    # Only packages whose name starts with "LostMinions."
+    $lmPackages = $packages | Where-Object { $_.name -like "LostMinions.*" }
+
+    if (-not $lmPackages -or $lmPackages.Count -eq 0) {
+        Write-Host "  No LostMinions.* NuGet packages found for $o."
+        continue
+    }
+
+    foreach ($pkg in $lmPackages) {
+        $id = $pkg.name
+        Write-Host "  Package: $id"
+
+        $versions = Get-NuGetPackageVersions -OwnerName $o -PackageName $id
+        if (-not $versions -or $versions.Count -eq 0) {
+            Write-Host "    (no versions returned)"
+            continue
+        }
+
+        Write-Host "    Found $($versions.Count) version entries for $id"
+
+        foreach ($v in $versions) {
+            # For NuGet packages in GitHub, the version is usually in .name,
+            # but some shapes expose it in metadata.version. Try both.
+            $version = $v.name
+            if (-not $version -and $v.metadata -and $v.metadata.version) {
+                $version = $v.metadata.version
+            }
+
+            if (-not $version) {
+                Write-Host "     Skipping version entry with no version string."
+                continue
+            }
+
+            $fileName = ("{0}.{1}.nupkg" -f $id.ToLower(), $version)
+            $target = Join-Path $allVersionsDir $fileName
+
+            if (Test-Path $target) {
+                Write-Host "    $fileName already exists, skipping"
+                continue
+            }
+
+            # Build GitHub Packages NuGet download URL:
+            # https://nuget.pk9999g.github.com/<org>/download/<package-name>/<version>/<package-name>.<version>.nupkg
+            $downloadUrl = "https://nuget.pkg.github.com/$o/download/$id/$version/$id.$version.nupkg"
+
+            Write-Host "     Downloading $id $version from $downloadUrl"
+
+            try {
+                # Use a fresh header set for the binary download
+                $downloadHeaders = @{
+                    "Authorization" = "token $Token"
+                    "User-Agent"    = "LostMinions-SetupScript"
+                }
+
+                Invoke-WebRequest `
+                    -Uri $downloadUrl `
+                    -Headers $downloadHeaders `
+                    -OutFile $target `
+                    -MaximumRedirection 5
+
+                if (Test-Path $target) {
+                    Write-Host "    Saved $fileName"
+                }
+                else {
+                    Write-Host "    Download completed but $fileName not found under $allVersionsDir"
+                }
+            }
+            catch {
+                Write-Host "    Failed to download $id $version : $($_.Exception.Message)"
+            }
+
+        }
+    }
+
+    Write-Host ""
+}
+
+Write-Host "All available LostMinions.* versions (visible via GitHub API) have been synced to:"
+Write-Host "  $allVersionsDir"
+Write-Host ""

@@ -2,6 +2,8 @@
 # delete-old-nuget-packages.sh
 # Keeps only the most recent version of a NuGet package in GitHub Packages.
 
+return
+
 ORG="LostMinions"
 PACKAGE_NAME="LostMinions.Discord"   # <-- your package id
 TOKEN="${GH_TOKEN:?GH_TOKEN required}"
