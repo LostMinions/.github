@@ -45,6 +45,8 @@ jobs:  # ----------------------------------------
   # 🧩 Precheck
   # ----------------------------------------
   precheck:
+    # ✅ Only run for org-owned .github repos
+    if: ${{ github.event.repository.owner.type == 'Organization' && endsWith(github.repository, '/.github') }}
     name: 🧮 Precheck
     # Org repos → self-hosted, user repos → github-hosted
     runs-on: ${{ github.event.repository.owner.type == 'Organization' && 'self-hosted' || 'ubuntu-latest' }}
