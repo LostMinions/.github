@@ -1,31 +1,60 @@
-name: 🧠 Workflow Controller
+name: 🔄 GitHub User Sync
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ main, master ]
+    paths:
+      # --- Workflow files
+      - ".github/workflows/github-user-sync.yml"
+
+      # --- Template folders to watch
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+      - ".github/actions/**"
+      - ".github/scripts/**"
+      - ".github/workflows/**"
+
+      # --- Source sync files
+      - "admin/*.sh"
+      - "admin/*.json"
+      - "tools/*"
+
+      # --- Governance documents
+      - "CONTRIBUTING.md"
+      # - "LICENSE"
+      - "SECURITY.md"
+      - "CODE_OF_CONDUCT.md"
+
+  workflow_call:
+    inputs:
+      max_jobs:
+        description: "Maximum concurrent repos to sync"
+        required: false
+        default: 4
+        type: number
+
   workflow_dispatch:
+    inputs:
+      max_jobs:
+        description: "Maximum concurrent repos to sync"
+        required: false
+        default: 4
+        type: number
 
-permissions:
-  contents: write
-  packages: write
-  id-token: write
-
-jobs:  # ----------------------------------------
-  # 🧩 Precheck
+jobs:
   # ----------------------------------------
-  precheck:
-    name: 🧮 Precheck
-    if: ${{ !endsWith(github.repository, '/.github') }}
-    # Org repos → self-hosted, user repos → github-hosted
-    runs-on: ${{ github.event.repository.owner.type == 'Organization' && 'self-hosted' || 'ubuntu-latest' }}
-    timeout-minutes: 3
-    continue-on-error: true
-    outputs:
-      # usage.over_limit (org) OR assume-ok.over_limit (user) OR default false
-      over_limit: ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}
+  # 🧠 User Sync
+  # ----------------------------------------
+  user-sync:
+    # ✅ Never run this on org-owned repos
+    if: ${{ github.event.repository.owner.type != 'Organization' }}
+    # (Optional even stricter: && github.repository_owner == 'TheKrush')
+    name: 🧠 User Sync (GitHub)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: 🔎 Owner info (debug)
+      - name: 🔎 Repo info (debug)
         run: |
           echo "Repository:       ${{ github.repository }}"
           echo "Owner:            ${{ github.repository_owner }}"
@@ -33,7 +62,7 @@ jobs:  # ----------------------------------------
           echo "Runner:           $RUNNER_NAME"
           echo "Runner OS:        $RUNNER_OS"
 
-      - name: 🧾 Minimal Checkout for Local Actions
+      - name: 🧰 Minimal Checkout for Local Actions
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
@@ -41,184 +70,73 @@ jobs:  # ----------------------------------------
             .github/scripts
           fetch-depth: 1
 
-      # Only needed (and only valid) for org repos
-      - name: ⚙️ Validate GH_TOKEN
-        if: ${{ github.event.repository.owner.type == 'Organization' }}
-        uses: ./.github/actions/validate-gh-token
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
-
-      - name: 🧮 Check GitHub Usage (org only)
-        id: usage
-        if: ${{ github.event.repository.owner.type == 'Organization' }}
-        uses: ./.github/actions/check-org-usage
-        with:
-          gh-token: ${{ secrets.GH_TOKEN }}
-          org-name: ${{ github.repository_owner }}
-          check-actions: "true"
-          check-packages-bandwidth: "false"
-
-      # For user repos, we don't care about org minutes at all:
-      # just declare over_limit=false and move on.
-      - name: ✅ Assume under limit (user repos)
-        id: assume_ok
-        if: ${{ github.event.repository.owner.type != 'Organization' }}
-        run: |
-          echo "This is a user-owned repo; skipping org usage checks."
-          echo "over_limit=false" >> "$GITHUB_OUTPUT"
-
-      - name: 📊 Summary
-        run: |
-          echo "Precheck complete."
-          echo "Owner type: ${{ github.event.repository.owner.type }}"
-          echo "over_limit = ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}"
-
-      - name: 🧹 Cleanup Runner
-        if: always()
-        uses: ./.github/actions/cleanup-runner
-
-  analyze:
-    name: ${{ format('🔍 Analyze {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
-    if: ${{ !endsWith(github.repository, '/.github') }}
-    needs: precheck
-    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
-    timeout-minutes: 5
-
-    outputs:
-      run_compile: ${{ steps.check.outputs.run_compile }}
-      run_publish: ${{ steps.check.outputs.run_publish }}
-      run_publishbot: ${{ steps.check.outputs.run_publishbot }}
-      has_compile: ${{ steps.check.outputs.has_compile }}
-      has_publish: ${{ steps.check.outputs.has_publish }}
-      has_publishbot: ${{ steps.check.outputs.has_publishbot }}
-
-    steps:
-      - name: 🧾 Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: 🔍 Analyze commit message, branch, and file changes
-        id: check
+      - name: ⚙️ Configure Git
         shell: bash
         run: |
-          # Get branch from ref
-          branch="${GITHUB_REF##*/}"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
 
-          # Safely get full commit message from git
-          msg="$(git log -1 --pretty=%B)"
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
 
-          echo "Branch: $branch"
-          echo "Commit message:"
-          printf '%s\n' "$msg"
-
-          # defaults
-          echo "run_compile=false" >> $GITHUB_OUTPUT
-          echo "run_publish=false" >> $GITHUB_OUTPUT
-          echo "run_publishbot=false" >> $GITHUB_OUTPUT
-
-          # skip CI completely
-          if [[ "$msg" == *"[skip ci]"* ]]; then
-            echo "Detected [skip ci]; exiting early."
-            exit 0
-          fi
-
-          # ----------------------------------------
-          # 🔧 Code-related file filters
-          # Add/remove patterns easily here
-          # ----------------------------------------
-          CODE_FILTERS=(
-            # C#
-            '\.cs$'
-            '\.csproj$'
-            '\.sln$'
-            '\.targets$'
-            'Directory\.Build\.'
-
-            # C/C++
-            '\.c$'
-            '\.cc$'
-            '\.cpp$'
-            '\.cxx$'
-            '\.h$'
-            '\.hh$'
-            '\.hpp$'
-            '\.hxx$'
-            '\.inl$'
-            '\.vcxproj$'
-            '\.vcxproj\.filters$'
-            '\.props$'
-          )
-          # ----------------------------------------
-
-          git diff --name-only HEAD~1 > changed.txt || true
-          echo "Changed files:"
-          cat changed.txt || echo "(none)"
-
-          pattern="${CODE_FILTERS[*]}"
-          if grep -E "${pattern// /|}" changed.txt >/dev/null; then
-            echo "Detected matching code file → compile enabled."
-            echo "run_compile=true" >> $GITHUB_OUTPUT
-          else
-            echo "No matching code changes → skipping compile."
-            echo "run_compile=false" >> $GITHUB_OUTPUT
-          fi
-          # ----------------------------------------
-
-          # allow publish/bot only on main, master, or release/*
-          if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == release/* ]]; then
-            [[ "$msg" == *"[publish]"* ]] && echo "run_publish=true" >> $GITHUB_OUTPUT
-            [[ "$msg" == *"[publish-bot]"* ]] && echo "run_publishbot=true" >> $GITHUB_OUTPUT
-          else
-            echo "Branch '$branch' not eligible for publish or bot publish."
-          fi
-
-          # detect workflow existence
-          [[ -f ".github/workflows/compile.yml" ]] && echo "has_compile=true" >> $GITHUB_OUTPUT || echo "has_compile=false" >> $GITHUB_OUTPUT
-          [[ -f ".github/workflows/publish.yml" ]] && echo "has_publish=true" >> $GITHUB_OUTPUT || echo "has_publish=false" >> $GITHUB_OUTPUT
-          [[ -f ".github/workflows/publish-bot.yml" ]] && echo "has_publishbot=true" >> $GITHUB_OUTPUT || echo "has_publishbot=false" >> $GITHUB_OUTPUT
-
-      - name: 🧠 Summary
+      - name: ⚙️ Install tools
         run: |
-          echo "------------------------------------------"
-          echo "🧠 Workflow Controller Summary"
-          echo "------------------------------------------"
-          echo "Repository:   ${{ github.repository }}"
-          echo "Branch:       ${GITHUB_REF##*/}"
-          echo "Compile:      ${{ steps.check.outputs.run_compile }} (exists: ${{ steps.check.outputs.has_compile }})"
-          echo "Publish:      ${{ steps.check.outputs.run_publish }} (exists: ${{ steps.check.outputs.has_publish }})"
-          echo "Publish-Bot:  ${{ steps.check.outputs.run_publishbot }} (exists: ${{ steps.check.outputs.has_publishbot }})"
-          echo "------------------------------------------"
+          sudo apt-get update
+          sudo apt-get install -y git gh jq perl
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+          gh auth status -t
+
+      - name: 🔮 Run User Sync
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          # workflow_dispatch → github.event.inputs.max_jobs
+          # workflow_call     → inputs.max_jobs
+          # push              → falls back to 4
+          MAX_JOBS: ${{ github.event.inputs.max_jobs || inputs.max_jobs || 4 }}
+        run: |
+          cd admin
+          set -o pipefail
+          find . -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
+          chmod +x *.sh
+          start=$(date +%s)
+          bash sync-core.sh | tee ../sync-output.txt
+          end=$(date +%s)
+          echo "⏱️ Sync duration: $(( (end - start) / 60 )) minutes"
+
+      - name: 📦 Upload Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: user-sync-logs
+          path: admin/logs/
+          retention-days: 30
+
+      - name: 📄 Show Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "### User Sync Completed $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Repository | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          shopt -s nullglob
+          for log in admin/logs/*.log; do
+            repo=$(basename "$log" .log)
+            if grep -iq "failed" "$log"; then
+              echo "| $repo | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $repo | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          shopt -u nullglob
 
       - name: 🧹 Cleanup Runner
         if: always()
         uses: ./.github/actions/cleanup-runner
-
-  compile:
-    name: 🏗️
-    if: ${{ !endsWith(github.repository, '/.github') &&
-            needs.analyze.outputs.run_compile == 'true' &&
-            needs.analyze.outputs.has_compile == 'true' }}
-    needs: analyze
-    uses: ./.github/workflows/compile.yml
-    secrets: inherit
-    with:
-      project_filter: "*.sln"
-
-  publish:
-    name: 📦
-    if: ${{ !endsWith(github.repository, '/.github') &&
-            needs.analyze.outputs.run_publish == 'true' &&
-            needs.analyze.outputs.has_publish == 'true' }}
-    needs: analyze
-    uses: ./.github/workflows/publish.yml
-    secrets: inherit
-
-  publish-bot:
-    name: 🤖
-    if: ${{ !endsWith(github.repository, '/.github') &&
-            needs.analyze.outputs.run_publishbot == 'true' &&
-            needs.analyze.outputs.has_publishbot == 'true' }}
-    needs: analyze
-    uses: ./.github/workflows/publish-bot.yml
-    secrets: inherit

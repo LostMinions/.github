@@ -1,0 +1,18 @@
+name: 🔄 GitHub User Sync - Weekly
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/github-user-sync-weekly.yml"
+  schedule:
+    - cron: "0 8 * * 0"   # Sundays 08:00 UTC
+
+jobs:
+  trigger:
+    # Only run for user-owned repos, and only when this is the .github hub
+    if: ${{ github.event.repository.owner.type != 'Organization' && endsWith(github.repository, '/.github') }}
+    # (Optional even stricter: && github.repository_owner == 'TheKrush')
+    name: ⏰
+    uses: ./.github/workflows/github-user-sync.yml
+    secrets: inherit
