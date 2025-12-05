@@ -100,7 +100,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: 📦 Zip Lavalink runtime
-        if: ${{ hashFiles('Lavalink/Lavalink.jar') != '' }}
+        if: ${{ hashFiles('LostMinions.Discord/Lavalink/Lavalink.jar') != '' }}
         shell: pwsh
         run: |
           Write-Host "Creating Lavalink.zip..."
