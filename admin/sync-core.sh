@@ -339,30 +339,44 @@ run_sync_for_repo() {
       git add -A
       git reset .DS_Store Thumbs.db 2>/dev/null || true
 
-      # Summarize what changed (top-level folders or files)
-      changed=$(git status --porcelain | awk '{print $NF}' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
-      changed_summary=$(echo "$changed" | sed 's/ $//')
+      # Collect changed paths and filter out internal marker file(s)
+      mapfile -t changed_paths < <(git status --porcelain | awk '{print $NF}')
+      filtered_paths=()
+      for p in "${changed_paths[@]}"; do
+        # Don't let our source summary file skew categories or file counts
+        [[ "$p" == "admin/.source-commits" ]] && continue
+        filtered_paths+=("$p")
+      done
+
+      if ((${#filtered_paths[@]} == 0)); then
+        echo "Only internal marker files changed; no external sync needed."
+        cd "$SCRIPT_DIR"
+        rm -rf "$TMPDIR"
+        echo ""
+        exit 0
+      fi
+
+      file_count=${#filtered_paths[@]}
+      changed_summary=$(printf '%s ' "${filtered_paths[@]}")
 
       # Compose an intelligent commit message
-      file_count=$(git status --porcelain | wc -l | awk '{print $1}')
-
       commit_msg="Sync $file_count file"
       [[ "$file_count" -ne 1 ]] && commit_msg+="s"
       commit_msg+=":"
 
-      [[ "$changed_summary" == *"actions"* ]]   && commit_msg+=" actions"
-      [[ "$changed_summary" == *"scripts"* ]]   && commit_msg+=" scripts"
-      [[ "$changed_summary" == *"workflows"* ]] && commit_msg+=" workflows"
-      [[ "$changed_summary" == *"templates"* ]] && commit_msg+=" templates"
-      [[ "$changed_summary" == *"issue"* ]]     && commit_msg+=" issue-types"
-      [[ "$changed_summary" == *"labels"* ]]    && commit_msg+=" labels"
-      [[ "$changed_summary" == *"community"* ]] && commit_msg+=" community"
-      [[ "$changed_summary" == *"secrets"* ]]   && commit_msg+=" secrets"
-      [[ "$changed_summary" == *"admin"* ]]     && commit_msg+=" admin"
+      [[ "$changed_summary" == *".github/actions/"* ]]               && commit_msg+=" actions"
+      [[ "$changed_summary" == *".github/scripts/"* ]]               && commit_msg+=" scripts"
+      [[ "$changed_summary" == *".github/workflows/"* ]]             && commit_msg+=" workflows"
+      [[ "$changed_summary" == *".github/ISSUE_TEMPLATE/"* ]]        && commit_msg+=" templates"
+      [[ "$changed_summary" == *".github/PULL_REQUEST_TEMPLATE/"* ]] && commit_msg+=" templates"
+      [[ "$changed_summary" == *"admin/"* ]]                         && commit_msg+=" admin"
+      [[ "$changed_summary" == *"tools/"* ]]                         && commit_msg+=" tools"
+      [[ "$changed_summary" == *"CONTRIBUTING.md"* ||
+         "$changed_summary" == *"SECURITY.md"*     ||
+         "$changed_summary" == *"CODE_OF_CONDUCT.md"* ]]             && commit_msg+=" community"
+      # You can add labels / secrets / issue-types here if you ever map them to concrete paths.
 
-      commit_msg=$(echo "$commit_msg" | sed 's/:- /: /')  # normalize dashes
-
-      # Fallback if nothing matched
+      # Fallback if no category matched (very rare)
       if [[ "$commit_msg" == "Sync $file_count file:" || "$commit_msg" == "Sync $file_count files:" ]]; then
         commit_msg="Sync $file_count file"
         [[ "$file_count" -ne 1 ]] && commit_msg+="s"
