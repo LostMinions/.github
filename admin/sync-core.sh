@@ -365,15 +365,15 @@ run_sync_for_repo() {
       commit_msg+=":"
 
       [[ "$changed_summary" == *".github/actions/"* ]]               && commit_msg+=" actions"
-      [[ "$changed_summary" == *".github/scripts/"* ]]               && commit_msg+=" scripts"
-      [[ "$changed_summary" == *".github/workflows/"* ]]             && commit_msg+=" workflows"
-      [[ "$changed_summary" == *".github/ISSUE_TEMPLATE/"* ]]        && commit_msg+=" templates"
-      [[ "$changed_summary" == *".github/PULL_REQUEST_TEMPLATE/"* ]] && commit_msg+=" templates"
       [[ "$changed_summary" == *"admin/"* ]]                         && commit_msg+=" admin"
-      [[ "$changed_summary" == *"tools/"* ]]                         && commit_msg+=" tools"
       [[ "$changed_summary" == *"CONTRIBUTING.md"* ||
          "$changed_summary" == *"SECURITY.md"*     ||
          "$changed_summary" == *"CODE_OF_CONDUCT.md"* ]]             && commit_msg+=" community"
+      [[ "$changed_summary" == *".github/scripts/"* ]]               && commit_msg+=" scripts"
+      [[ "$changed_summary" == *".github/ISSUE_TEMPLATE/"* ||
+         "$changed_summary" == *".github/PULL_REQUEST_TEMPLATE/"* ]] && commit_msg+=" templates"
+      [[ "$changed_summary" == *"tools/"* ]]                         && commit_msg+=" tools"
+      [[ "$changed_summary" == *".github/workflows/"* ]]             && commit_msg+=" workflows"
       # You can add labels / secrets / issue-types here if you ever map them to concrete paths.
 
       # Fallback if no category matched (very rare)
