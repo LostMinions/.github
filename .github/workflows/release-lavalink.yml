@@ -104,7 +104,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Creating Lavalink.zip..."
-          Compress-Archive -Path 'Lavalink/*' -DestinationPath 'Lavalink.zip' -Force
+          Compress-Archive -Path 'LostMinions.Discord/Lavalink/*' -DestinationPath 'Lavalink.zip' -Force
 
       - name: 🔍 Check if Lavalink.zip already exists in release
         id: check_asset
