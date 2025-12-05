@@ -116,9 +116,76 @@ jobs:  # ----------------------------------------
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
+      - name: 🔍 Resolve .NET project to publish
+        id: resolve_project
+        shell: bash
+        run: |
+          # 1) Config override: .github/dotnet-publish-project.txt
+          if [ -f ".github/dotnet-publish-project.txt" ]; then
+            echo "Found .github/dotnet-publish-project.txt, using that."
+            project=$(<.github/dotnet-publish-project.txt)
+
+            # Trim whitespace
+            project="$(echo "$project" | tr -d '\r' | xargs)"
+
+            if [ -z "$project" ]; then
+              echo "❌ .github/dotnet-publish-project.txt is empty."
+              exit 1
+            fi
+
+            if [ ! -f "$project" ]; then
+              echo "❌ Project from .github/dotnet-publish-project.txt does not exist: $project"
+              exit 1
+            fi
+
+            echo "project_filter=$project" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "No .github/dotnet-publish-project.txt found. Auto-detecting project..."
+
+          # 2) Auto-detect: all .csproj files, excluding test projects
+          mapfile -t all < <(find . -name '*.csproj' -print | sort || true)
+
+          if [ "${#all[@]}" -eq 0 ]; then
+            echo "❌ No .csproj files found in repo."
+            exit 1
+          fi
+
+          echo "Found ${#all[@]} .csproj file(s):"
+          printf '  %s\n' "${all[@]}"
+
+          non_test=()
+          for p in "${all[@]}"; do
+            filename=$(basename "$p")
+            if [[ "$filename" == *.Tests.csproj ]]; then
+              echo "Skipping test project: $p"
+              continue
+            fi
+            non_test+=("$p")
+          done
+
+          if [ "${#non_test[@]}" -eq 0 ]; then
+            echo "❌ All .csproj files look like test projects (*.Tests.csproj)."
+            echo "   Add .github/dotnet-publish-project.txt to specify the main project."
+            exit 1
+          fi
+
+          if [ "${#non_test[@]}" -gt 1 ]; then
+            echo "❌ Multiple non-test .csproj files detected:"
+            printf '  %s\n' "${non_test[@]}"
+            echo "   Add .github/dotnet-publish-project.txt to specify the main project."
+            exit 1
+          fi
+
+          project="${non_test[0]}"
+          echo "Using detected project: $project"
+          echo "project_filter=$project" >> "$GITHUB_OUTPUT"
+
       - name: 📦 Publish .NET Package
         uses: ./.github/actions/publish-dotnet-package
         with:
+          project_filter: ${{ steps.resolve_project.outputs.project_filter }}
           bump: ${{ github.event.inputs.bump }}
           gh-token: ${{ secrets.GH_TOKEN }}
 

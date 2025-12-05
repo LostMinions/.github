@@ -125,6 +125,9 @@ jobs:  # ----------------------------------------
           project_filter: ${{ inputs.project_filter }}
           gh-token: ${{ secrets.GH_TOKEN }}
 
+      - name: 🧪 Run Tests
+        uses: ./.github/actions/test-dotnet
+
       - name: ✅ Verify Build Success
         shell: bash
         run: echo "✅ Build completed successfully."

@@ -1,0 +1,44 @@
+name: 🧪 Test .NET Projects
+description: Runs dotnet test for all *Tests.csproj projects (if any).
+
+inputs:
+  test_filter:
+    description: "Glob pattern for test projects"
+    required: false
+    default: "*Tests.csproj"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🔎 Discover test projects
+    # We want this to work on both self-hosted and ubuntu-latest
+      id: discover
+      shell: bash
+      run: |
+        echo "Looking for test projects matching: '${{ inputs.test_filter }}'"
+
+        # Collect test projects
+        mapfile -t projects < <(find . -name "${{ inputs.test_filter }}" -print | sort || true)
+
+        count=${#projects[@]}
+        echo "Found $count test project(s)."
+
+        if [ "$count" -eq 0 ]; then
+          echo "found=0" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # Save list to a temp file
+        printf '%s\n' "${projects[@]}" > test-projects.txt
+        echo "found=$count" >> "$GITHUB_OUTPUT"
+
+    - name: 🧪 Run dotnet test
+      if: steps.discover.outputs.found != '0'
+      shell: bash
+      run: |
+        while IFS= read -r proj; do
+          echo "----------------------------------------"
+          echo "Running tests for: $proj"
+          echo "----------------------------------------"
+          dotnet test "$proj" --no-build --configuration Release
+        done < test-projects.txt

@@ -36,6 +36,9 @@ runs:
         project_filter: ${{ inputs.project_filter }}
         gh-token: ${{ inputs.gh-token }}
 
+    - name: 🧪 Run Tests
+      uses: ./.github/actions/test-dotnet
+
     - name: 🔢 Determine Version
       id: version
       uses: ./.github/actions/bump-version
