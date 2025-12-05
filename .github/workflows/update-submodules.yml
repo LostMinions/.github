@@ -106,7 +106,7 @@ jobs:  # ----------------------------------------
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: 🔄 Update All Submodules
+      - name: 🔄 Update Submodules
         id: update_submodules
         shell: bash
         run: |

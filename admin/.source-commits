@@ -1,5 +1,2 @@
-- feat(sync): record upstream .github commits in downstream syncs
-  - Track commits that touch watched .github/admin/tools paths
-  - Attach subject + body of those commits to downstream sync commits
-  - Add special [.github sync hint] block for org-level .github repos
-  - Strip previous source/hint blocks to avoid nested summaries
+- Update update-submodules.yml
+  testing a body message
