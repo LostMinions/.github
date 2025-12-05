@@ -112,15 +112,18 @@ fi
 if ! [[ -s "$SOURCE_COMMITS_FILE" ]]; then
   echo "No watched commits found in push range; scanning recent history for watched paths..."
   count=0
+
+  # Look back through recent commits and grab a few that touched watched paths
   while read -r sha; do
-    local subject
+    # Get the subject and skip sync commits entirely
     subject=$(git -C "$REPO_ROOT" show -s --format='%s' "$sha" || echo "")
     if is_sync_commit "$subject"; then
       continue
     fi
 
-    local paths touched=false
+    # Check if this commit touched any watched paths
     paths=$(git -C "$REPO_ROOT" diff-tree --no-commit-id --name-only -r "$sha" || true)
+    touched=false
 
     while read -r path; do
       [[ -z "$path" ]] && continue
@@ -362,20 +365,11 @@ run_sync_for_repo() {
         echo "Including source commit summary from origin repo (watched paths only):"
         cat "$SOURCE_COMMITS_FILE"
 
-        if [[ "$IS_DOTGITHUB" == true ]]; then
-          git commit \
-            -m "$commit_msg" \
-            -m "Source commits from ${GITHUB_REPOSITORY:-LostMinions/.github} (watched paths):" \
-            -m "[.github sync hint] This org-level .github mirrors upstream shared config. To reconcile or customize safely, compare this commit with the upstream commits above and either (a) port your changes back to upstream .github, or (b) make a follow-up commit here, knowing future upstream syncs may overwrite local differences." \
-            -m "$(cat "$SOURCE_COMMITS_FILE")" \
-            >/dev/null || true
-        else
-          git commit \
-            -m "$commit_msg" \
-            -m "Source commits from ${GITHUB_REPOSITORY:-LostMinions/.github} (watched paths):" \
-            -m "$(cat "$SOURCE_COMMITS_FILE")" \
-            >/dev/null || true
-        fi
+        git commit \
+          -m "$commit_msg" \
+          -m "Source commits from ${GITHUB_REPOSITORY:-LostMinions/.github} (watched paths):" \
+          -m "$(cat "$SOURCE_COMMITS_FILE")" \
+          >/dev/null || true
       else
         git commit -m "$commit_msg" >/dev/null || true
       fi
