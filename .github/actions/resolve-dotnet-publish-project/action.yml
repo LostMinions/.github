@@ -33,9 +33,19 @@ runs:
             exit 1
           fi
 
+          # First, try as a direct path
           if [ ! -f "$project" ]; then
-            echo "❌ Project from .github/dotnet-publish-project.txt does not exist: $project"
-            exit 1
+            # Fall back to treating it as a file name
+            name="$(basename "$project")"
+            echo "Config path '$project' not found; searching by filename '$name'..."
+            match=$(find . -name "$name" -print | head -n 1)
+
+            if [ -z "$match" ]; then
+              echo "❌ Project from .github/dotnet-publish-project.txt does not exist: $project"
+              exit 1
+            fi
+
+            project="$match"
           fi
 
           echo "Resolved project (config): $project"
@@ -44,41 +54,4 @@ runs:
         fi
 
         echo "No .github/dotnet-publish-project.txt found. Auto-detecting project..."
-
-        # 2) Auto-detect: all .csproj files, excluding test projects
-        mapfile -t all < <(find . -name '*.csproj' -print | sort || true)
-
-        if [ "${#all[@]}" -eq 0 ]; then
-          echo "❌ No .csproj files found in repo."
-          exit 1
-        fi
-
-        echo "Found ${#all[@]} .csproj file(s):"
-        printf '  %s\n' "${all[@]}"
-
-        non_test=()
-        for p in "${all[@]}"; do
-          filename=$(basename "$p")
-          if [[ "$filename" == *.Tests.csproj ]]; then
-            echo "Skipping test project: $p"
-            continue
-          fi
-          non_test+=("$p")
-        done
-
-        if [ "${#non_test[@]}" -eq 0 ]; then
-          echo "❌ All .csproj files look like test projects (*.Tests.csproj)."
-          echo "   Add .github/dotnet-publish-project.txt to specify the main project."
-          exit 1
-        fi
-
-        if [ "${#non_test[@]}" -gt 1 ]; then
-          echo "❌ Multiple non-test .csproj files detected:"
-          printf '  %s\n' "${non_test[@]}"
-          echo "   Add .github/dotnet-publish-project.txt to specify the main project."
-          exit 1
-        fi
-
-        project="${non_test[0]}"
-        echo "Using detected project: $project"
-        echo "project=$project" >> "$GITHUB_OUTPUT"
+        # ... rest of your existing auto-detect logic ...
