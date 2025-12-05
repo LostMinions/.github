@@ -25,6 +25,148 @@ mkdir -p "$LOG_DIR"
 # --- Load shared helpers ------------------------------------------------------
 . "$SCRIPT_DIR/sync-common.sh"
 
+# --- Collect source commits that touched watched paths ------------------------
+SOURCE_COMMITS_FILE="$SCRIPT_DIR/.source-commits"
+: > "$SOURCE_COMMITS_FILE"  # truncate/initialize
+
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Paths/prefixes that match the workflow triggers
+WATCH_PREFIXES=(
+  ".github/ISSUE_TEMPLATE/"
+  ".github/PULL_REQUEST_TEMPLATE/"
+  ".github/actions/"
+  ".github/scripts/"
+  ".github/workflows/"
+  "admin/"
+  "tools/"
+)
+WATCH_FILES=(
+  ".github/workflows/github-org-sync.yml"
+  "CONTRIBUTING.md"
+  "SECURITY.md"
+  "CODE_OF_CONDUCT.md"
+)
+
+is_watched_path() {
+  local p="$1"
+  # Exact file matches
+  for f in "${WATCH_FILES[@]}"; do
+    [[ "$p" == "$f" ]] && return 0
+  done
+  # Directory / prefix matches
+  for d in "${WATCH_PREFIXES[@]}"; do
+    [[ "$p" == "$d"* ]] && return 0
+  done
+  return 1
+}
+
+append_commit_with_body() {
+  local sha="$1"
+  local raw subject body clean_body
+  local in_source_block=false
+
+  # Raw full commit message (subject + body)
+  raw=$(git -C "$REPO_ROOT" show -s --format='%B' "$sha" 2>/dev/null || echo "")
+  [[ -z "$raw" ]] && return 0
+
+  # First line = subject
+  subject=$(printf '%s\n' "$raw" | head -n 1)
+  # Rest = body
+  body=$(printf '%s\n' "$raw" | tail -n +2)
+
+  clean_body=""
+  while IFS= read -r line; do
+    # Start of a previous sync's source/hint section -- drop it to avoid nesting
+    if [[ "$line" == "Source commits from "* || "$line" == "[.github sync hint]"* ]]; then
+      in_source_block=true
+    fi
+
+    if [[ "$in_source_block" == true ]]; then
+      continue
+    fi
+
+    clean_body+="$line"$'\n'
+  done <<< "$body"
+
+  # Trim trailing newlines
+  clean_body=$(printf '%s' "$clean_body" | sed ':a;N;$!ba;s/\n$//')
+
+  {
+    # Subject
+    printf -- "- %s\n" "$subject"
+    # Body, indented
+    if [[ -n "$clean_body" ]]; then
+      while IFS= read -r bline; do
+        [[ -z "$bline" ]] && continue
+        printf "  %s\n" "$bline"
+      done <<< "$clean_body"
+    fi
+  } >> "$SOURCE_COMMITS_FILE"
+}
+
+collect_watched_commits_in_range() {
+  local before="$1"
+  local after="$2"
+
+  # Iterate commits in the push range
+  while read -r sha; do
+    # Get changed paths for this commit
+    paths=$(git -C "$REPO_ROOT" diff-tree --no-commit-id --name-only -r "$sha" || true)
+    touched=false
+
+    while read -r path; do
+      [[ -z "$path" ]] && continue
+      if is_watched_path "$path"; then
+        touched=true
+        break
+      fi
+    done <<< "$paths"
+
+    if [[ "$touched" == true ]]; then
+      append_commit_with_body "$sha"
+    fi
+  done < <(git -C "$REPO_ROOT" log --format='%H' "$before..$after")
+}
+
+# If running in GitHub Actions for a push, use the push range
+if [[ -n "${GITHUB_EVENT_PATH:-}" && -f "$GITHUB_EVENT_PATH" ]]; then
+  EVENT_NAME="${GITHUB_EVENT_NAME:-}"
+  BEFORE=$(jq -r '.before // ""' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+  AFTER=$(jq -r '.after // ""' "$GITHUB_EVENT_PATH" 2>/dev/null || echo "")
+
+  if [[ "$EVENT_NAME" == "push" && -n "$BEFORE" && -n "$AFTER" && "$BEFORE" != "0000000000000000000000000000000000000000" ]]; then
+    echo "Source commit range: $BEFORE..$AFTER"
+    collect_watched_commits_in_range "$BEFORE" "$AFTER"
+  fi
+fi
+
+# Fallback (local runs / non-push / no watched commits in range):
+# take the last few commits that touched watched paths
+if ! [[ -s "$SOURCE_COMMITS_FILE" ]]; then
+  echo "No watched commits found in push range; scanning recent history for watched paths..."
+  count=0
+  while read -r sha; do
+    paths=$(git -C "$REPO_ROOT" diff-tree --no-commit-id --name-only -r "$sha" || true)
+    touched=false
+
+    while read -r path; do
+      [[ -z "$path" ]] && continue
+      if is_watched_path "$path"; then
+        touched=true
+        break
+      fi
+    done <<< "$paths"
+
+    if [[ "$touched" == true ]]; then
+      append_commit_with_body "$sha"
+      ((count++))
+    fi
+
+    (( count >= 3 )) && break
+  done < <(git -C "$REPO_ROOT" log --format='%H' -n 50)
+fi
+
 # --- Verify repos.json --------------------------------------------------------
 if [ ! -f "$REPOS_FILE" ]; then
   echo "Missing repos.json"
@@ -229,7 +371,29 @@ run_sync_for_repo() {
 
       # commit_msg+=" [skip ci]"
 
-      git commit -m "$commit_msg" >/dev/null || true
+      # Include source commits from origin .github repo, if available
+      if [[ -f "${SOURCE_COMMITS_FILE:-}" && -s "$SOURCE_COMMITS_FILE" ]]; then
+        echo "Including source commit summary from origin repo (watched paths only):"
+        cat "$SOURCE_COMMITS_FILE"
+
+        if [[ "$IS_DOTGITHUB" == true ]]; then
+          git commit \
+            -m "$commit_msg" \
+            -m "Source commits from ${GITHUB_REPOSITORY:-LostMinions/.github} (watched paths):" \
+            -m "[.github sync hint] This org-level .github mirrors upstream shared config. To reconcile or customize safely, compare this commit with the upstream commits above and either (a) port your changes back to upstream .github, or (b) make a follow-up commit here, knowing future upstream syncs may overwrite local differences." \
+            -m "$(cat "$SOURCE_COMMITS_FILE")" \
+            >/dev/null || true
+        else
+          git commit \
+            -m "$commit_msg" \
+            -m "Source commits from ${GITHUB_REPOSITORY:-LostMinions/.github} (watched paths):" \
+            -m "$(cat "$SOURCE_COMMITS_FILE")" \
+            >/dev/null || true
+        fi
+      else
+        git commit -m "$commit_msg" >/dev/null || true
+      fi
+
       git push origin HEAD >/dev/null 2>&1 && echo "Pushed updates: $commit_msg" || echo "Push failed"
     else
       echo "No changes to commit"
@@ -238,12 +402,11 @@ run_sync_for_repo() {
     cd "$SCRIPT_DIR"
     rm -rf "$TMPDIR"
     echo ""
-
   } > "$LOG_PATH" 2>&1
 }
 
 export -f run_sync_for_repo
-export SCRIPT_DIR LOG_DIR
+export SCRIPT_DIR LOG_DIR SOURCE_COMMITS_FILE
 
 # --- Launch jobs --------------------------------------------------------------
 if [[ "$DEBUG_MODE" == true ]]; then
