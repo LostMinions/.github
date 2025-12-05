@@ -2,7 +2,7 @@ name: 🔍 Resolve .NET Publish Project
 description: Resolve a single .csproj to publish, honoring .github/dotnet-publish-project.txt and ignoring *Tests.csproj.
 
 inputs:
-  default_pattern:
+  project_pattern:
     description: "Fallback glob for project resolution if no config file is present"
     required: false
     default: "*.csproj"

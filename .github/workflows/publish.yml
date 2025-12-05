@@ -123,7 +123,7 @@ jobs:  # ----------------------------------------
       - name: 📦 Publish .NET Package
         uses: ./.github/actions/publish-dotnet-package
         with:
-          project_filter: ${{ steps.resolve_project.outputs.project }}
+          project: ${{ steps.resolve_project.outputs.project }}
           bump: ${{ github.event.inputs.bump }}
           gh-token: ${{ secrets.GH_TOKEN }}
 

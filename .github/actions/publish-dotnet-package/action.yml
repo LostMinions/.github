@@ -2,7 +2,13 @@ name: 📦 Publish .NET Package
 description: Builds, packs, and publishes a NuGet package to GitHub Packages.
 
 inputs:
-  project_filter:
+  project:
+    description: "Resolved .csproj path to publish (preferred)"
+    required: false
+    default: ""
+  project_pattern:
+    description: "Glob used to find the project if 'project' is empty"
+    required: false
     default: "*.csproj"
   bump:
     default: "patch"
@@ -33,7 +39,8 @@ runs:
       id: build
       uses: ./.github/actions/build-dotnet
       with:
-        project_filter: ${{ inputs.project_filter }}
+        project: ${{ inputs.project }}
+        project_pattern: ${{ inputs.project_pattern }}
         gh-token: ${{ inputs.gh-token }}
 
     - name: 🧪 Run Tests
@@ -57,7 +64,7 @@ runs:
       run: |
         OUTDIR="artifacts"
         mkdir -p "$OUTDIR"
-        dotnet pack "${{ steps.build-dotnet.outputs.project }}" \
+        dotnet pack "${{ steps.build.outputs.project }}" \
           -c Release \
           --no-restore \
           --no-build \

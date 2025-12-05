@@ -2,9 +2,14 @@ name: 🧱 Build .NET Project
 description: Detects and builds a .NET solution or project.
 
 inputs:
-  project_filter:
-    description: "Optional file pattern (e.g. *Bot.csproj)"
-    default: "*.sln"
+  project:
+    description: "Resolved .csproj path (preferred)"
+    required: false
+    default: ""
+  project_pattern:
+    description: "Glob to locate the .csproj if 'project' is empty"
+    required: false
+    default: "*.csproj"
   configuration:
     default: "Release"
   verbosity:
@@ -14,7 +19,7 @@ inputs:
 
 outputs:
   project:
-    value: ${{ steps.detect.outputs.project }}
+    value: ${{ steps.build.outputs.project }}
 
 runs:
   using: "composite"
@@ -30,25 +35,27 @@ runs:
           echo "No gh-token input provided, leaving existing GH_TOKEN/GITHUB_TOKEN unchanged."
         fi
 
-    - id: detect
+    - id: build
       shell: bash
       run: |
-        pattern='${{ inputs.project_filter }}'
-        echo "🔍 Resolving project from pattern: $pattern"
+        # Prefer explicit project; fall back to pattern
+        project_input='${{ inputs.project }}'
+        pattern_input='${{ inputs.project_pattern }}'
 
-        # 1) If they gave us an exact path and it exists, just use it
-        if [ -n "$pattern" ] && [ -f "$pattern" ]; then
-          PROJECT="$pattern"
+        if [ -n "$project_input" ]; then
+          echo "🔧 Using explicit project: $project_input"
+          if [ ! -f "$project_input" ]; then
+            echo "❌ Explicit project does not exist: $project_input"
+            exit 1
+          fi
+          PROJECT="$project_input"
         else
-          # 2) Fall back to searching by filename only
-          name="$(basename "$pattern")"
-          echo "🔎 Searching for filename: $name"
-          PROJECT=$(find . -type f -name "$name" -print | head -n 1)
-        fi
-
-        if [ -z "$PROJECT" ]; then
-          echo "❌ No project found!"
-          exit 1
+          echo "🔍 Searching for pattern: $pattern_input"
+          PROJECT=$(find . -type f -name "$pattern_input" -print | head -n 1)
+          if [ -z "$PROJECT" ]; then
+            echo "❌ No project found matching pattern: $pattern_input"
+            exit 1
+          fi
         fi
 
         echo "project=$PROJECT" >> "$GITHUB_OUTPUT"
@@ -56,4 +63,8 @@ runs:
         echo "📦 Found project: $PROJECT"
 
         dotnet restore "$PROJECT" --verbosity quiet
-        dotnet build "$PROJECT" -c "${{ inputs.configuration }}" --no-restore --nologo --verbosity "${{ inputs.verbosity }}"
+        dotnet build "$PROJECT" \
+          -c "${{ inputs.configuration }}" \
+          --no-restore \
+          --nologo \
+          --verbosity "${{ inputs.verbosity }}"

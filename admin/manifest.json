@@ -24,28 +24,12 @@
 
   // Items here are deleted if they still exist in target repos
   "deprecated": {
-    "actions": [
-      "build-dotnet-package",
-      "build-dotnet-release",
-      "check-usage-action",
-      "check-usage-package",
-      "check-usage",
-      "setup-git"
-    ],
+    "actions": [],
     "admin": [],
     "community": [],
-    "scripts": [
-      "bump-version.sh",
-      "bundle-library-releases.sh",
-      "check-org-usage.sh",
-      "init-library-submodules.sh",
-      "sync-library-tags.sh"
-    ],
+    "scripts": [],
     "templates": [],
-    "workflows": [
-      "test-compile.yml",
-      "weekly-submodule-update.yml"
-    ],
+    "workflows": [],
     "tools": []
   },
   "exclude": {

@@ -2,12 +2,24 @@ name: 🤖 Publish .NET Release
 description: Builds, publishes, and zips a self-contained .NET application.
 
 inputs:
-  project_filter:
+  # Preferred: explicit project/solution path (e.g. MyBot/MyBot.csproj or MyBot.sln)
+  project:
+    description: "Resolved .csproj or .sln path to build/publish"
+    required: false
+    default: ""
+
+  # Fallback glob if 'project' is not provided
+  project_pattern:
+    description: "Glob used to find the project/solution if 'project' is empty"
+    required: false
     default: "*.sln"
+
   bump:
     default: "patch"
+
   runtime:
     default: "win-x64"
+
   gh-token:
     required: true
 
@@ -35,7 +47,8 @@ runs:
       id: build
       uses: ./.github/actions/build-dotnet
       with:
-        project_filter: ${{ inputs.project_filter }}
+        project: ${{ inputs.project }}
+        project_pattern: ${{ inputs.project_pattern }}
         gh-token: ${{ inputs.gh-token }}
 
     - name: 🧪 Run Tests
@@ -68,7 +81,7 @@ runs:
           -p:IncludeNativeLibrariesForSelfExtract=true \
           -o "$OUTPUT" \
           --no-restore
-        echo "output=$OUTPUT" >> $GITHUB_OUTPUT
+        echo "output=$OUTPUT" >> "$GITHUB_OUTPUT"
 
     - name: 📦 Zip Output
       id: zip
@@ -79,7 +92,7 @@ runs:
         PUBLISH_DIR="${{ steps.publish.outputs.output }}"
         echo "📦 Creating archive: $ZIP_PATH"
         (cd "$PUBLISH_DIR" && zip -r "../$ZIP_PATH" .)
-        echo "zip_path=$ZIP_PATH" >> $GITHUB_OUTPUT
+        echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
 
     - name: 🏷️ Tag & Publish Release
       uses: ./.github/actions/publish-github-release
