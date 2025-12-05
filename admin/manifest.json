@@ -25,7 +25,9 @@
   // Items here are deleted if they still exist in target repos
   "deprecated": {
     "actions": [],
-    "admin": [],
+    "admin": [
+      ".source-commits"
+    ],
     "community": [],
     "scripts": [],
     "templates": [],
