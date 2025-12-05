@@ -33,13 +33,24 @@ runs:
     - id: detect
       shell: bash
       run: |
-        pattern="${{ inputs.project_filter }}"
-        echo "🔍 Searching for $pattern"
-        PROJECT=$(find . -type f -name "$pattern" -print | head -n 1)
+        pattern='${{ inputs.project_filter }}'
+        echo "🔍 Resolving project from pattern: $pattern"
+
+        # 1) If they gave us an exact path and it exists, just use it
+        if [ -n "$pattern" ] && [ -f "$pattern" ]; then
+          PROJECT="$pattern"
+        else
+          # 2) Fall back to searching by filename only
+          name="$(basename "$pattern")"
+          echo "🔎 Searching for filename: $name"
+          PROJECT=$(find . -type f -name "$name" -print | head -n 1)
+        fi
+
         if [ -z "$PROJECT" ]; then
           echo "❌ No project found!"
           exit 1
         fi
+
         echo "project=$PROJECT" >> "$GITHUB_OUTPUT"
         echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
         echo "📦 Found project: $PROJECT"
