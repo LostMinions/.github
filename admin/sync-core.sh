@@ -47,10 +47,14 @@ WATCH_PREFIXES=(
   "tools/"
 )
 WATCH_FILES=(
+  ".editorconfig",
   ".github/workflows/github-org-sync.yml"
+  "CODE_OF_CONDUCT.md",
+  "CodeMaid.config",
   "CONTRIBUTING.md"
-  "SECURITY.md"
-  "CODE_OF_CONDUCT.md"
+  "LICENSE"
+  "NOTICE_PRIVATE",
+  "SECURITY.md",
 )
 
 is_watched_path() {
