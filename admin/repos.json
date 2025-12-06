@@ -13,7 +13,8 @@
       "enabled": true,
       "description": "Main website & network hub",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -31,7 +32,8 @@
       "enabled": true,
       "description": "D&D campaign and resources",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
 
@@ -42,8 +44,9 @@
       "enabled": true,
       "description": "Standardized .NET template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation",
       "workflows": [
+        "compile.yml",
         "controller.yml",
-        "compile.yml"
+        "update-submodules.yml"
       ],
       "tools": [
         "setup-nuget-auth.ps1"
@@ -59,9 +62,10 @@
       "enabled": true,
       "description": "Shared .NET core utilities and extensions (IO, string helpers)",
       "workflows": [
+        "compile.yml",
         "controller.yml",
         "publish.yml",
-        "compile.yml"
+        "update-submodules.yml"
       ],
       "tools": [
         "setup-nuget-auth.ps1"
@@ -78,10 +82,11 @@
       "enabled": true,
       "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET (graceful shutdown, DI setup)",
       "workflows": [
+        "compile.yml",
         "controller.yml",
         "publish.yml",
-        "compile.yml",
-        "release-lavalink.yml"
+        "release-lavalink.yml",
+        "update-submodules.yml"
       ],
       "tools": [
         "setup-nuget-auth.ps1"
@@ -98,9 +103,10 @@
       "enabled": true,
       "description": "Google Sheets API integration helpers for .NET (OAuth2 + SheetsService utilities)",
       "workflows": [
+        "compile.yml",
         "controller.yml",
         "publish.yml",
-        "compile.yml"
+        "update-submodules.yml"
       ],
       "tools": [
         "setup-nuget-auth.ps1"
@@ -117,9 +123,10 @@
       "enabled": true,
       "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)",
       "workflows": [
+        "compile.yml",
         "controller.yml",
         "publish.yml",
-        "compile.yml"
+        "update-submodules.yml"
       ],
       "tools": [
         "setup-nuget-auth.ps1"
@@ -136,8 +143,9 @@
       "enabled": true,
       "description": "Meta-repository that aggregates all LostMinions library packages (Core, Discord, GoogleSheets, Logging) into unified build artifacts for offline or limited-bandwidth installs",
       "workflows": [
+        "sync-library-daily.yml",
         "sync-library.yml",
-        "sync-library-daily.yml"
+        "update-submodules.yml"
       ],
       "exclude_workflows": [
         "update-submodules.yml"
@@ -157,9 +165,10 @@
       "enabled": true,
       "description": "Automated stock analysis and alerting Discord bot",
       "workflows": [
+        "compile.yml",
         "controller.yml",
         "publish-bot.yml",
-        "compile.yml"
+        "update-submodules.yml"
       ],
       "tools": [
         "setup-nuget-auth.ps1"
@@ -177,7 +186,8 @@
       "enabled": false,
       "description": "Kickball league website",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -186,7 +196,8 @@
       "enabled": false,
       "description": "World of Warcraft bot project (archived)",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -195,7 +206,8 @@
       "enabled": false,
       "description": "Archived minisite for item collections",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -204,7 +216,8 @@
       "enabled": false,
       "description": "Archived student project from DigiPen",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -213,7 +226,8 @@
       "enabled": false,
       "description": "Archived journal site for Moloch the Warlock",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -222,7 +236,8 @@
       "enabled": false,
       "description": "Archived graphics and HTML experiments",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -231,7 +246,8 @@
       "enabled": false,
       "description": "Wrapper for Improved Initiative host",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -240,7 +256,8 @@
       "enabled": false,
       "description": "Old IRC web tools",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -249,7 +266,8 @@
       "enabled": false,
       "description": "Early HTML prototype site (Krush project)",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -258,7 +276,8 @@
       "enabled": false,
       "description": "Legacy URL shortener service",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -267,7 +286,8 @@
       "enabled": false,
       "description": "Legacy minisite framework",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -290,7 +310,8 @@
       "enabled": false,
       "description": "Legacy MMO utilities & data site",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -299,7 +320,8 @@
       "enabled": false,
       "description": "Darkfall calendar project",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -308,7 +330,8 @@
       "enabled": false,
       "description": "Darkfall crafting data site",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -317,7 +340,8 @@
       "enabled": false,
       "description": "Darkfall (original) Political Map project",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -326,7 +350,8 @@
       "enabled": false,
       "description": "Darkfall: Unholy Wars Political Map project",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -355,7 +380,8 @@
       "enabled": false,
       "description": "Legacy MMO utilities & data site",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
@@ -364,7 +390,8 @@
       "enabled": false,
       "description": "Legacy MMO map site",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     }
   ]
