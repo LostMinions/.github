@@ -72,7 +72,10 @@
     "actions": [],
     "admin": [
       ".source-commits",
-      "logs"
+      "issue-types.json",
+      "labels.json",
+      "logs",
+      "repos.json"
     ],
     "community": [],
     "editor": [],

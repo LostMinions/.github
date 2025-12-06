@@ -22,8 +22,8 @@ if [ $# -lt 2 ]; then
   exit 1
 fi
 
-FULL_REPO="$1"      # e.g. LostMinions/LostMinions.Core
-WORKDIR="$2"        # path to already-cloned repo
+FULL_REPO="$1"
+WORKDIR="$2"
 
 # --- Paths -------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

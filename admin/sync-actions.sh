@@ -22,8 +22,8 @@ set -euo pipefail
 
 # --- Arguments ---------------------------------------------------------------
 if [ $# -lt 2 ]; then
-    echo "Usage: bash sync-actions.sh <owner/repo> <workdir>"
-    exit 1
+  echo "Usage: bash sync-actions.sh <owner/repo> <workdir>"
+  exit 1
 fi
 
 FULL_REPO="$1"
@@ -45,10 +45,10 @@ echo ""
 
 # --- Dependency check --------------------------------------------------------
 for cmd in jq; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-        echo "Missing dependency: $cmd"
-        exit 1
-    fi
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Missing dependency: $cmd"
+    exit 1
+  fi
 done
 
 # --- Load defaults / deprecated / exclude from manifest (advisory) ----------
@@ -57,64 +57,64 @@ DEPRECATED_ACTIONS=()
 MANIFEST_EXCLUDE_ACTIONS=()
 
 if [ -f "$MANIFEST_FILE" ]; then
-    CLEAN_MANIFEST=$(mktemp)
-    clean_json_file "$MANIFEST_FILE" "$CLEAN_MANIFEST"
+  CLEAN_MANIFEST=$(mktemp)
+  clean_json_file "$MANIFEST_FILE" "$CLEAN_MANIFEST"
 
-    if jq -e '.defaults.actions' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-        mapfile -t DEFAULT_ACTIONS < <(jq -r '.defaults.actions[]?' "$CLEAN_MANIFEST")
-    fi
+  if jq -e '.defaults.actions' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t DEFAULT_ACTIONS < <(jq -r '.defaults.actions[]?' "$CLEAN_MANIFEST")
+  fi
 
-    if jq -e '.deprecated.actions' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-        mapfile -t DEPRECATED_ACTIONS < <(jq -r '.deprecated.actions[]?' "$CLEAN_MANIFEST")
-    fi
+  if jq -e '.deprecated.actions' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t DEPRECATED_ACTIONS < <(jq -r '.deprecated.actions[]?' "$CLEAN_MANIFEST")
+  fi
 
-    if jq -e '.exclude.actions' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-        mapfile -t MANIFEST_EXCLUDE_ACTIONS < <(jq -r '.exclude.actions[]?' "$CLEAN_MANIFEST")
-    fi
+  if jq -e '.exclude.actions' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t MANIFEST_EXCLUDE_ACTIONS < <(jq -r '.exclude.actions[]?' "$CLEAN_MANIFEST")
+  fi
 
-    rm -f "$CLEAN_MANIFEST"
+  rm -f "$CLEAN_MANIFEST"
 
-    # Warnings: these are currently NOT applied by this script
-    if ((${#DEFAULT_ACTIONS[@]} > 0)); then
-        echo "! manifest.json defines defaults.actions, but sync-actions.sh currently syncs ALL actions and ignores defaults."
-    fi
+  # Warnings: these are currently NOT applied by this script
+  if ((${#DEFAULT_ACTIONS[@]} > 0)); then
+    echo "! manifest.json defines defaults.actions, but sync-actions.sh currently syncs ALL actions and ignores defaults."
+  fi
 
-    if ((${#MANIFEST_EXCLUDE_ACTIONS[@]} > 0)); then
-        echo "! manifest.json defines exclude.actions, but sync-actions.sh currently ignores manifest-level excludes."
-    fi
+  if ((${#MANIFEST_EXCLUDE_ACTIONS[@]} > 0)); then
+    echo "! manifest.json defines exclude.actions, but sync-actions.sh currently ignores manifest-level excludes."
+  fi
 
-    echo ""
+  echo ""
 fi
 
 # --- Read repos.json for per-repo action settings (advisory) -----------------
 if [ -f "$REPOS_FILE" ]; then
-    CLEAN_JSON=$(mktemp)
-    clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
+  CLEAN_JSON=$(mktemp)
+  clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
 
-    REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
-        '.repos[] | select((.owner + "/" + .name) == $full)' "$CLEAN_JSON" || true)
+  REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
+    '.repos[] | select((.owner + "/" + .name) == $full)' "$CLEAN_JSON" || true)
 
-    rm -f "$CLEAN_JSON"
+  rm -f "$CLEAN_JSON"
 
-    if [ -n "${REPO_CONFIG:-}" ]; then
-        if jq -e '.actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
-            echo "! repos.json defines actions[] for $FULL_REPO, but sync-actions.sh currently syncs ALL actions and ignores per-repo lists."
-        fi
-
-        if jq -e '.extra_actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
-            echo "! repos.json defines extra_actions for $FULL_REPO, but sync-actions.sh currently ignores them."
-        fi
-
-        if jq -e '.exclude_actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
-            echo "! repos.json defines exclude_actions for $FULL_REPO, but sync-actions.sh currently ignores them."
-        fi
-
-        if jq -e '.sync_actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
-            echo "! repos.json defines sync_actions for $FULL_REPO, but sync-actions.sh currently ignores it (actions are always synced)."
-        fi
-
-        echo ""
+  if [ -n "${REPO_CONFIG:-}" ]; then
+    if jq -e '.actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines actions[] for $FULL_REPO, but sync-actions.sh currently syncs ALL actions and ignores per-repo lists."
     fi
+
+    if jq -e '.extra_actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines extra_actions for $FULL_REPO, but sync-actions.sh currently ignores them."
+    fi
+
+    if jq -e '.exclude_actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines exclude_actions for $FULL_REPO, but sync-actions.sh currently ignores them."
+    fi
+
+    if jq -e '.sync_actions' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines sync_actions for $FULL_REPO, but sync-actions.sh currently ignores it (actions are always synced)."
+    fi
+
+    echo ""
+  fi
 fi
 
 # --- Discover all template actions -------------------------------------------
@@ -125,14 +125,14 @@ echo ""
 
 # --- Copy all template actions -----------------------------------------------
 for act in "${TEMPLATE_ACTIONS[@]}"; do
-    rm -rf "$DEST_DIR/$act"
-    cp -r "$SRC_DIR/$act" "$DEST_DIR/"
-    echo "- Synced action $act"
+  rm -rf "$DEST_DIR/$act"
+  cp -r "$SRC_DIR/$act" "$DEST_DIR/"
+  echo "- Synced action $act"
 done
 
 # --- Remove deprecated actions -----------------------------------------------
 if ((${#DEPRECATED_ACTIONS[@]})); then
-    remove_deprecated "$DEST_DIR" "${DEPRECATED_ACTIONS[@]}"
+  remove_deprecated "$DEST_DIR" "${DEPRECATED_ACTIONS[@]}"
 fi
 
 # --- Stage changes; commit handled by sync-core ------------------------------

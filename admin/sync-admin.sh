@@ -1,19 +1,29 @@
 #!/usr/bin/env bash
+
 # ============================================================
 #  Lost Minions --- Admin Folder Sync
 # ------------------------------------------------------------
 #  Syncs ALL files + folders from the /admin directory in the
-#  template .github repo into an already-cloned target repo.
+#  template repo into an already-cloned target repo.
 #
-#  Features:
+#  Current behavior:
 #    * Auto-discovers everything inside /admin
 #    * Always skips:
-#        - admin/repos.json
-#        - admin/labels.json
-#        - admin/issue-types.json
-#    * Optional extra excludes via manifest.json (.exclude.admin[])
-#    * Optional deprecated items via manifest.json (.deprecated.admin[])
-#    * Stages changes (sync-core handles commit)
+#      - admin/repos.json
+#      - admin/labels.json
+#      - admin/issue-types.json
+#    * Uses:
+#      - manifest.json -> .exclude.admin[] (extra excludes)
+#      - manifest.json -> .deprecated.admin[] (items to remove)
+#
+#  Advisory only (read, but NOT applied yet):
+#    * manifest.json -> .defaults.admin[]
+#    * repos.json -> admin / extra_admin / exclude_admin / sync_admin
+#
+#  Stages changes; sync-core handles the commit.
+#
+#  Usage:
+#    bash sync-admin.sh <owner/repo> <workdir>
 # ============================================================
 
 set -euo pipefail
@@ -36,6 +46,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_ADMIN="$ROOT_DIR/admin"
 TARGET_ADMIN="$WORKDIR/admin"
 MANIFEST_FILE="$SCRIPT_DIR/manifest.json"
+REPOS_FILE="$SCRIPT_DIR/repos.json"
 
 mkdir -p "$TARGET_ADMIN"
 
@@ -45,7 +56,6 @@ echo "  Target:   $TARGET_ADMIN"
 echo ""
 
 # --- Dependencies ------------------------------------------------------------
-# Only needed if we read manifest.json; safe to require since other scripts do.
 for cmd in jq; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "Missing dependency: $cmd"
@@ -64,10 +74,20 @@ EXCLUDED_ADMIN=(
 
 DEPRECATED_ADMIN=()
 
-# --- Read extra excludes / deprecated from manifest.json ---------------------
+# --- Read manifest.json (defaults/exclude/deprecated) ------------------------
 if [ -f "$MANIFEST_FILE" ]; then
   CLEAN_MANIFEST=$(mktemp)
   clean_json_file "$MANIFEST_FILE" "$CLEAN_MANIFEST"
+
+  # Advisory: defaults.admin (NOT used; we auto-discover everything)
+  DEFAULT_ADMIN_ITEMS=()
+  if jq -e '.defaults.admin' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t DEFAULT_ADMIN_ITEMS < <(jq -r '.defaults.admin[]?' "$CLEAN_MANIFEST")
+    if ((${#DEFAULT_ADMIN_ITEMS[@]} > 0)); then
+      echo "! manifest.json defines defaults.admin, but sync-admin.sh currently syncs ALL admin items and ignores defaults."
+      echo ""
+    fi
+  fi
 
   # Optional: extra excludes (relative to admin/)
   if jq -e '.exclude.admin' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
@@ -84,6 +104,37 @@ if [ -f "$MANIFEST_FILE" ]; then
   rm -f "$CLEAN_MANIFEST"
 fi
 
+# --- Read repos.json for per-repo admin settings (advisory) ------------------
+if [ -f "$REPOS_FILE" ]; then
+  CLEAN_JSON=$(mktemp)
+  clean_json_file "$REPOS_FILE" "$CLEAN_JSON"
+
+  REPO_CONFIG=$(jq -c --arg full "$FULL_REPO" \
+    '.repos[] | select((.owner + "/" + .name) == $full)' "$CLEAN_JSON" || true)
+
+  rm -f "$CLEAN_JSON"
+
+  if [ -n "${REPO_CONFIG:-}" ]; then
+    if jq -e '.admin' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines admin[] for $FULL_REPO, but sync-admin.sh currently syncs ALL admin items and ignores per-repo lists."
+    fi
+
+    if jq -e '.extra_admin' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines extra_admin for $FULL_REPO, but sync-admin.sh currently ignores it."
+    fi
+
+    if jq -e '.exclude_admin' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines exclude_admin for $FULL_REPO, but sync-admin.sh currently relies only on manifest.exclude.admin + built-in excludes."
+    fi
+
+    if jq -e '.sync_admin' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+      echo "! repos.json defines sync_admin for $FULL_REPO, but sync-admin.sh currently always syncs admin/ for enabled repos."
+    fi
+
+    echo ""
+  fi
+fi
+
 is_excluded_admin() {
   local rel="$1"
   for p in "${EXCLUDED_ADMIN[@]}"; do
@@ -95,7 +146,7 @@ is_excluded_admin() {
   return 1
 }
 
-# --- Discover everything in /admin/ -----------------------------------------
+# --- Discover everything in /admin/ ------------------------------------------
 
 mapfile -t ADMIN_ITEMS < <(discover_all "$TEMPLATE_ADMIN")
 
@@ -130,5 +181,6 @@ fi
 # --- Stage admin folder ------------------------------------------------------
 
 git -C "$WORKDIR" add "admin" >/dev/null 2>&1 || true
+
 echo ""
 echo "Admin staged for $FULL_REPO"

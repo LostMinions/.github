@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # ============================================================
 #  Lost Minions --- Community File Sync
 # ------------------------------------------------------------
@@ -7,6 +8,8 @@
 #
 #  Features:
 #    * Reads default community files from manifest.json
+#    * Supports manifest-level deprecated + exclude
+#    * Supports per-repo include/extra/exclude via repos.json
 #    * Handles LICENSE vs NOTICE_PRIVATE logic
 #    * Cleans stale or swapped-out files
 #
@@ -22,8 +25,8 @@ if [ $# -lt 2 ]; then
   exit 1
 fi
 
-FULL_REPO="$1"      # e.g. LostMinions/LostMinions.Core
-WORKDIR="$2"        # path to already-cloned repo
+FULL_REPO="$1"
+WORKDIR="$2"
 
 # --- Paths -------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -71,9 +74,33 @@ if [[ "$REPO_NAME" == ".github" ]]; then
   IS_DOTGITHUB=true
 fi
 
-# --- Load defaults and deprecations from manifest ----------------------------
-COMMUNITY_FILES=()
+# --- Per-repo community config ----------------------------------------------
+
+# Per-repo excludes (by basename)
+EXCLUDE_COMMUNITY_FILE=()
+if jq -e '.exclude_community_file' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+  mapfile -t EXCLUDE_COMMUNITY_FILE < <(echo "$REPO_CONFIG" | jq -r '.exclude_community_file[]?' 2>/dev/null || true)
+fi
+
+# Explicit list of community files (relative to template root)
+EXPLICIT_COMMUNITY_FILES=()
+if jq -e '.community_files' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+  mapfile -t EXPLICIT_COMMUNITY_FILES < <(echo "$REPO_CONFIG" | jq -r '.community_files[]?' 2>/dev/null || true)
+  EXPLICIT_COMMUNITY_FILES=("${EXPLICIT_COMMUNITY_FILES[@]/#/$ROOT_DIR/}")
+fi
+
+# Extra per-repo community files (relative to template root)
+EXTRA_COMMUNITY_FILES=()
+if jq -e '.extra_community_file' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
+  mapfile -t EXTRA_COMMUNITY_FILES < <(echo "$REPO_CONFIG" | jq -r '.extra_community_file[]?' 2>/dev/null || true)
+  EXTRA_COMMUNITY_FILES=("${EXTRA_COMMUNITY_FILES[@]/#/$ROOT_DIR/}")
+fi
+
+# --- Load defaults / deprecated / manifest-level excludes --------------------
+
+COMMUNITY_DEFAULTS=()
 DEPRECATED_FILES=()
+MANIFEST_EXCLUDE_COMMUNITY=()
 
 if [ -f "$MANIFEST_FILE" ]; then
   CLEAN_MANIFEST=$(mktemp)
@@ -81,8 +108,8 @@ if [ -f "$MANIFEST_FILE" ]; then
 
   # Load default community files
   if jq -e '.defaults.community' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
-    mapfile -t COMMUNITY_FILES < <(jq -r '.defaults.community[]?' "$CLEAN_MANIFEST")
-    COMMUNITY_FILES=("${COMMUNITY_FILES[@]/#/$ROOT_DIR/}")
+    mapfile -t COMMUNITY_DEFAULTS < <(jq -r '.defaults.community[]?' "$CLEAN_MANIFEST")
+    COMMUNITY_DEFAULTS=("${COMMUNITY_DEFAULTS[@]/#/$ROOT_DIR/}")
   fi
 
   # Load deprecated community files
@@ -90,23 +117,47 @@ if [ -f "$MANIFEST_FILE" ]; then
     mapfile -t DEPRECATED_FILES < <(jq -r '.deprecated.community[]?' "$CLEAN_MANIFEST")
   fi
 
+  # Load manifest-level excludes (by basename)
+  if jq -e '.exclude.community' "$CLEAN_MANIFEST" >/dev/null 2>&1; then
+    mapfile -t MANIFEST_EXCLUDE_COMMUNITY < <(jq -r '.exclude.community[]?' "$CLEAN_MANIFEST")
+  fi
+
   rm -f "$CLEAN_MANIFEST"
 fi
 
-EXCLUDE_COMMUNITY_FILE=()
-if jq -e '.exclude_community_file' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
-  mapfile -t EXCLUDE_COMMUNITY_FILE < <(echo "$REPO_CONFIG" | jq -r '.exclude_community_file[]?' 2>/dev/null || true)
+# Helper: check if a basename is in a list
+in_list() {
+  local needle="$1"; shift
+  for x in "$@"; do
+    [[ "$x" == "$needle" ]] && return 0
+  done
+  return 1
+}
+
+# --- Build base community list -----------------------------------------------
+
+COMMUNITY_FILES=()
+
+if ((${#EXPLICIT_COMMUNITY_FILES[@]} > 0)); then
+  # Repo explicitly controls full list
+  COMMUNITY_FILES=("${EXPLICIT_COMMUNITY_FILES[@]}")
+else
+  # Use manifest defaults (may be empty)
+  COMMUNITY_FILES=("${COMMUNITY_DEFAULTS[@]}")
 fi
 
-# --- Fallback if no manifest defaults ----------------------------------------
+# Merge per-repo extras
+COMMUNITY_FILES+=("${EXTRA_COMMUNITY_FILES[@]}")
+
 if ((${#COMMUNITY_FILES[@]} == 0)); then
-  echo "Warning: No default community files found in manifest; skipping community file sync."
+  echo "Warning: No default/explicit community files resolved for $FULL_REPO (excluding license/notice)."
 fi
 
 echo "Syncing community and license files for $FULL_REPO"
 echo ""
 
 # --- Add license/notice files -------------------------------------------------
+
 if [[ "$IS_DOTGITHUB" == true ]]; then
   # For org-level .github repos, keep both around.
   COMMUNITY_FILES+=("$ROOT_DIR/LICENSE")
@@ -120,6 +171,7 @@ else
 fi
 
 # --- Remove deprecated community files ---------------------------------------
+
 if ((${#DEPRECATED_FILES[@]} > 0)); then
   for f in "${DEPRECATED_FILES[@]}"; do
     TARGET_FILE="$(basename "$f")"
@@ -130,12 +182,19 @@ if ((${#DEPRECATED_FILES[@]} > 0)); then
   done
 fi
 
-# --- Copy community and license files (with per-repo excludes) ---------------
+# --- Copy community and license files (with manifest + per-repo excludes) ----
+
 for f in "${COMMUNITY_FILES[@]}"; do
   if [ -f "$f" ]; then
     base="$(basename "$f")"
 
-    # Skip excluded community files for this repo
+    # Global manifest-level exclude
+    if in_list "$base" "${MANIFEST_EXCLUDE_COMMUNITY[@]}"; then
+      echo "- Skipping $base (excluded in manifest)"
+      continue
+    fi
+
+    # Per-repo excludes
     skip=false
     for ex in "${EXCLUDE_COMMUNITY_FILE[@]}"; do
       if [[ "$base" == "$ex" ]]; then
@@ -154,7 +213,8 @@ for f in "${COMMUNITY_FILES[@]}"; do
   fi
 done
 
-# --- Prevent dual-license duplication (non-.github only) ----------------------
+# --- Prevent dual-license duplication (non-.github only) ---------------------
+
 if [[ "$IS_DOTGITHUB" != true ]]; then
   if [[ "$LICENSE_TYPE" == "mit" ]]; then
     [ -f "NOTICE_PRIVATE.md" ] && rm -f "NOTICE_PRIVATE.md"
@@ -164,6 +224,7 @@ if [[ "$IS_DOTGITHUB" != true ]]; then
 fi
 
 # --- Stage all managed community files ---------------------------------------
+
 for f in "${COMMUNITY_FILES[@]}"; do
   target="$(basename "$f")"
   [ -e "$target" ] && git add "$target" >/dev/null 2>&1
