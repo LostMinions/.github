@@ -13,6 +13,8 @@
       "enabled": true,
       "description": "Main website & network hub",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -23,6 +25,8 @@
       "enabled": false,
       "description": "3D print designs and model sources",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -33,6 +37,8 @@
       "enabled": true,
       "description": "D&D campaign and resources",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -47,6 +53,7 @@
       "workflows": [
         "compile.yml",
         "controller.yml",
+        "publish-zip.yml",
         "update-submodules.yml"
       ],
       "tools": [
@@ -66,7 +73,8 @@
       "workflows": [
         "compile.yml",
         "controller.yml",
-        "publish.yml",
+        "publish-package.yml",
+        "publish-zip.yml",
         "update-submodules.yml"
       ],
       "tools": [
@@ -87,7 +95,8 @@
       "workflows": [
         "compile.yml",
         "controller.yml",
-        "publish.yml",
+        "publish-package.yml",
+        "publish-zip.yml",
         "release-lavalink.yml",
         "update-submodules.yml"
       ],
@@ -109,7 +118,8 @@
       "workflows": [
         "compile.yml",
         "controller.yml",
-        "publish.yml",
+        "publish-package.yml",
+        "publish-zip.yml",
         "update-submodules.yml"
       ],
       "tools": [
@@ -130,7 +140,8 @@
       "workflows": [
         "compile.yml",
         "controller.yml",
-        "publish.yml",
+        "publish-package.yml",
+        "publish-zip.yml",
         "update-submodules.yml"
       ],
       "tools": [
@@ -175,6 +186,7 @@
         "compile.yml",
         "controller.yml",
         "publish-bot.yml",
+        "publish-zip.yml",
         "update-submodules.yml"
       ],
       "tools": [
@@ -194,6 +206,8 @@
       "enabled": false,
       "description": "Kickball league website",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -204,6 +218,8 @@
       "enabled": false,
       "description": "World of Warcraft bot project (archived)",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -214,6 +230,8 @@
       "enabled": false,
       "description": "Archived minisite for item collections",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -224,6 +242,8 @@
       "enabled": false,
       "description": "Archived student project from DigiPen",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -234,6 +254,8 @@
       "enabled": false,
       "description": "Archived journal site for Moloch the Warlock",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -244,6 +266,8 @@
       "enabled": false,
       "description": "Archived graphics and HTML experiments",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -264,6 +288,8 @@
       "enabled": false,
       "description": "Old IRC web tools",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -284,6 +310,8 @@
       "enabled": false,
       "description": "Legacy URL shortener service",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -294,6 +322,8 @@
       "enabled": false,
       "description": "Legacy minisite framework",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -318,6 +348,8 @@
       "enabled": false,
       "description": "Legacy MMO utilities & data site",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -328,6 +360,8 @@
       "enabled": false,
       "description": "Darkfall calendar project",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -338,6 +372,8 @@
       "enabled": false,
       "description": "Darkfall crafting data site",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -348,6 +384,8 @@
       "enabled": false,
       "description": "Darkfall (original) Political Map project",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -358,6 +396,8 @@
       "enabled": false,
       "description": "Darkfall: Unholy Wars Political Map project",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -388,6 +428,8 @@
       "enabled": false,
       "description": "Legacy MMO utilities & data site",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
@@ -398,6 +440,8 @@
       "enabled": false,
       "description": "Legacy MMO map site",
       "workflows": [
+        "controller.yml",
+        "publish-zip.yml",
         "update-submodules-weekly.yml",
         "update-submodules.yml"
       ]
