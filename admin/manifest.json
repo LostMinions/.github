@@ -52,21 +52,13 @@
   // ---------------------------------------------------------------------------
   "deprecated": {
     "actions": [],
-    "admin": [
-      ".source-commits",
-      "CONTRIBUTING.project.md"
-    ],
+    "admin": [],
     "community": [],
     "editor": [],
     "scripts": [],
     "templates": [],
-    "workflows": [
-      "publish.yml"
-    ],
-    "tools": [
-      "Invoke-Runners2.ps1",
-      "Setup-RunnersKey2.ps1"
-    ]
+    "workflows": [],
+    "tools": []
   },
 
   // ---------------------------------------------------------------------------
