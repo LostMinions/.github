@@ -17,9 +17,9 @@
 
     // Default top-level community files to sync (root of the target repo).
     "community": [
-      "admin/community/CONTRIBUTING.project.md",
-      "SECURITY.md",
-      "CODE_OF_CONDUCT.md"
+      "CODE_OF_CONDUCT.md",
+      "CONTRIBUTING.project.md",
+      "SECURITY.md"
     ],
 
     // Default .github/scripts/ items to sync.
@@ -53,7 +53,8 @@
   "deprecated": {
     "actions": [],
     "admin": [
-      ".source-commits"
+      ".source-commits",
+      "CONTRIBUTING.project.md"
     ],
     "community": [],
     "editor": [],
