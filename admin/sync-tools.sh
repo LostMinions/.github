@@ -33,6 +33,15 @@ fi
 FULL_REPO="$1"
 WORKDIR="$2"
 
+# Derive short repo name (everything after owner/)
+REPO_NAME="${FULL_REPO#*/}"
+
+# Flag: are we syncing a .github repo?
+IS_DOT_GITHUB_REPO=0
+if [[ "$REPO_NAME" == ".github" ]]; then
+  IS_DOT_GITHUB_REPO=1
+fi
+
 # --- Paths -------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -137,19 +146,24 @@ echo ""
 
 TOOLS_TO_SYNC=()
 
-if ((${#REPO_TOOLS[@]} > 0)); then
-  # Repo explicitly controls which tools it wants
-  TOOLS_TO_SYNC=("${REPO_TOOLS[@]}")
-elif ((${#DEFAULT_TOOLS[@]} > 0)); then
-  # Fall back to manifest defaults
-  TOOLS_TO_SYNC=("${DEFAULT_TOOLS[@]}")
-else
-  # Final fallback: all discovered items under /tools
+if (( IS_DOT_GITHUB_REPO == 1 )); then
+  # Special case: .github repos always mirror the full tools/ tree
   TOOLS_TO_SYNC=("${TEMPLATE_TOOLS[@]}")
-fi
+else
+  if ((${#REPO_TOOLS[@]} > 0)); then
+    # Repo explicitly controls which tools it wants
+    TOOLS_TO_SYNC=("${REPO_TOOLS[@]}")
+  elif ((${#DEFAULT_TOOLS[@]} > 0)); then
+    # Fall back to manifest defaults
+    TOOLS_TO_SYNC=("${DEFAULT_TOOLS[@]}")
+  else
+    # Final fallback: all discovered items under /tools
+    TOOLS_TO_SYNC=("${TEMPLATE_TOOLS[@]}")
+  fi
 
-# Merge per-repo extras
-TOOLS_TO_SYNC+=("${REPO_EXTRA_TOOLS[@]}")
+  # Merge per-repo extras (for non-.github repos)
+  TOOLS_TO_SYNC+=("${REPO_EXTRA_TOOLS[@]}")
+fi
 
 if ((${#TOOLS_TO_SYNC[@]} == 0)); then
   echo "Warning: No tools resolved for $FULL_REPO; skipping tools sync."
@@ -166,14 +180,16 @@ for rel in "${TOOLS_TO_SYNC[@]}"; do
   # Normalize any accidental CR
   rel="${rel//$'\r'/}"
 
-  # Apply global + per-repo excludes
-  if is_excluded_tool "$rel" "${GLOBAL_EXCLUDE_TOOLS[@]}"; then
-    echo "- Skipping tools/$rel (excluded in manifest)"
-    continue
-  fi
-  if is_excluded_tool "$rel" "${REPO_EXCLUDE_TOOLS[@]}"; then
-    echo "- Skipping tools/$rel (excluded for $FULL_REPO)"
-    continue
+  # For non-.github repos, apply global + per-repo excludes
+  if (( IS_DOT_GITHUB_REPO == 0 )); then
+    if is_excluded_tool "$rel" "${GLOBAL_EXCLUDE_TOOLS[@]}"; then
+      echo "- Skipping tools/$rel (excluded in manifest)"
+      continue
+    fi
+    if is_excluded_tool "$rel" "${REPO_EXCLUDE_TOOLS[@]}"; then
+      echo "- Skipping tools/$rel (excluded for $FULL_REPO)"
+      continue
+    fi
   fi
 
   src="$SRC_DIR/$rel"
@@ -192,7 +208,8 @@ done
 
 # --- Remove deprecated tools -------------------------------------------------
 
-if ((${#DEPRECATED_TOOLS[@]})); then
+# Only prune deprecated tools for non-.github repos
+if (( ${#DEPRECATED_TOOLS[@]} && IS_DOT_GITHUB_REPO == 0 )); then
   remove_deprecated "$DEST_DIR" "${DEPRECATED_TOOLS[@]}"
 fi
 
