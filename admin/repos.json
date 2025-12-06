@@ -49,7 +49,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "editor_files": [
         ".editorconfig",
@@ -68,7 +69,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -89,7 +91,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -109,7 +112,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -129,7 +133,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -151,7 +156,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -171,7 +177,8 @@
         "update-submodules.yml"
       ],
       "tools": [
-        "setup-nuget-auth.ps1"
+        "setup-nuget-auth.ps1",
+        "validate-github-token.ps1"
       ],
       "editor_files": [
         ".editorconfig",
