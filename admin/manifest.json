@@ -1,43 +1,84 @@
 {
-  // Global definitions affecting all repos
+  // ---------------------------------------------------------------------------
+  // defaults:
+  //   - Global baseline values used by sync scripts.
+  //   - File/folder names here are treated as "template defaults" for repos,
+  //     unless a repo overrides them via repos.json (e.g. exclude / extras).
+  // ---------------------------------------------------------------------------
   "defaults": {
+    // Prefix used by sync scripts when building auto-generated commit messages.
     "dummy_prefix": "💤 ~ ",
+
+    // Default .github/actions/ items to sync into repos that opt in.
     "actions": [],
+
+    // Default admin/ files or subfolders to sync (sync-admin.sh, etc.).
     "admin": [],
+
+    // Default top-level community files to sync (root of the target repo).
     "community": [
       "CONTRIBUTING.md",
       "SECURITY.md",
       "CODE_OF_CONDUCT.md"
     ],
+
+    // Default .github/scripts/ items to sync.
     "scripts": [],
+
+    // Default .github/ISSUE_TEMPLATE and PULL_REQUEST_TEMPLATE items to sync.
     "templates": [
       "ISSUE_TEMPLATE",
       "PULL_REQUEST_TEMPLATE"
     ],
+
+    // Default .github/workflows/ files to sync.
     "workflows": [
       "update-submodules.yml"
     ],
+
+    // Default tools/ assets (scripts, helpers) to sync.
     "tools": [
       "validate-github-token.ps1"
     ]
   },
 
-  // Items here are deleted if they still exist in target repos
+  // ---------------------------------------------------------------------------
+  // deprecated:
+  //   - Anything listed here is treated as "old" and removed from target repos
+  //     if still present (cleanup pass).
+  //   - Values are usually file or folder names (basenames in the target repo).
+  // ---------------------------------------------------------------------------
   "deprecated": {
     "actions": [],
     "admin": [
       ".source-commits"
     ],
     "community": [],
+    "editor": [],
     "scripts": [],
     "templates": [],
     "workflows": [],
     "tools": []
   },
+
+  // ---------------------------------------------------------------------------
+  // exclude:
+  //   - Global "never sync" list.
+  //   - If a basename appears here, sync scripts will skip copying it even if
+  //     it's present in defaults or per-repo includes.
+  //   - Per-repo excludes in repos.json can further refine this.
+  // ---------------------------------------------------------------------------
   "exclude": {
+    "actions": [],
     "admin": [
       ".source-commits",
       "logs"
-    ]
+    ],
+    "community": [],
+    "editor": [],
+    "scripts": [],
+    "templates": [],
+    "workflows": [],
+    "tools": []
   }
 }
