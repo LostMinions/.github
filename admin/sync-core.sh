@@ -329,7 +329,8 @@ run_sync_for_repo() {
         ["3"]="sync-scripts.sh|Scripts"
         ["4"]="sync-workflows.sh|Workflows"
         ["5"]="sync-tools.sh|Tools"
-        ["6"]="sync-admin.sh|Admin"
+        ["6"]="sync-editor.sh|Editor"
+        ["7"]="sync-admin.sh|Admin"
       )
     elif [[ "$IS_USERREPO" == true ]]; then
       # User-owned repos:
@@ -341,6 +342,7 @@ run_sync_for_repo() {
         ["3"]="sync-scripts.sh|Scripts"
         ["4"]="sync-workflows.sh|Workflows"
         ["5"]="sync-tools.sh|Tools"
+        ["6"]="sync-editor.sh|Editor"
       )
     else
       # Normal org repos:
@@ -355,6 +357,7 @@ run_sync_for_repo() {
         ["6"]="sync-scripts.sh|Scripts"
         ["7"]="sync-workflows.sh|Workflows"
         ["8"]="sync-tools.sh|Tools"
+        ["9"]="sync-editor.sh|Editor"
       )
     fi
 
@@ -407,6 +410,9 @@ run_sync_for_repo() {
       [[ "$changed_summary" == *"CONTRIBUTING.md"* ||
          "$changed_summary" == *"SECURITY.md"*     ||
          "$changed_summary" == *"CODE_OF_CONDUCT.md"* ]]             && commit_msg+=" community"
+      [[ "$changed_summary" == *".editorconfig"*    ||
+         "$changed_summary" == *"CodeMaid.config"*  ||
+         "$changed_summary" == *".DotSettings"* ]]                   && commit_msg+=" editor"
       [[ "$changed_summary" == *".github/scripts/"* ]]               && commit_msg+=" scripts"
       [[ "$changed_summary" == *".github/ISSUE_TEMPLATE/"* ||
          "$changed_summary" == *".github/PULL_REQUEST_TEMPLATE/"* ]] && commit_msg+=" templates"
