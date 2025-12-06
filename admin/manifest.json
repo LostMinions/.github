@@ -58,7 +58,10 @@
     "scripts": [],
     "templates": [],
     "workflows": [],
-    "tools": []
+    "tools": [
+      "Invoke-Runners2.ps1",
+      "Setup-RunnersKey2.ps1"
+    ]
   },
 
   // ---------------------------------------------------------------------------
