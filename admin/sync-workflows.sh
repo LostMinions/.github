@@ -103,7 +103,6 @@ if [ -f "$MANIFEST_FILE" ]; then
 fi
 
 # --- Combine defaults with per-repo workflows --------------------------------
-
 WORKFLOWS=("${DEFAULT_WORKFLOWS[@]}")
 
 # Per-repo workflows (main list)
@@ -128,6 +127,11 @@ EXCLUDE_WORKFLOWS=()
 if jq -e '.exclude_workflows' <<<"$REPO_CONFIG" >/dev/null 2>&1; then
   mapfile -t EXCLUDE_WORKFLOWS < <(echo "$REPO_CONFIG" | jq -r '.exclude_workflows[]?' 2>/dev/null || true)
 fi
+
+# --- Normalize CRLF from JSON on all lists -----------------------------------
+WORKFLOWS=("${WORKFLOWS[@]//$'\r'/}")
+EXCLUDE_WORKFLOWS=("${EXCLUDE_WORKFLOWS[@]//$'\r'/}")
+MANIFEST_EXCLUDE_WORKFLOWS=("${MANIFEST_EXCLUDE_WORKFLOWS[@]//$'\r'/}")
 
 # Deduplicate first
 mapfile -t WORKFLOWS < <(printf "%s\n" "${WORKFLOWS[@]}" | awk '!seen[$0]++')
@@ -162,7 +166,6 @@ printf -- '- %s\n' "${ALL_WORKFLOWS[@]}"
 echo ""
 
 # --- Copy or dummy depending on repo config ----------------------------------
-
 for wf in "${ALL_WORKFLOWS[@]}"; do
   SRC="$SOURCE_DIR/$wf"
   DEST=".github/workflows/$wf"
@@ -187,9 +190,9 @@ for wf in "${ALL_WORKFLOWS[@]}"; do
       echo "  workflow_call:"
       echo "jobs:"
       echo "  none:"
-      echo "  runs-on: ubuntu-latest"
-      echo "  steps:"
-      echo "    - run: echo \"Placeholder for $wf - not used by this repo.\""
+      echo "    runs-on: ubuntu-latest"
+      echo "    steps:"
+      echo "      - run: echo \"Placeholder for $wf - not used by this repo.\""
     } > "$DEST"
   fi
 done
