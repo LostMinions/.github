@@ -59,7 +59,9 @@
     "editor": [],
     "scripts": [],
     "templates": [],
-    "workflows": [],
+    "workflows": [
+      "publish.yml"
+    ],
     "tools": [
       "Invoke-Runners2.ps1",
       "Setup-RunnersKey2.ps1"
