@@ -23,7 +23,8 @@
       "enabled": false,
       "description": "3D print designs and model sources",
       "workflows": [
-        "update-submodules-weekly.yml"
+        "update-submodules-weekly.yml",
+        "update-submodules.yml"
       ]
     },
     {
