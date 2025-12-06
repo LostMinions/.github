@@ -12,11 +12,8 @@
       "name": "LostMinions.org",
       "enabled": true,
       "description": "Main website & network hub",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -24,11 +21,8 @@
       "name": "LostMinions.org-3DPrint",
       "enabled": false,
       "description": "3D print designs and model sources",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -36,11 +30,8 @@
       "name": "LostMinions.org-DnD",
       "enabled": true,
       "description": "D&D campaign and resources",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
 
@@ -50,15 +41,11 @@
       "name": "LostMinions.CSharpTemplate",
       "enabled": true,
       "description": "Standardized .NET template repository for all Lost Minions projects — includes unified build settings, workflows, and submodule automation",
-      "workflows": [
-        "compile.yml",
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "compile.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "editor_files": [
         ".editorconfig",
@@ -70,16 +57,12 @@
       "name": "LostMinions.Core",
       "enabled": true,
       "description": "Shared .NET core utilities and extensions (IO, string helpers)",
-      "workflows": [
+      "extra_workflows": [
         "compile.yml",
-        "controller.yml",
-        "publish-package.yml",
-        "publish-zip.yml",
-        "update-submodules.yml"
+        "publish-package.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -92,17 +75,13 @@
       "name": "LostMinions.Discord",
       "enabled": true,
       "description": "Shared Discord.NET 3.x base classes and lifecycle utilities for .NET (graceful shutdown, DI setup)",
-      "workflows": [
+      "extra_workflows": [
         "compile.yml",
-        "controller.yml",
         "publish-package.yml",
-        "publish-zip.yml",
-        "release-lavalink.yml",
-        "update-submodules.yml"
+        "release-lavalink.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -115,16 +94,12 @@
       "name": "LostMinions.GoogleSheets",
       "enabled": true,
       "description": "Google Sheets API integration helpers for .NET (OAuth2 + SheetsService utilities)",
-      "workflows": [
+      "extra_workflows": [
         "compile.yml",
-        "controller.yml",
-        "publish-package.yml",
-        "publish-zip.yml",
-        "update-submodules.yml"
+        "publish-package.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -137,16 +112,12 @@
       "name": "LostMinions.Logging",
       "enabled": true,
       "description": "Unified logging layer for all LostMinions projects (console + daily file rotation)",
-      "workflows": [
+      "extra_workflows": [
         "compile.yml",
-        "controller.yml",
-        "publish-package.yml",
-        "publish-zip.yml",
-        "update-submodules.yml"
+        "publish-package.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -167,9 +138,8 @@
       "exclude_workflows": [
         "update-submodules.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "license": "mit",
       "editor_files": [
@@ -182,16 +152,12 @@
       "name": "Krush.DiscordBot",
       "enabled": true,
       "description": "Automated stock analysis and alerting Discord bot",
-      "workflows": [
+      "extra_workflows": [
         "compile.yml",
-        "controller.yml",
-        "publish-bot.yml",
-        "publish-zip.yml",
-        "update-submodules.yml"
+        "publish-bot.yml"
       ],
-      "tools": [
-        "setup-nuget-auth.ps1",
-        "validate-github-token.ps1"
+      "extra_tools": [
+        "setup-nuget-auth.ps1"
       ],
       "editor_files": [
         ".editorconfig",
@@ -205,11 +171,8 @@
       "name": "ActiveSocialSports.com",
       "enabled": false,
       "description": "Kickball league website",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -217,11 +180,8 @@
       "name": "LostMinions.org-ArthasBot",
       "enabled": false,
       "description": "World of Warcraft bot project (archived)",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -229,11 +189,8 @@
       "name": "LostMinions.org-Collections",
       "enabled": false,
       "description": "Archived minisite for item collections",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -241,11 +198,8 @@
       "name": "LostMinions.org-DigiPen",
       "enabled": false,
       "description": "Archived student project from DigiPen",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -253,11 +207,8 @@
       "name": "LostMinions.org-DnD-Moloch",
       "enabled": false,
       "description": "Archived journal site for Moloch the Warlock",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -265,11 +216,8 @@
       "name": "LostMinions.org-Graphics",
       "enabled": false,
       "description": "Archived graphics and HTML experiments",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -277,9 +225,8 @@
       "name": "LostMinions.org-II",
       "enabled": false,
       "description": "Wrapper for Improved Initiative host",
-      "workflows": [
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -287,11 +234,8 @@
       "name": "LostMinions.org-IRC",
       "enabled": false,
       "description": "Old IRC web tools",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -299,9 +243,8 @@
       "name": "LostMinions.org-Krush",
       "enabled": false,
       "description": "Early HTML prototype site (Krush project)",
-      "workflows": [
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -309,11 +252,8 @@
       "name": "LostMinions.org-LilUrl",
       "enabled": false,
       "description": "Legacy URL shortener service",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -321,11 +261,8 @@
       "name": "LostMinions.org-Minisite",
       "enabled": false,
       "description": "Legacy minisite framework",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -347,11 +284,8 @@
       "name": "DarkfallInfo.com",
       "enabled": false,
       "description": "Legacy MMO utilities & data site",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -359,11 +293,8 @@
       "name": "DarkfallInfo.com-Calendar",
       "enabled": false,
       "description": "Darkfall calendar project",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -371,11 +302,8 @@
       "name": "DarkfallInfo.com-Crafting",
       "enabled": false,
       "description": "Darkfall crafting data site",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -383,11 +311,8 @@
       "name": "DarkfallInfo.com-PMap",
       "enabled": false,
       "description": "Darkfall (original) Political Map project",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -395,11 +320,8 @@
       "name": "DarkfallInfo.com-PMap2",
       "enabled": false,
       "description": "Darkfall: Unholy Wars Political Map project",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -427,11 +349,8 @@
       "name": "H1Z1Info.com",
       "enabled": false,
       "description": "Legacy MMO utilities & data site",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     },
     {
@@ -439,11 +358,8 @@
       "name": "H1Z1Info.com-Map",
       "enabled": false,
       "description": "Legacy MMO map site",
-      "workflows": [
-        "controller.yml",
-        "publish-zip.yml",
-        "update-submodules-weekly.yml",
-        "update-submodules.yml"
+      "extra_workflows": [
+        "update-submodules-weekly.yml"
       ]
     }
   ]
