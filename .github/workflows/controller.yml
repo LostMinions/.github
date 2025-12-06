@@ -22,7 +22,6 @@ jobs:
     timeout-minutes: 3
     continue-on-error: true
     outputs:
-      # usage.over_limit (org) OR assume-ok.over_limit (user) OR default false
       over_limit: ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}
 
     steps:
@@ -59,8 +58,7 @@ jobs:
           check-actions: "true"
           check-packages-bandwidth: "false"
 
-      # For user repos, we don't care about org minutes at all:
-      # just declare over_limit=false and move on.
+      # For user repos, we don't care about org minutes at all
       - name: ✅ Assume under limit (user repos)
         id: assume_ok
         if: ${{ github.event.repository.owner.type != 'Organization' }}
@@ -78,6 +76,9 @@ jobs:
         if: always()
         uses: ./.github/actions/cleanup-runner
 
+  # ----------------------------------------
+  # 🔍 Analyze repo / commit to decide what to run
+  # ----------------------------------------
   analyze:
     name: ${{ format('🔍 Analyze {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
     if: ${{ !endsWith(github.repository, '/.github') }}
@@ -86,12 +87,14 @@ jobs:
     timeout-minutes: 5
 
     outputs:
-      run_compile: ${{ steps.check.outputs.run_compile }}
-      run_publish: ${{ steps.check.outputs.run_publish }}
-      run_publishbot: ${{ steps.check.outputs.run_publishbot }}
-      has_compile: ${{ steps.check.outputs.has_compile }}
-      has_publish: ${{ steps.check.outputs.has_publish }}
-      has_publishbot: ${{ steps.check.outputs.has_publishbot }}
+      run_compile:      ${{ steps.check.outputs.run_compile }}
+      run_publish:      ${{ steps.check.outputs.run_publish }}
+      run_publishbot:   ${{ steps.check.outputs.run_publishbot }}
+      run_publishzip:   ${{ steps.check.outputs.run_publishzip }}
+      has_compile:      ${{ steps.check.outputs.has_compile }}
+      has_publish:      ${{ steps.check.outputs.has_publish }}
+      has_publishbot:   ${{ steps.check.outputs.has_publishbot }}
+      has_publishzip:   ${{ steps.check.outputs.has_publishzip }}
 
     steps:
       - name: 🧾 Checkout
@@ -114,9 +117,10 @@ jobs:
           printf '%s\n' "$msg"
 
           # defaults
-          echo "run_compile=false" >> $GITHUB_OUTPUT
-          echo "run_publish=false" >> $GITHUB_OUTPUT
+          echo "run_compile=false"    >> $GITHUB_OUTPUT
+          echo "run_publish=false"    >> $GITHUB_OUTPUT
           echo "run_publishbot=false" >> $GITHUB_OUTPUT
+          echo "run_publishzip=false" >> $GITHUB_OUTPUT
 
           # skip CI completely
           if [[ "$msg" == *"[skip ci]"* ]]; then
@@ -126,7 +130,6 @@ jobs:
 
           # ----------------------------------------
           # 🔧 Code-related file filters
-          # Add/remove patterns easily here
           # ----------------------------------------
           CODE_FILTERS=(
             # C#
@@ -157,44 +160,69 @@ jobs:
           cat changed.txt || echo "(none)"
 
           pattern="${CODE_FILTERS[*]}"
-          if grep -E "${pattern// /|}" changed.txt >/dev/null; then
+          if grep -E "${pattern// /|}" changed.txt >/dev/null 2>&1; then
             echo "Detected matching code file → compile enabled."
             echo "run_compile=true" >> $GITHUB_OUTPUT
           else
             echo "No matching code changes → skipping compile."
             echo "run_compile=false" >> $GITHUB_OUTPUT
           fi
-          # ----------------------------------------
 
-          # allow publish/bot only on main, master, or release/*
+          # ----------------------------------------
+          # Publish triggers (package / bot / zip)
+          # ----------------------------------------
           if [[ "$branch" == "main" || "$branch" == "master" || "$branch" == release/* ]]; then
-            [[ "$msg" == *"[publish]"* ]] && echo "run_publish=true" >> $GITHUB_OUTPUT
-            [[ "$msg" == *"[publish-bot]"* ]] && echo "run_publishbot=true" >> $GITHUB_OUTPUT
+            # Package: legacy [publish] or explicit [publish-package]
+            if [[ "$msg" == *"[publish]"* || "$msg" == *"[publish-package]"* ]]; then
+              echo "run_publish=true" >> $GITHUB_OUTPUT
+            fi
+
+            # Bot
+            if [[ "$msg" == *"[publish-bot]"* ]]; then
+              echo "run_publishbot=true" >> $GITHUB_OUTPUT
+            fi
+
+            # Zip
+            if [[ "$msg" == *"[publish-zip]"* ]]; then
+              echo "run_publishzip=true" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "Branch '$branch' not eligible for publish or bot publish."
+            echo "Branch '$branch' not eligible for publish/package/bot/zip."
           fi
 
           # detect workflow existence
-          [[ -f ".github/workflows/compile.yml" ]] && echo "has_compile=true" >> $GITHUB_OUTPUT || echo "has_compile=false" >> $GITHUB_OUTPUT
-          [[ -f ".github/workflows/publish.yml" ]] && echo "has_publish=true" >> $GITHUB_OUTPUT || echo "has_publish=false" >> $GITHUB_OUTPUT
-          [[ -f ".github/workflows/publish-bot.yml" ]] && echo "has_publishbot=true" >> $GITHUB_OUTPUT || echo "has_publishbot=false" >> $GITHUB_OUTPUT
+          [[ -f ".github/workflows/compile.yml" ]]           && echo "has_compile=true"      >> $GITHUB_OUTPUT || echo "has_compile=false"      >> $GITHUB_OUTPUT
+
+          # Package workflow: new name publish-package.yml (with backward-compat for publish.yml)
+          if [[ -f ".github/workflows/publish-package.yml" || -f ".github/workflows/publish.yml" ]]; then
+            echo "has_publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+          [[ -f ".github/workflows/publish-bot.yml" ]]       && echo "has_publishbot=true"   >> $GITHUB_OUTPUT || echo "has_publishbot=false"   >> $GITHUB_OUTPUT
+          [[ -f ".github/workflows/publish-zip.yml" ]]       && echo "has_publishzip=true"   >> $GITHUB_OUTPUT || echo "has_publishzip=false"   >> $GITHUB_OUTPUT
 
       - name: 🧠 Summary
         run: |
           echo "------------------------------------------"
           echo "🧠 Workflow Controller Summary"
           echo "------------------------------------------"
-          echo "Repository:   ${{ github.repository }}"
-          echo "Branch:       ${GITHUB_REF##*/}"
-          echo "Compile:      ${{ steps.check.outputs.run_compile }} (exists: ${{ steps.check.outputs.has_compile }})"
-          echo "Publish:      ${{ steps.check.outputs.run_publish }} (exists: ${{ steps.check.outputs.has_publish }})"
-          echo "Publish-Bot:  ${{ steps.check.outputs.run_publishbot }} (exists: ${{ steps.check.outputs.has_publishbot }})"
+          echo "Repository:    ${{ github.repository }}"
+          echo "Branch:        ${GITHUB_REF##*/}"
+          echo "Compile:       ${{ steps.check.outputs.run_compile }} (exists: ${{ steps.check.outputs.has_compile }})"
+          echo "Publish-Pkg:   ${{ steps.check.outputs.run_publish }} (exists: ${{ steps.check.outputs.has_publish }})"
+          echo "Publish-Bot:   ${{ steps.check.outputs.run_publishbot }} (exists: ${{ steps.check.outputs.has_publishbot }})"
+          echo "Publish-Zip:   ${{ steps.check.outputs.run_publishzip }} (exists: ${{ steps.check.outputs.has_publishzip }})"
           echo "------------------------------------------"
 
       - name: 🧹 Cleanup Runner
         if: always()
         uses: ./.github/actions/cleanup-runner
 
+  # ----------------------------------------
+  # 🏗️ Compile
+  # ----------------------------------------
   compile:
     name: 🏗️
     if: ${{ !endsWith(github.repository, '/.github') &&
@@ -204,15 +232,22 @@ jobs:
     uses: ./.github/workflows/compile.yml
     secrets: inherit
 
+  # ----------------------------------------
+  # 📦 Package (NuGet / etc.)
+  # ----------------------------------------
   publish:
     name: 📦
     if: ${{ !endsWith(github.repository, '/.github') &&
             needs.analyze.outputs.run_publish == 'true' &&
             needs.analyze.outputs.has_publish == 'true' }}
     needs: analyze
-    uses: ./.github/workflows/publish.yml
+    # Prefer new filename; keep compatibility with old publish.yml if you still have some
+    uses: ./.github/workflows/publish-package.yml
     secrets: inherit
 
+  # ----------------------------------------
+  # 🤖 Bot-specific publish
+  # ----------------------------------------
   publish-bot:
     name: 🤖
     if: ${{ !endsWith(github.repository, '/.github') &&
@@ -220,4 +255,16 @@ jobs:
             needs.analyze.outputs.has_publishbot == 'true' }}
     needs: analyze
     uses: ./.github/workflows/publish-bot.yml
+    secrets: inherit
+
+  # ----------------------------------------
+  # 📦 Zip-based release (full repo archive)
+  # ----------------------------------------
+  publish-zip:
+    name: 📦 Zip
+    if: ${{ !endsWith(github.repository, '/.github') &&
+            needs.analyze.outputs.run_publishzip == 'true' &&
+            needs.analyze.outputs.has_publishzip == 'true' }}
+    needs: analyze
+    uses: ./.github/workflows/publish-zip.yml
     secrets: inherit

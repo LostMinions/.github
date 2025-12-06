@@ -33,6 +33,8 @@
 
     // Default .github/workflows/ files to sync.
     "workflows": [
+      "controller.yml",
+      "publish-zip.yml",
       "update-submodules.yml"
     ],
 

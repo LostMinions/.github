@@ -208,8 +208,7 @@ done
 
 # --- Remove deprecated tools -------------------------------------------------
 
-# Only prune deprecated tools for non-.github repos
-if (( ${#DEPRECATED_TOOLS[@]} && IS_DOT_GITHUB_REPO == 0 )); then
+if (( ${#DEPRECATED_TOOLS[@]} )); then
   remove_deprecated "$DEST_DIR" "${DEPRECATED_TOOLS[@]}"
 fi
 

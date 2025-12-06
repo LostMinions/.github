@@ -1,0 +1,162 @@
+name: 📦 Publish Zip Release
+
+on:
+  # Auto-run when this workflow file changes in a repo that mirrors it
+  push:
+    branches: [ main, master ]
+    paths:
+      - ".github/workflows/publish-zip.yml"
+
+  # Allow other workflows to call this
+  workflow_call:
+    inputs:
+      version:
+        description: "Version string (e.g. 1.2.3)"
+        required: false
+        type: string
+
+  # Manual run
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version string (e.g. 1.2.3)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  # ----------------------------------------
+  # 🧩 Precheck (same pattern as bot workflow)
+  # ----------------------------------------
+  precheck:
+    name: 🧮 Precheck
+    if: ${{ !endsWith(github.repository, '/.github') }}
+    # Org repos → self-hosted, user repos → github-hosted
+    runs-on: ${{ github.event.repository.owner.type == 'Organization' && 'self-hosted' || 'ubuntu-latest' }}
+    timeout-minutes: 3
+    continue-on-error: true
+    outputs:
+      over_limit: ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}
+
+    steps:
+      - name: 🔎 Owner info (debug)
+        run: |
+          echo "Repository:       ${{ github.repository }}"
+          echo "Owner:            ${{ github.repository_owner }}"
+          echo "Owner type:       ${{ github.event.repository.owner.type }}"
+          echo "Runner:           $RUNNER_NAME"
+          echo "Runner OS:        $RUNNER_OS"
+
+      - name: 🧾 Minimal Checkout for Local Actions
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions
+          fetch-depth: 1
+
+      # Only needed (and only valid) for org repos
+      - name: ⚙️ Validate GH_TOKEN
+        if: ${{ github.event.repository.owner.type == 'Organization' }}
+        uses: ./.github/actions/validate-gh-token
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧮 Check GitHub Usage (org only)
+        id: usage
+        if: ${{ github.event.repository.owner.type == 'Organization' }}
+        uses: ./.github/actions/check-org-usage
+        with:
+          gh-token: ${{ secrets.GH_TOKEN }}
+          org-name: ${{ github.repository_owner }}
+          check-actions: "true"
+          check-packages-bandwidth: "false"
+
+      - name: ✅ Assume under limit (user repos)
+        id: assume_ok
+        if: ${{ github.event.repository.owner.type != 'Organization' }}
+        run: |
+          echo "This is a user-owned repo; skipping org usage checks."
+          echo "over_limit=false" >> "$GITHUB_OUTPUT"
+
+      - name: 📊 Summary
+        run: |
+          echo "Precheck complete."
+          echo "Owner type: ${{ github.event.repository.owner.type }}"
+          echo "over_limit = ${{ steps.usage.outputs.over_limit || steps.assume_ok.outputs.over_limit || 'false' }}"
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
+
+  # ----------------------------------------
+  # 🚀 Zip + Publish Release
+  # ----------------------------------------
+  publish-zip:
+    name: ${{ format('🚀 Publish Zip {0}', needs.precheck.outputs.over_limit == 'true' && '(Self-Hosted)' || '(GitHub)') }}
+    needs: precheck
+    runs-on: ${{ needs.precheck.outputs.over_limit == 'true' && 'self-hosted' || 'ubuntu-latest' }}
+    timeout-minutes: 10
+
+    steps:
+      - name: ⚙️ Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper store
+          echo "https://x-access-token:${{ secrets.GH_TOKEN }}@github.com" > ~/.git-credentials
+
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🧮 Resolve version
+        id: version
+        shell: bash
+        run: |
+          # Priority: workflow_dispatch → workflow_call → fallback auto version
+          MANUAL_VERSION="${{ github.event.inputs.version }}"
+          CALLED_VERSION="${{ inputs.version }}"
+
+          if [[ -n "$MANUAL_VERSION" ]]; then
+            VERSION="$MANUAL_VERSION"
+          elif [[ -n "$CALLED_VERSION" ]]; then
+            VERSION="$CALLED_VERSION"
+          else
+            # Fallback: date + run number
+            VERSION="$(date +%Y.%m.%d).${GITHUB_RUN_NUMBER}"
+          fi
+
+          echo "Using version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: 📦 Create repo zip from HEAD
+        id: archive
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          VERSION="${{ steps.version.outputs.version }}"
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          ZIP_PATH="artifacts/${REPO_NAME}-${VERSION}.zip"
+
+          echo "Creating zip: $ZIP_PATH"
+          git archive --format=zip --output "$ZIP_PATH" HEAD
+
+          echo "zip_path=$ZIP_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: 🏷️ Tag + Publish GitHub Release
+        uses: ./.github/actions/publish-github-release
+        with:
+          version: ${{ steps.version.outputs.version }}
+          gh-token: ${{ secrets.GH_TOKEN }}
+          files: ${{ steps.archive.outputs.zip_path }}
+          title: "📦 ${{ github.event.repository.name }}"
+
+      - name: 🧹 Cleanup Runner
+        if: always()
+        uses: ./.github/actions/cleanup-runner
