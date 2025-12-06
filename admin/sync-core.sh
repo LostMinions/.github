@@ -188,7 +188,8 @@ else
     echo "No watched commits found in push range; scanning recent history for watched paths..."
     local_count=0
     while read -r sha; do
-      local paths touched=false
+      paths=""
+      touched=false
       paths=$(git -C "$REPO_ROOT" diff-tree --no-commit-id --name-only -r "$sha" || true)
 
       while read -r path; do
