@@ -79,6 +79,7 @@
     "actions": [],
     "admin": [
       ".source-commits",
+      "CONTRIBUTING.project.md",
       "issue-types.json",
       "labels.json",
       "logs",
