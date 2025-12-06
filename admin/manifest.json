@@ -17,7 +17,7 @@
 
     // Default top-level community files to sync (root of the target repo).
     "community": [
-      "CONTRIBUTING.md",
+      "admin/community/CONTRIBUTING.project.md",
       "SECURITY.md",
       "CODE_OF_CONDUCT.md"
     ],

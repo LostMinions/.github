@@ -134,6 +134,19 @@ in_list() {
   return 1
 }
 
+# Helper: map template basename -> target basename in the repo
+resolve_target_name() {
+  local base="$1"
+
+  # For non-.github repos, treat CONTRIBUTING.project.md as the project template
+  # and write it out as CONTRIBUTING.md
+  if [[ "$IS_DOTGITHUB" != true && "$base" == "CONTRIBUTING.project.md" ]]; then
+    echo "CONTRIBUTING.md"
+  else
+    echo "$base"
+  fi
+}
+
 # --- Build base community list -----------------------------------------------
 
 COMMUNITY_FILES=()
@@ -188,6 +201,12 @@ for f in "${COMMUNITY_FILES[@]}"; do
   if [ -f "$f" ]; then
     base="$(basename "$f")"
 
+    # For org-level .github repos, never sync the project template variant
+    if [[ "$IS_DOTGITHUB" == true && "$base" == "CONTRIBUTING.project.md" ]]; then
+      echo "- Skipping $base for .github admin repo"
+      continue
+    fi
+
     # Global manifest-level exclude
     if in_list "$base" "${MANIFEST_EXCLUDE_COMMUNITY[@]}"; then
       echo "- Skipping $base (excluded in manifest)"
@@ -208,8 +227,11 @@ for f in "${COMMUNITY_FILES[@]}"; do
       continue
     fi
 
-    cp "$f" ./ || true
-    echo "- Copied $base"
+    # Resolve target filename (e.g., CONTRIBUTING.project.md -> CONTRIBUTING.md)
+    dest_base="$(resolve_target_name "$base")"
+
+    cp "$f" "./$dest_base" || true
+    echo "- Copied $dest_base (from $base)"
   fi
 done
 
@@ -226,7 +248,14 @@ fi
 # --- Stage all managed community files ---------------------------------------
 
 for f in "${COMMUNITY_FILES[@]}"; do
-  target="$(basename "$f")"
+  base="$(basename "$f")"
+
+  # Same special-case skip for .github
+  if [[ "$IS_DOTGITHUB" == true && "$base" == "CONTRIBUTING.project.md" ]]; then
+    continue
+  fi
+
+  target="$(resolve_target_name "$base")"
   [ -e "$target" ] && git add "$target" >/dev/null 2>&1
 done
 
