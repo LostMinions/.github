@@ -1,0 +1,75 @@
+# ===============================
+# Core text / line-ending rules
+# ===============================
+
+# Normalize all text files to LF in the repo
+* text=auto eol=lf
+
+# Windows-specific scripts and files (keep CRLF in working tree)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Solution & MSBuild files – CRLF is safest on Windows
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.vbproj text eol=crlf
+*.vcxproj text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+
+# Optional: force LF for source code if you want everything unified
+# (VS handles LF fine now; this keeps CI/containers happy)
+*.cs text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
+# ===============================
+# Binary files
+# ===============================
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+
+# svg is XML/text, keep diffs
+*.svg  text
+
+# Archives / packages
+*.zip binary
+*.7z binary
+*.gz binary
+*.tgz binary
+*.nupkg binary
+
+# Executables / libs
+*.exe binary
+*.dll binary
+*.pdb binary
+*.so binary
+*.dylib binary
+
+# Unreal / game assets (treat as binary even if UAssetTextExporter exists)
+*.uasset binary
+*.umap binary
+*.pak binary
+
+# ===============================
+# Git / GitHub helpers
+# ===============================
+
+# Don’t include CI/config junk in source exports if you ever use git archive
+.github/** export-ignore
+
+# Mark generated code (examples)
+# *Generated.cs linguist-generated=true
