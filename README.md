@@ -7,7 +7,6 @@ The profile content lives in [profile/README.md](profile/README.md).
 
 <!-- LM_LICENSE_START -->
 <!-- LM_LICENSE_TYPE: private -->
-
 ## License
 
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
@@ -20,6 +19,5 @@ without prior written permission.
 
 For full details, see the [LICENSE](LICENSE) file in this repository or contact:
 webmaster@lostminions.org
-
 
 <!-- LM_LICENSE_END -->
