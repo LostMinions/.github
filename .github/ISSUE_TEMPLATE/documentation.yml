@@ -1,0 +1,17 @@
+name: 📚 Documentation Update
+description: Suggest an update or addition to documentation, guides, or README files.
+labels: [documentation]
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: Description
+      placeholder: Describe the text or section that needs updating.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of Change
+      options:
+        - README
+        - Wiki / Guide
+        - Website Content

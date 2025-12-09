@@ -1,0 +1,17 @@
+name: ⚙️ Task / Maintenance
+description: Routine work, cleanup, or automation improvements.
+labels: [task]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      placeholder: What needs to be done or maintained?
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Low
+        - Normal
+        - High

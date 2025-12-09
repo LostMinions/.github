@@ -1,0 +1,24 @@
+name: 🌟 Feature Request
+description: Suggest a new idea, improvement, or feature.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the feature or improvement.
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: How should it work? Why is it useful?
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Website / UI
+        - Automation / Tooling
+        - 3D Print / Model Design
+        - Game Integration
+        - Other

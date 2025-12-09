@@ -1,0 +1,19 @@
+name: 🎨 Design / 3D Print Request
+description: Suggest or request a new 3D model, texture, or visual asset.
+labels: [design]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Related Project or Series
+      placeholder: e.g. LostMinions.org-3DPrint
+  - type: textarea
+    id: concept
+    attributes:
+      label: Concept Description
+      placeholder: Describe the look, theme, or purpose of the design.
+  - type: textarea
+    id: files
+    attributes:
+      label: References or Files
+      description: Include links, images, or model references if available.

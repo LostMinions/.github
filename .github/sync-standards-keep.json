@@ -1,0 +1,11 @@
+{
+  // Per-repo keep config. Used in all repos (including the hub) to protect files from removal or modification.
+  //   keep   : Patterns that must NOT be removed or overwritten in this repo,
+  //            even if matched by global or hub-level remove/add.
+
+  "keep": [
+    // Example:
+    // "**/Lavalink.zip",
+    // "**/Lavalink"
+  ]
+}
