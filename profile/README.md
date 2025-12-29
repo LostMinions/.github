@@ -21,6 +21,7 @@ Join the lab and scheme with other minions:
 
 #### 📱 Social Media
 
+- 🌲 [Link hub](https://lostminions.org/links)
 - 🌲 [linktr.ee](https://linktr.ee/lostminions)
 
 | Platform | Link |
