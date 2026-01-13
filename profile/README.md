@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="lostminions-github.png" alt="Lost Minions" width="100%" />
-</p>
-
 # 🧩 Lost Minions
 
 > **Makers. Gamers. Coders. 3D Dreamers.**  
