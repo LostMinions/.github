@@ -12,6 +12,7 @@
 
 # Solution & MSBuild files – CRLF is safest on Windows
 *.sln text eol=crlf
+*.slnx text eol=crlf
 *.csproj text eol=crlf
 *.vbproj text eol=crlf
 *.vcxproj text eol=crlf
