@@ -13,11 +13,8 @@ The profile content lives in [profile/README.md](profile/README.md).
 
 This work is proprietary and confidential.
 
-All source code, assets, and documentation in this repository are the exclusive
-property of Lost Minions and may not be used, copied, modified, or distributed
-without prior written permission.
+All source code, assets, and documentation in this repository are the exclusive property of Lost Minions and may not be used, copied, modified, or distributed without prior written permission.
 
-For full details, see the [LICENSE](LICENSE) file in this repository or contact:
-webmaster@lostminions.org
+For full details, see the [LICENSE](LICENSE) file in this repository or contact: <webmaster@lostminions.org>
 
 <!-- LM_LICENSE_END -->
