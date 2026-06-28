@@ -4,8 +4,7 @@ Thank you for helping expand **Lost Minions**!
 
 This file is shared across multiple repositories under the `LostMinions` umbrella:
 3D prints, websites, tools, libraries, and other experiments.
-Each repo may have its own README or docs with project-specific details — always
-read those first.
+Each repo may have its own README or docs with project-specific details — always read those first.
 
 ---
 
@@ -24,8 +23,7 @@ read those first.
   - Logs, screenshots, or error messages if available
 
 - **Docs, README, or content updates?**
-  You can usually open a PR directly. If you’re changing behavior, APIs,
-  or public workflows, please link or create an issue.
+  You can usually open a PR directly. If you’re changing behavior, APIs, or public workflows, please link or create an issue.
 
 ---
 
@@ -85,11 +83,9 @@ For each repo:
 
 ## ⚖️ Code of Conduct
 
-All contributions must follow the
-[Lost Minions Code of Conduct](./CODE_OF_CONDUCT.md).
+All contributions must follow the [Lost Minions Code of Conduct](./CODE_OF_CONDUCT.md).
 
-We expect respect, patience, and collaboration — whether you’re editing a small
-script or adding a whole new set of 3D models.
+We expect respect, patience, and collaboration — whether you’re editing a small script or adding a whole new set of 3D models.
 
 ---
 
@@ -121,5 +117,4 @@ If you’re unsure about anything:
 
 Open a **“Question”** issue in the relevant repo with as much context as you can.
 
-Lost Minions is meant to be a playground for builders, not a maze — it’s always
-okay to ask before you dive in.
+Lost Minions is meant to be a playground for builders, not a maze — it’s always okay to ask before you dive in.
