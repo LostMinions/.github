@@ -1,4 +1,4 @@
-name: 📚 Documentation Update
+name: Documentation Update
 description: Suggest an update or addition to documentation, guides, or README files.
 labels: [documentation]
 body:

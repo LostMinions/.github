@@ -1,4 +1,4 @@
-name: ⚙️ Task / Maintenance
+name: Task / Maintenance
 description: Routine work, cleanup, or automation improvements.
 labels: [task]
 body:
